@@ -77,7 +77,9 @@
 
         .id-inputs-generic { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .id-inputs-qc { display: grid; grid-template-columns: 1fr 65px 1.5fr; gap: 8px; margin-bottom: 15px; }
-        .id-inputs-mhc { display: grid; grid-template-columns: 1fr 65px 1.5fr; gap: 8px; margin-bottom: 15px; }
+        .id-inputs-gct { display: grid; grid-template-columns: 1fr 65px 1.5fr; gap: 8px; margin-bottom: 8px; }
+        .id-inputs-loose { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .full-width-input { grid-column: span 3; margin-top: 5px; }
         
         input, select { padding: 12px; border: 1px solid #ced4da; border-radius: 10px; font-size: 0.85rem; width: 100%; box-sizing: border-box; outline: none; background: white; }
         .qc-no-box { text-align: center; }
@@ -157,9 +159,9 @@
         <button class="back-btn" onclick="showScreen('home-screen')"><i class="fas fa-arrow-left"></i> BACK</button>
         <h2 style="text-align:center; color: var(--ct-blue);">GCT OPERATIONS</h2>
         <div class="equip-grid">
-            <button class="equip-item" style="background:var(--ct-blue)" onclick="startTimer('MHC')">MHC</button>
+            <button class="equip-item" style="background:var(--ct-blue)" onclick="startTimer('MHC_LOOSE')">MHC Loose cargo</button>
             <button class="equip-item" style="background:var(--ct-blue)" onclick="startTimer('LASHER')">LASHER</button>
-            <button class="equip-item" style="background:var(--ct-blue)" onclick="startTimer('SHIPCRANE')">SHIPCRANE</button>
+            <button class="equip-item" style="background:var(--ct-blue)" onclick="startTimer('BAGGED_CARGO')">Crane- bagged cargo</button>
             <button class="equip-item" style="background:var(--ct-blue)" onclick="startTimer('FLT')">FLT</button>
             <button class="equip-item" style="background:var(--ct-blue)" onclick="startTimer('RTG')">RTG</button>
             <button class="equip-item" style="background:var(--ct-blue)" onclick="startTimer('RS')">RS</button>
@@ -233,7 +235,6 @@
                 "5. FROM START ADJUSTING ON TRUCK TO UNLOCK",
                 "6. FROM UNLOCK TRUCK TO SILL BEAM/PARK"
             ],
-            // HATCH COVER
             HATCH_DISCHARGE: [
                 "1. From Park position / Sillbeam to target hatch cover location",
                 "2. From Start adjust on hatch cover to Lock",
@@ -250,7 +251,6 @@
                 "5. From Start adjust on target row to Unlock",
                 "6. From Unlock to sill beam"
             ],
-            // OOG (OHF)
             OOG_OHF_DISCHARGE: [
                 "1. From Park position / Sillbeam to target OOG",
                 "2. From Start adjust on OOG to Lock",
@@ -267,7 +267,6 @@
                 "5. From Start adjust on target row to Unlock",
                 "6. From Unlock to sill beam"
             ],
-            // OOG (WIRE SLING)
             OOG_WIRE_DISCHARGE: [
                 "1. From Park position / Sillbeam to target OOG",
                 "2. From Start adjust on OOG to Awaiting attachements",
@@ -302,7 +301,7 @@
                 "3. FROM UNLOCK TO PARK POSITION"
             ]
         },
-        MHC: {
+        MHC_LOOSE: {
             LOADING: [
                 "STEP1: Grap touch cargo to grab close",
                 "STEP2: Hoist up to reach unload position",
@@ -314,6 +313,20 @@
                 "STEP2: Hoist up to reach unload position",
                 "STEP3: Start open cargo to full unload",
                 "STEP4: Hoist empty grap to grap touch cargo on vessel"
+            ]
+        },
+        BAGGED_CARGO: {
+            LOADING: [
+                "STEP 1: CONNECT SLING TO HOIST UP",
+                "STEP 2: Move cargo to till touch the target area",
+                "STEP 3: disconnect the sling to hoist up",
+                "STEP 4: move empty hook to the Quayside ground"
+            ],
+            DISCHARGE: [
+                "STEP 1: CONNECT SLING TO HOIST UP",
+                "STEP 2: Move cargo to till touch the target area",
+                "STEP 3: disconnect the sling to hoist up",
+                "STEP 4: move empty hook to the vessel target location"
             ]
         },
         DEFAULT: {
@@ -349,15 +362,33 @@
                     <option value="RORO">RORO</option>
                 </select>
             `;
-        } else if (equipment === 'MHC') {
-            inputDiv.className = 'id-inputs-mhc';
+        } else if (equipment === 'MHC_LOOSE') {
+            inputDiv.className = 'id-inputs-loose';
             inputDiv.innerHTML = `
                 <input type="text" id="staffId" placeholder="STAFF ID" maxlength="4">
-                <input type="text" id="unitNo" class="qc-no-box" placeholder="MHC#" maxlength="2">
+                <input type="text" id="unitNo" placeholder="MHC#" maxlength="2">
                 <select id="category" onchange="renderSteps()">
-                    <option value="Gotwald">Gotwald</option>
                     <option value="LHM">LHM</option>
+                    <option value="GOTWALD">GOTWALD</option>
                     <option value="SHIPCRANE">SHIPCRANE</option>
+                </select>
+            `;
+        } else if (equipment === 'BAGGED_CARGO') {
+            inputDiv.className = 'id-inputs-gct';
+            inputDiv.innerHTML = `
+                <input type="text" id="staffId" placeholder="STAFF ID" maxlength="4">
+                <input type="text" id="unitNo" class="qc-no-box" placeholder="CRANE#" maxlength="2">
+                <select id="category" onchange="renderSteps()">
+                    <option value="KATO">KATO</option>
+                    <option value="SHIP CRANE">SHIP CRANE</option>
+                    <option value="LHM">LHM</option>
+                </select>
+                <select id="cargoType" class="full-width-input" onchange="renderSteps()">
+                    <option value="Jumbo Bag">Jumbo Bag</option>
+                    <option value="cement">cement</option>
+                    <option value="Dhow">Dhow</option>
+                    <option value="steel pipe">steel pipe</option>
+                    <option value="steel rod">steel rod</option>
                 </select>
             `;
         } else {
@@ -405,7 +436,8 @@
         
         let steps = [];
         if (currentCrane === 'QC') {
-            const category = document.getElementById('category').value;
+            const categoryElem = document.getElementById('category');
+            const category = categoryElem ? categoryElem.value : 'Above deck';
             let key = currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGING';
             
             if (category === 'Hatch cover') {
@@ -417,8 +449,10 @@
             }
             
             steps = config.QC[key] || config.QC[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGING'];
-        } else if (currentCrane === 'MHC') {
-            steps = config.MHC[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'];
+        } else if (currentCrane === 'MHC_LOOSE') {
+            steps = config.MHC_LOOSE[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'];
+        } else if (currentCrane === 'BAGGED_CARGO') {
+            steps = config.BAGGED_CARGO[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'];
         } else {
             steps = config[currentCrane] ? config[currentCrane][currentMode] : config.DEFAULT[currentMode];
         }
@@ -440,14 +474,17 @@
         let steps = [];
         
         if (currentCrane === 'QC') {
-            const category = document.getElementById('category').value;
+            const categoryElem = document.getElementById('category');
+            const category = categoryElem ? categoryElem.value : 'Above deck';
             let key = currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGING';
             if (category === 'Hatch cover') key = currentMode === 'LOADING' ? 'HATCH_LOADING' : 'HATCH_DISCHARGE';
             else if (category === 'OOG (OHF)') key = currentMode === 'LOADING' ? 'OOG_OHF_LOADING' : 'OOG_OHF_DISCHARGE';
             else if (category === 'OOG (Wire Sling)') key = currentMode === 'LOADING' ? 'OOG_WIRE_LOADING' : 'OOG_WIRE_DISCHARGE';
             steps = config.QC[key] || config.QC[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGING'];
-        } else if (currentCrane === 'MHC') {
-            steps = config.MHC[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'];
+        } else if (currentCrane === 'MHC_LOOSE') {
+            steps = config.MHC_LOOSE[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'];
+        } else if (currentCrane === 'BAGGED_CARGO') {
+            steps = config.BAGGED_CARGO[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'];
         } else {
             steps = config[currentCrane] ? config[currentCrane][currentMode] : config.DEFAULT[currentMode];
         }
@@ -456,13 +493,16 @@
 
         if (stepNum === 1) {
             startTime = now;
+            const categoryElem = document.getElementById('category');
+            const cargoTypeElem = document.getElementById('cargoType');
             currentCycleData = { 
                 Date: new Date().toLocaleDateString(), 
                 Time: new Date().toLocaleTimeString(),
-                Equipment: currentCrane, 
+                Equipment: currentCrane.replace('_', ' '), 
                 Unit_No: document.getElementById('unitNo').value || "N/A", 
                 Staff_ID: document.getElementById('staffId').value || "N/A", 
-                Category: (currentCrane === 'QC' || currentCrane === 'MHC') ? document.getElementById('category').value : "N/A",
+                Category: categoryElem ? categoryElem.value : "N/A",
+                Cargo_Type: cargoTypeElem ? cargoTypeElem.value : "N/A",
                 Operation: currentMode 
             };
             document.getElementById('muda-btn').disabled = false;
@@ -533,7 +573,8 @@
     }
 
     function downloadReport(equipment) {
-        const filtered = masterLogs.filter(log => log.Equipment === equipment);
+        const keyToSearch = equipment.replace(' ', '_');
+        const filtered = masterLogs.filter(log => log.Equipment.replace(' ', '_') === keyToSearch);
         if (filtered.length === 0) return alert("No recorded cycles found.");
         const headers = Object.keys(filtered[0]).join(",");
         let csv = "data:text/csv;charset=utf-8," + headers + "\n" + filtered.map(r => Object.values(r).join(",")).join("\n");
