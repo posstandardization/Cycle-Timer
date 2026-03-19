@@ -76,9 +76,9 @@
         .mode-btn.active { background: var(--dark); color: white; border-color: var(--dark); }
 
         .id-inputs-generic { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .id-inputs-qc { display: grid; grid-template-columns: 1.2fr 75px 1.5fr; gap: 8px; margin-bottom: 15px; }
+        .id-inputs-qc { display: grid; grid-template-columns: 1fr 65px 1.5fr; gap: 8px; margin-bottom: 15px; }
         
-        input, select { padding: 12px; border: 1px solid #ced4da; border-radius: 10px; font-size: 0.9rem; width: 100%; box-sizing: border-box; outline: none; background: white; }
+        input, select { padding: 12px; border: 1px solid #ced4da; border-radius: 10px; font-size: 0.85rem; width: 100%; box-sizing: border-box; outline: none; background: white; }
         .qc-no-box { text-align: center; }
 
         .timer-container { background: var(--dark); color: #0dcaf0; padding: 25px; border-radius: 15px; text-align: center; margin: 15px 0; position: relative; }
@@ -93,10 +93,10 @@
 
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .btn-step { 
-            height: 85px; border: none; border-radius: 15px; font-size: 0.8rem; font-weight: 700; 
+            height: 85px; border: none; border-radius: 15px; font-size: 0.75rem; font-weight: 700; 
             color: var(--white); background: var(--orange); cursor: pointer; 
             display: flex; align-items: center; justify-content: center; text-align: center; 
-            padding: 10px; line-height: 1.2; transition: background 0.2s;
+            padding: 8px; line-height: 1.2; transition: background 0.2s;
         }
         .step-active { background: var(--gray-active) !important; }
         .btn-step:disabled { opacity: 0.35; cursor: not-allowed; }
@@ -231,6 +231,61 @@
                 "4. FROM SILL BEAM TO START ADJUSTING ON TRUCK",
                 "5. FROM START ADJUSTING ON TRUCK TO UNLOCK",
                 "6. FROM UNLOCK TRUCK TO SILL BEAM/PARK"
+            ],
+            // HATCH COVER
+            HATCH_DISCHARGE: [
+                "1. From Park position / Sillbeam to target hatch cover location",
+                "2. From Start adjust on hatch cover to Lock",
+                "3. From Lock to sillbeam",
+                "4. From Sillbeam to start Aligning on back reach",
+                "5. From start Aligning on back reach to Unlock",
+                "6. From Unlock to sillbeam / Park position"
+            ],
+            HATCH_LOADING: [
+                "1. From Park position Or Silllbeam TO Adjustment on Hatch cover",
+                "2. From start Adjusting to lock",
+                "3. From lock on Hatch cover to sillbeam",
+                "4. From sillbeam to start adjust on target row",
+                "5. From Start adjust on target row to Unlock",
+                "6. From Unlock to sill beam"
+            ],
+            // OOG (OHF)
+            OOG_OHF_DISCHARGE: [
+                "1. From Park position / Sillbeam to target OOG",
+                "2. From Start adjust on OOG to Lock",
+                "3. From Lock to sillbeam",
+                "4. From Sillbeam to start Adjusting on TT",
+                "5. From start Adjustment on TT to Unlock",
+                "6. From Unlock to sillbeam / Park position"
+            ],
+            OOG_OHF_LOADING: [
+                "1. From Park position Or Silllbeam TO Adjustment on TT",
+                "2. From start Adjusting to lock",
+                "3. From lock on OOG to sillbeam",
+                "4. From sillbeam to start adjust on target row",
+                "5. From Start adjust on target row to Unlock",
+                "6. From Unlock to sill beam"
+            ],
+            // OOG (WIRE SLING)
+            OOG_WIRE_DISCHARGE: [
+                "1. From Park position / Sillbeam to target OOG",
+                "2. From Start adjust on OOG to Awaiting attachements",
+                "3. From Awaiting attachements by dowelman to clearance to hoist",
+                "4. From Hoist to sillbeam",
+                "5. From Sillbeam to start Adjusting on TT",
+                "6. From start Adjustment on TT to Landed",
+                "7. From Landed to Remove Attachements",
+                "8. From Remove Attachements to sill beam"
+            ],
+            OOG_WIRE_LOADING: [
+                "1. From Park position Or Silllbeam TO Adjustment on TT",
+                "2. From start Adjusting to Awaiting Attachments",
+                "3. From Awaiting Attachments to clearance to hoist",
+                "4. From Clearance to hoist on OOG to sillbeam",
+                "5. From sillbeam to start adjust on target row",
+                "6. From Start adjust on target row to Landed",
+                "7. From Landed to Remove attachements and clearance to hoist",
+                "8. From Clearance to hoist to sill beam"
             ]
         },
         RTG: {
@@ -246,7 +301,6 @@
                 "3. FROM UNLOCK TO PARK POSITION"
             ]
         },
-        // Placeholders for other equipment
         DEFAULT: {
             LOADING: ["1. START OPERATION", "2. IN PROGRESS", "3. COMPLETION"],
             DISCHARGE: ["1. START OPERATION", "2. IN PROGRESS", "3. COMPLETION"]
@@ -263,20 +317,20 @@
 
     function startTimer(equipment) {
         currentCrane = equipment;
-        currentMode = equipment === 'QC' ? 'LOADING' : 'LOADING';
+        currentMode = 'LOADING';
         
-        // Setup Inputs
         const inputDiv = document.getElementById('input-container');
         if (equipment === 'QC') {
             inputDiv.className = 'id-inputs-qc';
             inputDiv.innerHTML = `
                 <input type="text" id="staffId" placeholder="STAFF ID">
                 <input type="text" id="unitNo" class="qc-no-box" placeholder="QC#" maxlength="2">
-                <select id="qcCategory">
+                <select id="qcCategory" onchange="renderSteps()">
                     <option value="Above deck">Above deck</option>
                     <option value="Below deck">Below deck</option>
-                    <option value="hatch cover">Hatch cover</option>
-                    <option value="OOG">OOG</option>
+                    <option value="Hatch cover">Hatch cover</option>
+                    <option value="OOG (OHF)">OOG (OHF)</option>
+                    <option value="OOG (Wire Sling)">OOG (Wire Sling)</option>
                     <option value="RORO">RORO</option>
                 </select>
             `;
@@ -288,11 +342,9 @@
             `;
         }
 
-        // Setup Mode Toggle visibility
         const toggle = document.querySelector('.mode-toggle');
         toggle.style.display = (equipment === 'M&R') ? 'none' : 'flex';
         
-        // Colors
         const card = document.getElementById('timer-card');
         card.style.borderTopColor = (parentScreen === 'gct-ops-screen') ? 'var(--ct-blue)' : 'var(--orange)';
 
@@ -306,13 +358,16 @@
 
         document.getElementById('dl-report-btn').onclick = () => downloadReport(equipment);
         
+        document.getElementById('m-load').className = 'mode-btn active';
+        document.getElementById('m-dis').className = 'mode-btn';
+        
         resetCrane();
         showScreen('timer-screen');
     }
 
     function updateMode(mode) {
         if (startTime) return;
-        currentMode = (mode === 'DISCHARGE' && currentCrane === 'QC') ? 'DISCHARGING' : mode;
+        currentMode = mode;
         document.getElementById('m-load').className = mode === 'LOADING' ? 'mode-btn active' : 'mode-btn';
         document.getElementById('m-dis').className = mode === 'DISCHARGE' ? 'mode-btn active' : 'mode-btn';
         renderSteps();
@@ -321,7 +376,24 @@
     function renderSteps() {
         const container = document.getElementById('step-btns');
         container.innerHTML = '';
-        const steps = config[currentCrane] ? config[currentCrane][currentMode] : config.DEFAULT[currentMode];
+        
+        let steps = [];
+        if (currentCrane === 'QC') {
+            const category = document.getElementById('qcCategory').value;
+            let key = currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGING';
+            
+            if (category === 'Hatch cover') {
+                key = currentMode === 'LOADING' ? 'HATCH_LOADING' : 'HATCH_DISCHARGE';
+            } else if (category === 'OOG (OHF)') {
+                key = currentMode === 'LOADING' ? 'OOG_OHF_LOADING' : 'OOG_OHF_DISCHARGE';
+            } else if (category === 'OOG (Wire Sling)') {
+                key = currentMode === 'LOADING' ? 'OOG_WIRE_LOADING' : 'OOG_WIRE_DISCHARGE';
+            }
+            
+            steps = config.QC[key] || config.QC[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGING'];
+        } else {
+            steps = config[currentCrane] ? config[currentCrane][currentMode] : config.DEFAULT[currentMode];
+        }
         
         steps.forEach((text, i) => {
             const btn = document.createElement('button');
@@ -337,7 +409,18 @@
 
     function triggerStep(stepNum) {
         const now = Date.now();
-        const steps = config[currentCrane] ? config[currentCrane][currentMode] : config.DEFAULT[currentMode];
+        let steps = [];
+        
+        if (currentCrane === 'QC') {
+            const category = document.getElementById('qcCategory').value;
+            let key = currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGING';
+            if (category === 'Hatch cover') key = currentMode === 'LOADING' ? 'HATCH_LOADING' : 'HATCH_DISCHARGE';
+            else if (category === 'OOG (OHF)') key = currentMode === 'LOADING' ? 'OOG_OHF_LOADING' : 'OOG_OHF_DISCHARGE';
+            else if (category === 'OOG (Wire Sling)') key = currentMode === 'LOADING' ? 'OOG_WIRE_LOADING' : 'OOG_WIRE_DISCHARGE';
+            steps = config.QC[key] || config.QC[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGING'];
+        } else {
+            steps = config[currentCrane] ? config[currentCrane][currentMode] : config.DEFAULT[currentMode];
+        }
 
         if (navigator.vibrate) navigator.vibrate(40);
 
@@ -360,7 +443,6 @@
             currentCycleData['Step_'+(stepNum-1)] = ((now - lastTime) / 1000).toFixed(2);
         }
 
-        // Visual Highlight
         for(let i=1; i<=steps.length; i++) {
             const btn = document.getElementById(`s${i}`);
             btn.disabled = true;
