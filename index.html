@@ -14,6 +14,9 @@
             --dark: #212529; 
             --danger: #dc3545;
             --success: #198754;
+            --ct-blue: #0891b2;
+            --gct-purple: #7c3aed;
+            --mr-teal: #0d9488;
         }
         
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 0; display: flex; justify-content: center; position: relative; min-height: 100vh; }
@@ -21,27 +24,38 @@
         .screen { width: 100%; max-width: 500px; min-height: 100vh; background: white; display: none; padding: 20px; box-sizing: border-box; position: relative; }
         .active { display: block; }
 
-        /* HOME SCREEN */
+        /* LOGO & HEADER */
         .logo-container { text-align: center; margin-top: 20px; margin-bottom: 20px; }
         .logo-img { max-width: 220px; height: auto; }
         
-        .home-header { text-align: center; margin-bottom: 40px; }
+        .home-header { text-align: center; margin-bottom: 30px; }
         .home-header h1 { font-size: 2.2rem; color: var(--dark); margin: 0; font-weight: 800; }
         .home-header p { color: #6c757d; font-weight: 500; margin-top: 5px; }
         
-        .menu-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        /* NAVIGATION CARDS */
+        .menu-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
         .menu-card { 
-            padding: 35px; border-radius: 20px; border: none; color: white; cursor: pointer; 
+            padding: 30px; border-radius: 20px; border: none; color: white; cursor: pointer; 
             display: flex; align-items: center; justify-content: space-between; 
-            font-size: 1.6rem; font-weight: 800; background: var(--orange); 
+            font-size: 1.4rem; font-weight: 800; background: var(--orange); 
             box-shadow: 0 8px 20px rgba(0,0,0,0.1); transition: transform 0.1s;
         }
-        .menu-card i {
-            font-size: 2.8rem;
-            opacity: 0.9;
-        }
+        .menu-card i { font-size: 2.4rem; opacity: 0.9; }
         .menu-card:active { transform: scale(0.97); }
-        .rtg-btn { background: #0891b2; }
+        
+        /* SPECIFIC MENU COLORS */
+        .ct-btn { background: var(--orange); }
+        .gct-btn { background: var(--ct-blue); }
+        .mr-btn { background: var(--mr-teal); }
+
+        /* EQUIPMENT GRID (Inside CT/GCT) */
+        .equip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .equip-item { 
+            padding: 20px 10px; border-radius: 15px; border: none; background: var(--orange); 
+            color: white; font-weight: 800; font-size: 1rem; cursor: pointer; text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .equip-item:active { opacity: 0.9; transform: translateY(2px); }
 
         .developer-credit { 
             position: absolute; 
@@ -61,15 +75,15 @@
         .mode-btn { flex: 1; padding: 15px; border-radius: 12px; border: 2px solid #dee2e6; background: white; font-weight: 800; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
         .mode-btn.active { background: var(--dark); color: white; border-color: var(--dark); }
 
+        .id-inputs-generic { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .id-inputs-qc { display: grid; grid-template-columns: 1.2fr 75px 1.5fr; gap: 8px; margin-bottom: 15px; }
-        .id-inputs-rtg { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         
         input, select { padding: 12px; border: 1px solid #ced4da; border-radius: 10px; font-size: 0.9rem; width: 100%; box-sizing: border-box; outline: none; background: white; }
         .qc-no-box { text-align: center; }
 
         .timer-container { background: var(--dark); color: #0dcaf0; padding: 25px; border-radius: 15px; text-align: center; margin: 15px 0; position: relative; }
-        .timer { font-size: 4rem; font-weight: 800; font-family: 'Courier New', Courier, monospace; }
-        .cycle-badge { position: absolute; top: 10px; right: 10px; background: var(--orange); color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
+        .timer { font-size: 3.5rem; font-weight: 800; font-family: 'Courier New', Courier, monospace; }
+        .cycle-badge { position: absolute; top: 10px; right: 10px; background: var(--orange); color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; }
 
         .muda-btn { width: 100%; padding: 18px; border: none; border-radius: 12px; font-weight: 800; background: #e9ecef; margin-bottom: 8px; cursor: pointer; font-size: 1rem; color: #495057; }
         .muda-on { background: var(--danger) !important; color: white; animation: pulse 1s infinite; }
@@ -100,93 +114,105 @@
         
         <div class="home-header">
             <h1>Cycle Timer</h1>
-            <p>Terminal Operations Dashboard</p>
+            <p>Main Selection Dashboard</p>
         </div>
 
         <div class="menu-grid">
-            <button class="menu-card" onclick="showScreen('qc-screen')">
-                <span>QUAY CRANE</span>
-                <i class="fa-solid fa-ship"></i>
+            <button class="menu-card ct-btn" onclick="showScreen('ct-ops-screen')">
+                <span>CT OPS</span>
+                <i class="fa-solid fa-container-storage"></i>
             </button>
-            <button class="menu-card rtg-btn" onclick="showScreen('rtg-screen')">
-                <span>RTG CRANE</span>
-                <i class="fa-solid fa-truck-ramp-box"></i>
+            <button class="menu-card gct-btn" onclick="showScreen('gct-ops-screen')">
+                <span>GCT OPS</span>
+                <i class="fa-solid fa-boxes-stacked"></i>
+            </button>
+            <button class="menu-card mr-btn" onclick="showScreen('mr-screen')">
+                <span>M&R</span>
+                <i class="fa-solid fa-screwdriver-wrench"></i>
             </button>
         </div>
 
         <div class="developer-credit">DEVLOPED BY : Mr. Golden Micheal.</div>
     </div>
 
-    <!-- QC TIMER SCREEN -->
-    <div id="qc-screen" class="screen">
-        <button class="back-btn" onclick="showScreen('home-screen')"><i class="fas fa-arrow-left"></i> HOME</button>
-        <div class="section-card">
-            <div class="mode-toggle">
-                <button id="qc-m-load" class="mode-btn active" onclick="setMode('QC', 'LOADING')">LOADING</button>
-                <button id="qc-m-dis" class="mode-btn" onclick="setMode('QC', 'DISCHARGING')">DISCHARGING</button>
-            </div>
-            
-            <div class="id-inputs-qc">
-                <input type="text" id="qcStaffId" placeholder="STAFF ID">
-                <input type="text" id="qcNo" class="qc-no-box" placeholder="QC#" maxlength="2">
-                <select id="qcCategory">
-                    <option value="Above deck">Above deck</option>
-                    <option value="Below deck">Below deck</option>
-                    <option value="hatch cover">Hatch cover</option>
-                    <option value="OOG">OOG</option>
-                    <option value="RORO">RORO</option>
-                </select>
-            </div>
-            
-            <div class="timer-container">
-                <div class="cycle-badge">CYCLES: <span id="qc-cycle-count">0</span></div>
-                <div class="timer" id="qc-timer">0.00</div>
-            </div>
-            
-            <button id="qc-muda" class="muda-btn" onclick="toggleMuda('QC')" disabled>PAUSE (MUDA)</button>
-            <button class="reset-btn" onclick="resetCurrentTimer('QC')">RESET CURRENT TIMER</button>
-            
-            <div id="qc-btns" class="btn-grid"></div>
-            
-            <button class="report-btn" onclick="downloadReport('QC')">DOWNLOAD QC REPORT</button>
+    <!-- CT OPS MENU SCREEN -->
+    <div id="ct-ops-screen" class="screen">
+        <button class="back-btn" onclick="showScreen('home-screen')"><i class="fas fa-arrow-left"></i> BACK</button>
+        <h2 style="text-align:center; color: var(--orange);">CT OPERATIONS</h2>
+        <div class="equip-grid">
+            <button class="equip-item" onclick="startTimer('QC')">QC</button>
+            <button class="equip-item" onclick="startTimer('RTG')">RTG</button>
+            <button class="equip-item" onclick="startTimer('TT')">TT</button>
+            <button class="equip-item" onclick="startTimer('EH')">EH</button>
+            <button class="equip-item" onclick="startTimer('RS')">RS</button>
+            <button class="equip-item" onclick="startTimer('FLT')">FLT</button>
+            <button class="equip-item" onclick="startTimer('LASHER')">LASHER</button>
+            <button class="equip-item" onclick="startTimer('DOWELMAN')">DOWELMAN</button>
         </div>
     </div>
 
-    <!-- RTG TIMER SCREEN -->
-    <div id="rtg-screen" class="screen">
-        <button class="back-btn" onclick="showScreen('home-screen')"><i class="fas fa-arrow-left"></i> HOME</button>
-        <div class="section-card" style="border-top-color:#0891b2">
-            <div class="mode-toggle">
-                <button id="rtg-m-load" class="mode-btn active" onclick="setMode('RTG', 'LOADING')">LOADING</button>
-                <button id="rtg-m-dis" class="mode-btn" onclick="setMode('RTG', 'DISCHARGE')">DISCHARGE</button>
-            </div>
+    <!-- GCT OPS MENU SCREEN -->
+    <div id="gct-ops-screen" class="screen">
+        <button class="back-btn" onclick="showScreen('home-screen')"><i class="fas fa-arrow-left"></i> BACK</button>
+        <h2 style="text-align:center; color: var(--ct-blue);">GCT OPERATIONS</h2>
+        <div class="equip-grid">
+            <button class="equip-item" style="background:var(--ct-blue)" onclick="startTimer('MHC')">MHC</button>
+            <button class="equip-item" style="background:var(--ct-blue)" onclick="startTimer('LASHER')">LASHER</button>
+            <button class="equip-item" style="background:var(--ct-blue)" onclick="startTimer('SHIPCRANE')">SHIPCRANE</button>
+            <button class="equip-item" style="background:var(--ct-blue)" onclick="startTimer('FLT')">FLT</button>
+            <button class="equip-item" style="background:var(--ct-blue)" onclick="startTimer('RTG')">RTG</button>
+            <button class="equip-item" style="background:var(--ct-blue)" onclick="startTimer('RS')">RS</button>
+        </div>
+    </div>
 
-            <div class="id-inputs-rtg">
-                <input type="text" id="rtgStaffId" placeholder="STAFF ID">
-                <input type="text" id="rtgNo" placeholder="RTG NO.">
+    <!-- M&R SCREEN -->
+    <div id="mr-screen" class="screen">
+        <button class="back-btn" onclick="showScreen('home-screen')"><i class="fas fa-arrow-left"></i> BACK</button>
+        <h2 style="text-align:center; color: var(--mr-teal);">M&R</h2>
+        <div class="equip-grid">
+            <button class="equip-item" style="background:var(--mr-teal); grid-column: span 2;" onclick="startTimer('M&R')">M&R LOG</button>
+        </div>
+    </div>
+
+    <!-- GENERIC TIMER SCREEN -->
+    <div id="timer-screen" class="screen">
+        <button id="timer-back-btn" class="back-btn"><i class="fas fa-arrow-left"></i> BACK</button>
+        <div class="section-card" id="timer-card">
+            <div class="mode-toggle">
+                <button id="m-load" class="mode-btn active" onclick="updateMode('LOADING')">LOADING</button>
+                <button id="m-dis" class="mode-btn" onclick="updateMode('DISCHARGE')">DISCHARGE</button>
+            </div>
+            
+            <div id="input-container">
+                <!-- Inputs injected dynamically -->
             </div>
             
             <div class="timer-container">
-                <div class="cycle-badge">CYCLES: <span id="rtg-cycle-count">0</span></div>
-                <div class="timer" id="rtg-timer">0.00</div>
+                <div class="cycle-badge">CYCLES: <span id="cycle-count">0</span></div>
+                <div class="timer" id="main-timer">0.00</div>
             </div>
             
-            <button id="rtg-muda" class="muda-btn" onclick="toggleMuda('RTG')" disabled>PAUSE (MUDA)</button>
-            <button class="reset-btn" onclick="resetCurrentTimer('RTG')">RESET CURRENT TIMER</button>
+            <button id="muda-btn" class="muda-btn" onclick="toggleMuda()" disabled>PAUSE (MUDA)</button>
+            <button class="reset-btn" onclick="resetCurrentTimer()">RESET CURRENT TIMER</button>
             
-            <div id="rtg-btns" class="btn-grid"></div>
+            <div id="step-btns" class="btn-grid"></div>
             
-            <button class="report-btn" onclick="downloadReport('RTG')" style="background:#0891b2">DOWNLOAD RTG REPORT</button>
+            <button class="report-btn" id="dl-report-btn">DOWNLOAD REPORT</button>
         </div>
     </div>
 
 <script>
     let masterLogs = [];
-    let counts = { QC: 0, RTG: 0 };
-    let state = {
-        QC: { mode: 'LOADING', startTime: null, lastTime: null, interval: null, isPaused: false, mudaStart: null },
-        RTG: { mode: 'LOADING', startTime: null, lastTime: null, interval: null, isPaused: false, mudaStart: null }
-    };
+    let currentCrane = '';
+    let currentMode = 'LOADING';
+    let currentCounts = {};
+    let activeInterval = null;
+    let startTime = null;
+    let lastTime = null;
+    let isPaused = false;
+    let mudaStart = null;
+    let currentCycleData = {};
+    let parentScreen = 'home-screen';
 
     const config = {
         QC: {
@@ -219,131 +245,189 @@
                 "2. FROM LOCK ON TRUCK TO UNLOCK ON TARGET ROW",
                 "3. FROM UNLOCK TO PARK POSITION"
             ]
+        },
+        // Placeholders for other equipment
+        DEFAULT: {
+            LOADING: ["1. START OPERATION", "2. IN PROGRESS", "3. COMPLETION"],
+            DISCHARGE: ["1. START OPERATION", "2. IN PROGRESS", "3. COMPLETION"]
         }
     };
 
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        if(id !== 'home-screen') render(id.split('-')[0].toUpperCase());
+        if (id === 'ct-ops-screen' || id === 'gct-ops-screen' || id === 'mr-screen') {
+            parentScreen = id;
+        }
     }
 
-    function setMode(crane, mode) {
-        if(state[crane].startTime) return;
-        state[crane].mode = mode;
-        const p = crane.toLowerCase();
-        document.getElementById(`${p}-m-load`).className = mode.includes('LOAD') ? 'mode-btn active' : 'mode-btn';
-        document.getElementById(`${p}-m-dis`).className = !mode.includes('LOAD') ? 'mode-btn active' : 'mode-btn';
-        render(crane);
+    function startTimer(equipment) {
+        currentCrane = equipment;
+        currentMode = equipment === 'QC' ? 'LOADING' : 'LOADING';
+        
+        // Setup Inputs
+        const inputDiv = document.getElementById('input-container');
+        if (equipment === 'QC') {
+            inputDiv.className = 'id-inputs-qc';
+            inputDiv.innerHTML = `
+                <input type="text" id="staffId" placeholder="STAFF ID">
+                <input type="text" id="unitNo" class="qc-no-box" placeholder="QC#" maxlength="2">
+                <select id="qcCategory">
+                    <option value="Above deck">Above deck</option>
+                    <option value="Below deck">Below deck</option>
+                    <option value="hatch cover">Hatch cover</option>
+                    <option value="OOG">OOG</option>
+                    <option value="RORO">RORO</option>
+                </select>
+            `;
+        } else {
+            inputDiv.className = 'id-inputs-generic';
+            inputDiv.innerHTML = `
+                <input type="text" id="staffId" placeholder="STAFF ID">
+                <input type="text" id="unitNo" placeholder="${equipment} NO.">
+            `;
+        }
+
+        // Setup Mode Toggle visibility
+        const toggle = document.querySelector('.mode-toggle');
+        toggle.style.display = (equipment === 'M&R') ? 'none' : 'flex';
+        
+        // Colors
+        const card = document.getElementById('timer-card');
+        card.style.borderTopColor = (parentScreen === 'gct-ops-screen') ? 'var(--ct-blue)' : 'var(--orange)';
+
+        document.getElementById('timer-back-btn').onclick = () => {
+            if (startTime) {
+                if (!confirm("Stop current timer and go back?")) return;
+                resetCrane();
+            }
+            showScreen(parentScreen);
+        };
+
+        document.getElementById('dl-report-btn').onclick = () => downloadReport(equipment);
+        
+        resetCrane();
+        showScreen('timer-screen');
     }
 
-    function render(crane) {
-        const container = document.getElementById(crane.toLowerCase() + '-btns');
+    function updateMode(mode) {
+        if (startTime) return;
+        currentMode = (mode === 'DISCHARGE' && currentCrane === 'QC') ? 'DISCHARGING' : mode;
+        document.getElementById('m-load').className = mode === 'LOADING' ? 'mode-btn active' : 'mode-btn';
+        document.getElementById('m-dis').className = mode === 'DISCHARGE' ? 'mode-btn active' : 'mode-btn';
+        renderSteps();
+    }
+
+    function renderSteps() {
+        const container = document.getElementById('step-btns');
         container.innerHTML = '';
-        const steps = config[crane][state[crane].mode];
+        const steps = config[currentCrane] ? config[currentCrane][currentMode] : config.DEFAULT[currentMode];
+        
         steps.forEach((text, i) => {
             const btn = document.createElement('button');
             btn.className = 'btn-step';
             btn.disabled = i !== 0;
-            btn.id = `${crane}-s${i+1}`;
+            btn.id = `s${i+1}`;
             btn.innerText = text;
-            btn.onclick = () => triggerStep(crane, i + 1);
+            btn.style.background = (parentScreen === 'gct-ops-screen') ? 'var(--ct-blue)' : 'var(--orange)';
+            btn.onclick = () => triggerStep(i + 1);
             container.appendChild(btn);
         });
     }
 
-    function triggerStep(crane, stepNum) {
+    function triggerStep(stepNum) {
         const now = Date.now();
-        const s = state[crane];
-        const mode = s.mode;
-        const steps = config[crane][mode];
+        const steps = config[currentCrane] ? config[currentCrane][currentMode] : config.DEFAULT[currentMode];
 
         if (navigator.vibrate) navigator.vibrate(40);
 
         if (stepNum === 1) {
-            s.startTime = now;
-            s.currentCycle = { 
+            startTime = now;
+            currentCycleData = { 
                 Date: new Date().toLocaleDateString(), 
                 Time: new Date().toLocaleTimeString(),
-                Equipment: crane, 
-                Unit_No: document.getElementById(crane.toLowerCase() + 'No').value || "N/A", 
-                Staff_ID: document.getElementById(crane.toLowerCase() + 'StaffId').value || "N/A", 
-                Category: crane === 'QC' ? document.getElementById('qcCategory').value : "N/A",
-                Operation: mode 
+                Equipment: currentCrane, 
+                Unit_No: document.getElementById('unitNo').value || "N/A", 
+                Staff_ID: document.getElementById('staffId').value || "N/A", 
+                Category: currentCrane === 'QC' ? document.getElementById('qcCategory').value : "N/A",
+                Operation: currentMode 
             };
-            document.getElementById(crane.toLowerCase() + '-muda').disabled = false;
-            s.interval = setInterval(() => {
-                document.getElementById(crane.toLowerCase()+'-timer').innerText = ((Date.now() - s.startTime)/1000).toFixed(2);
+            document.getElementById('muda-btn').disabled = false;
+            activeInterval = setInterval(() => {
+                document.getElementById('main-timer').innerText = ((Date.now() - startTime)/1000).toFixed(2);
             }, 50);
         } else {
-            s.currentCycle['Step_'+(stepNum-1)] = ((now - s.lastTime) / 1000).toFixed(2);
+            currentCycleData['Step_'+(stepNum-1)] = ((now - lastTime) / 1000).toFixed(2);
         }
 
+        // Visual Highlight
         for(let i=1; i<=steps.length; i++) {
-            const btn = document.getElementById(`${crane}-s${i}`);
+            const btn = document.getElementById(`s${i}`);
             btn.disabled = true;
             btn.classList.remove('step-active');
         }
-        document.getElementById(`${crane}-s${stepNum}`).classList.add('step-active');
+        document.getElementById(`s${stepNum}`).classList.add('step-active');
 
         if (stepNum === steps.length) {
-            clearInterval(s.interval);
-            s.currentCycle['Step_'+stepNum] = ((now - s.lastTime) / 1000).toFixed(2);
-            s.currentCycle['Total_Cycle_Time'] = ((now - s.startTime) / 1000).toFixed(2);
-            masterLogs.push({...s.currentCycle});
-            counts[crane]++;
-            document.getElementById(crane.toLowerCase() + '-cycle-count').innerText = counts[crane];
-            document.getElementById(crane.toLowerCase() + '-muda').disabled = true;
-            setTimeout(() => resetCrane(crane), 1500);
+            clearInterval(activeInterval);
+            currentCycleData['Step_'+stepNum] = ((now - lastTime) / 1000).toFixed(2);
+            currentCycleData['Total_Time'] = ((now - startTime) / 1000).toFixed(2);
+            masterLogs.push({...currentCycleData});
+            
+            if (!currentCounts[currentCrane]) currentCounts[currentCrane] = 0;
+            currentCounts[currentCrane]++;
+            document.getElementById('cycle-count').innerText = currentCounts[currentCrane];
+            
+            document.getElementById('muda-btn').disabled = true;
+            setTimeout(resetCrane, 1500);
         } else {
-            document.getElementById(`${crane}-s${stepNum+1}`).disabled = false;
+            document.getElementById(`s${stepNum+1}`).disabled = false;
         }
-        s.lastTime = now;
+        lastTime = now;
     }
 
-    function toggleMuda(crane) {
-        const s = state[crane];
-        const btn = document.getElementById(crane.toLowerCase() + '-muda');
-        if (!s.isPaused) {
-            s.isPaused = true;
-            s.mudaStart = Date.now();
+    function toggleMuda() {
+        const btn = document.getElementById('muda-btn');
+        if (!isPaused) {
+            isPaused = true;
+            mudaStart = Date.now();
             btn.classList.add('muda-on');
-            clearInterval(s.interval);
+            clearInterval(activeInterval);
         } else {
-            s.isPaused = false;
-            let pauseDuration = (Date.now() - s.mudaStart);
-            s.startTime += pauseDuration;
-            s.lastTime += pauseDuration;
+            isPaused = false;
+            let pauseDuration = (Date.now() - mudaStart);
+            startTime += pauseDuration;
+            lastTime += pauseDuration;
             btn.classList.remove('muda-on');
-            s.interval = setInterval(() => {
-                document.getElementById(crane.toLowerCase()+'-timer').innerText = ((Date.now() - s.startTime)/1000).toFixed(2);
+            activeInterval = setInterval(() => {
+                document.getElementById('main-timer').innerText = ((Date.now() - startTime)/1000).toFixed(2);
             }, 50);
         }
     }
 
-    function resetCurrentTimer(crane) {
-        if(confirm("Discard current measurement?")) resetCrane(crane);
+    function resetCurrentTimer() {
+        if(confirm("Discard current measurement?")) resetCrane();
     }
 
-    function resetCrane(crane) {
-        const s = state[crane];
-        clearInterval(s.interval);
-        s.startTime = null;
-        s.isPaused = false;
-        document.getElementById(crane.toLowerCase()+'-timer').innerText = "0.00";
-        document.getElementById(crane.toLowerCase()+'-muda').disabled = true;
-        document.getElementById(crane.toLowerCase()+'-muda').classList.remove('muda-on');
-        render(crane);
+    function resetCrane() {
+        clearInterval(activeInterval);
+        startTime = null;
+        isPaused = false;
+        document.getElementById('main-timer').innerText = "0.00";
+        document.getElementById('muda-btn').disabled = true;
+        document.getElementById('muda-btn').classList.remove('muda-on');
+        document.getElementById('cycle-count').innerText = currentCounts[currentCrane] || 0;
+        renderSteps();
     }
 
-    function downloadReport(type) {
-        const filtered = masterLogs.filter(log => log.Equipment === type);
+    function downloadReport(equipment) {
+        const filtered = masterLogs.filter(log => log.Equipment === equipment);
         if (filtered.length === 0) return alert("No recorded cycles found.");
         const headers = Object.keys(filtered[0]).join(",");
         let csv = "data:text/csv;charset=utf-8," + headers + "\n" + filtered.map(r => Object.values(r).join(",")).join("\n");
         const link = document.createElement("a");
         link.href = encodeURI(csv);
-        link.download = `${type}_Cycle_Report_${new Date().toLocaleDateString().replace(/\//g,'-')}.csv`;
+        link.download = `${equipment}_Cycle_Report_${new Date().toLocaleDateString().replace(/\//g,'-')}.csv`;
         link.click();
     }
 </script>
