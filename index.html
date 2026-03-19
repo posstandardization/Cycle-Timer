@@ -34,7 +34,7 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.1); transition: transform 0.1s;
         }
         .menu-card:active { transform: scale(0.97); }
-        .rtg-btn { background: #0891b2; } /* Distinct color for RTG card on home only */
+        .rtg-btn { background: #0891b2; }
 
         /* TIMER SCREEN UI */
         .back-btn { background: #f1f3f5; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; margin-bottom: 20px; color: var(--dark); display: flex; align-items: center; gap: 8px; }
@@ -44,8 +44,12 @@
         .mode-btn { flex: 1; padding: 15px; border-radius: 12px; border: 2px solid #dee2e6; background: white; font-weight: 800; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
         .mode-btn.active { background: var(--dark); color: white; border-color: var(--dark); }
 
-        .id-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .id-inputs input { padding: 12px; border: 1px solid #ced4da; border-radius: 10px; font-size: 1rem; width: 100%; box-sizing: border-box; outline: none; }
+        /* Modified Input Grids */
+        .id-inputs-qc { display: grid; grid-template-columns: 1.2fr 75px 1.5fr; gap: 8px; margin-bottom: 15px; }
+        .id-inputs-rtg { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        
+        input, select { padding: 12px; border: 1px solid #ced4da; border-radius: 10px; font-size: 0.9rem; width: 100%; box-sizing: border-box; outline: none; background: white; }
+        .qc-no-box { text-align: center; }
 
         .timer-container { background: var(--dark); color: #0dcaf0; padding: 25px; border-radius: 15px; text-align: center; margin: 15px 0; position: relative; }
         .timer { font-size: 4rem; font-weight: 800; font-family: 'Courier New', Courier, monospace; }
@@ -56,9 +60,7 @@
         @keyframes pulse { 50% { opacity: 0.7; } }
         
         .reset-btn { width: 100%; padding: 12px; border: 2px solid #dee2e6; border-radius: 12px; font-weight: 800; background: white; color: #6c757d; cursor: pointer; margin-bottom: 20px; transition: 0.2s; }
-        .reset-btn:active { background: #f8f9fa; }
 
-        /* UNIFORM STEP BUTTONS */
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .btn-step { 
             height: 85px; border: none; border-radius: 15px; font-size: 0.8rem; font-weight: 700; 
@@ -102,9 +104,16 @@
                 <button id="qc-m-dis" class="mode-btn" onclick="setMode('QC', 'DISCHARGING')">DISCHARGING</button>
             </div>
             
-            <div class="id-inputs">
+            <div class="id-inputs-qc">
                 <input type="text" id="qcStaffId" placeholder="STAFF ID">
-                <input type="text" id="qcNo" placeholder="QC NO.">
+                <input type="text" id="qcNo" class="qc-no-box" placeholder="QC#" maxlength="2">
+                <select id="qcCategory">
+                    <option value="Above deck">Above deck</option>
+                    <option value="Below deck">Below deck</option>
+                    <option value="hatch cover">Hatch cover</option>
+                    <option value="OOG">OOG</option>
+                    <option value="RORO">RORO</option>
+                </select>
             </div>
             
             <div class="timer-container">
@@ -130,7 +139,7 @@
                 <button id="rtg-m-dis" class="mode-btn" onclick="setMode('RTG', 'DISCHARGE')">DISCHARGE</button>
             </div>
 
-            <div class="id-inputs">
+            <div class="id-inputs-rtg">
                 <input type="text" id="rtgStaffId" placeholder="STAFF ID">
                 <input type="text" id="rtgNo" placeholder="RTG NO.">
             </div>
@@ -157,7 +166,6 @@
         RTG: { mode: 'LOADING', startTime: null, lastTime: null, interval: null, isPaused: false, mudaStart: null }
     };
 
-    // EXACT STEPS FROM IMAGE
     const config = {
         QC: {
             LOADING: [
@@ -228,7 +236,6 @@
         const mode = s.mode;
         const steps = config[crane][mode];
 
-        // Haptic Feedback
         if (navigator.vibrate) navigator.vibrate(40);
 
         if (stepNum === 1) {
@@ -239,6 +246,7 @@
                 Equipment: crane, 
                 Unit_No: document.getElementById(crane.toLowerCase() + 'No').value || "N/A", 
                 Staff_ID: document.getElementById(crane.toLowerCase() + 'StaffId').value || "N/A", 
+                Category: crane === 'QC' ? document.getElementById('qcCategory').value : "N/A",
                 Operation: mode 
             };
             document.getElementById(crane.toLowerCase() + '-muda').disabled = false;
@@ -246,11 +254,9 @@
                 document.getElementById(crane.toLowerCase()+'-timer').innerText = ((Date.now() - s.startTime)/1000).toFixed(2);
             }, 50);
         } else {
-            // Record Duration of Previous Step
             s.currentCycle['Step_'+(stepNum-1)] = ((now - s.lastTime) / 1000).toFixed(2);
         }
 
-        // Color Logic: Current Step Gray, Others Orange
         for(let i=1; i<=steps.length; i++) {
             const btn = document.getElementById(`${crane}-s${i}`);
             btn.disabled = true;
@@ -260,14 +266,11 @@
 
         if (stepNum === steps.length) {
             clearInterval(s.interval);
-            // RECORD FINAL STEP DURATION
             s.currentCycle['Step_'+stepNum] = ((now - s.lastTime) / 1000).toFixed(2);
             s.currentCycle['Total_Cycle_Time'] = ((now - s.startTime) / 1000).toFixed(2);
-            
             masterLogs.push({...s.currentCycle});
             counts[crane]++;
             document.getElementById(crane.toLowerCase() + '-cycle-count').innerText = counts[crane];
-            
             document.getElementById(crane.toLowerCase() + '-muda').disabled = true;
             setTimeout(() => resetCrane(crane), 1500);
         } else {
@@ -297,7 +300,7 @@
     }
 
     function resetCurrentTimer(crane) {
-        if(confirm("Discard current measurement? Previous cycles are safe.")) resetCrane(crane);
+        if(confirm("Discard current measurement?")) resetCrane(crane);
     }
 
     function resetCrane(crane) {
@@ -314,10 +317,8 @@
     function downloadReport(type) {
         const filtered = masterLogs.filter(log => log.Equipment === type);
         if (filtered.length === 0) return alert("No recorded cycles found.");
-        
         const headers = Object.keys(filtered[0]).join(",");
         let csv = "data:text/csv;charset=utf-8," + headers + "\n" + filtered.map(r => Object.values(r).join(",")).join("\n");
-        
         const link = document.createElement("a");
         link.href = encodeURI(csv);
         link.download = `${type}_Cycle_Report_${new Date().toLocaleDateString().replace(/\//g,'-')}.csv`;
