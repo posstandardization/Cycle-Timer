@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cycle Timer Master</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root { 
             --orange: #ff9800; 
@@ -32,6 +32,10 @@
             display: flex; align-items: center; justify-content: space-between; 
             font-size: 1.6rem; font-weight: 800; background: var(--orange); 
             box-shadow: 0 8px 20px rgba(0,0,0,0.1); transition: transform 0.1s;
+        }
+        .menu-card i {
+            font-size: 2.8rem;
+            opacity: 0.9;
         }
         .menu-card:active { transform: scale(0.97); }
         .rtg-btn { background: #0891b2; }
@@ -86,11 +90,11 @@
         <div class="menu-grid">
             <button class="menu-card" onclick="showScreen('qc-screen')">
                 <span>QUAY CRANE</span>
-                <i class="fas fa-ship"></i>
+                <i class="fa-solid fa-ship"></i>
             </button>
             <button class="menu-card rtg-btn" onclick="showScreen('rtg-screen')">
                 <span>RTG CRANE</span>
-                <i class="fas fa-truck-loading"></i>
+                <i class="fa-solid fa-truck-ramp-box"></i>
             </button>
         </div>
     </div>
