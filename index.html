@@ -6,53 +6,79 @@
     <title>Cycle Timer Master</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --orange: #ff9800; --white: #ffffff; --gray-active: #546e7a; --bg: #f1f5f9; --success: #2e7d32; --danger: #ef4444; --dark: #1e293b; }
-        body { font-family: system-ui, sans-serif; background: var(--bg); margin: 0; padding: 0; display: flex; justify-content: center; }
+        :root { 
+            --orange: #ff9800; 
+            --white: #ffffff; 
+            --gray-active: #757575; 
+            --bg: #f8f9fa; 
+            --dark: #212529; 
+            --danger: #dc3545;
+            --success: #198754;
+        }
+        
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 0; display: flex; justify-content: center; }
+        
         .screen { width: 100%; max-width: 500px; min-height: 100vh; background: white; display: none; padding: 20px; box-sizing: border-box; }
         .active { display: block; }
 
-        /* CLEAN HOME SCREEN */
-        .home-header { text-align: center; margin-bottom: 60px; margin-top: 40px; }
-        .home-header h1 { font-size: 2.5rem; color: var(--dark); margin: 0; }
-        .home-header p { color: #64748b; font-weight: 500; }
+        /* HOME SCREEN - CLEAN */
+        .home-header { text-align: center; margin-bottom: 60px; margin-top: 50px; }
+        .home-header h1 { font-size: 2.5rem; color: var(--dark); margin: 0; font-weight: 800; }
+        .home-header p { color: #6c757d; font-weight: 500; margin-top: 10px; }
         
         .menu-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
         .menu-card { 
-            padding: 35px; border-radius: 25px; border: none; color: white; cursor: pointer; 
+            padding: 35px; border-radius: 20px; border: none; color: white; cursor: pointer; 
             display: flex; align-items: center; justify-content: space-between; 
             font-size: 1.6rem; font-weight: 800; background: var(--orange); 
             box-shadow: 0 8px 20px rgba(0,0,0,0.1); transition: transform 0.1s;
         }
-        .menu-card:active { transform: scale(0.96); }
-        
-        /* Timer UI */
-        .back-btn { background: #eee; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; margin-bottom: 20px; color: var(--dark); }
-        .section-card { border-top: 10px solid var(--orange); padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .menu-card:active { transform: scale(0.97); }
+        .rtg-btn { background: #0891b2; } /* Distinct color for RTG card on home only */
+
+        /* TIMER SCREEN UI */
+        .back-btn { background: #f1f3f5; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; margin-bottom: 20px; color: var(--dark); display: flex; align-items: center; gap: 8px; }
+        .section-card { border-top: 10px solid var(--orange); padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         
         .mode-toggle { display: flex; gap: 10px; margin-bottom: 20px; }
-        .mode-btn { flex: 1; padding: 15px; border-radius: 12px; border: 2px solid #ddd; background: white; font-weight: 800; cursor: pointer; }
+        .mode-btn { flex: 1; padding: 15px; border-radius: 12px; border: 2px solid #dee2e6; background: white; font-weight: 800; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
         .mode-btn.active { background: var(--dark); color: white; border-color: var(--dark); }
 
-        .timer-container { background: var(--dark); color: #38bdf8; padding: 25px; border-radius: 15px; text-align: center; margin: 15px 0; position: relative; }
-        .timer { font-size: 3.8rem; font-weight: 800; font-family: monospace; }
+        .id-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .id-inputs input { padding: 12px; border: 1px solid #ced4da; border-radius: 10px; font-size: 1rem; width: 100%; box-sizing: border-box; outline: none; }
+
+        .timer-container { background: var(--dark); color: #0dcaf0; padding: 25px; border-radius: 15px; text-align: center; margin: 15px 0; position: relative; }
+        .timer { font-size: 4rem; font-weight: 800; font-family: 'Courier New', Courier, monospace; }
         .cycle-badge { position: absolute; top: 10px; right: 10px; background: var(--orange); color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
 
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .btn-step { height: 80px; border: none; border-radius: 15px; font-size: 0.9rem; font-weight: 700; color: var(--white); background: var(--orange); cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; padding: 10px; }
-        .step-active { background: var(--gray-active) !important; }
-        .btn-step:disabled { opacity: 0.35; }
+        .muda-btn { width: 100%; padding: 18px; border: none; border-radius: 12px; font-weight: 800; background: #e9ecef; margin-bottom: 8px; cursor: pointer; font-size: 1rem; color: #495057; }
+        .muda-on { background: var(--danger) !important; color: white; animation: pulse 1s infinite; }
+        @keyframes pulse { 50% { opacity: 0.7; } }
+        
+        .reset-btn { width: 100%; padding: 12px; border: 2px solid #dee2e6; border-radius: 12px; font-weight: 800; background: white; color: #6c757d; cursor: pointer; margin-bottom: 20px; transition: 0.2s; }
+        .reset-btn:active { background: #f8f9fa; }
 
-        .muda-btn { width: 100%; padding: 18px; border: none; border-radius: 12px; font-weight: 800; background: #e2e8f0; margin-bottom: 10px; cursor: pointer; font-size: 1rem; }
-        .muda-on { background: var(--danger) !important; color: white; }
-        .reset-btn { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 12px; font-weight: 800; background: white; color: #64748b; cursor: pointer; margin-bottom: 20px; }
+        /* UNIFORM STEP BUTTONS */
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .btn-step { 
+            height: 85px; border: none; border-radius: 15px; font-size: 0.8rem; font-weight: 700; 
+            color: var(--white); background: var(--orange); cursor: pointer; 
+            display: flex; align-items: center; justify-content: center; text-align: center; 
+            padding: 10px; line-height: 1.2; transition: background 0.2s;
+        }
+        .step-active { background: var(--gray-active) !important; }
+        .btn-step:disabled { opacity: 0.35; cursor: not-allowed; }
+
+        .report-btn { width: 100%; padding: 18px; border: none; border-radius: 15px; background: var(--dark); color: white; font-weight: 800; margin-top: 25px; cursor: pointer; font-size: 1rem; }
     </style>
 </head>
 <body>
 
+    <!-- MASTER HOME PAGE -->
     <div id="home-screen" class="screen active">
         <div class="home-header">
             <h1>Cycle Timer</h1>
-            <p>Select Equipment to Start</p>
+            <p>Terminal Operations Dashboard</p>
         </div>
 
         <div class="menu-grid">
@@ -60,54 +86,66 @@
                 <span>QUAY CRANE</span>
                 <i class="fas fa-ship"></i>
             </button>
-            <button class="menu-card" style="background:#0891b2" onclick="showScreen('rtg-screen')">
+            <button class="menu-card rtg-btn" onclick="showScreen('rtg-screen')">
                 <span>RTG CRANE</span>
                 <i class="fas fa-truck-loading"></i>
             </button>
         </div>
     </div>
 
+    <!-- QC TIMER SCREEN -->
     <div id="qc-screen" class="screen">
-        <button class="back-btn" onclick="showScreen('home-screen')">← HOME</button>
+        <button class="back-btn" onclick="showScreen('home-screen')"><i class="fas fa-arrow-left"></i> HOME</button>
         <div class="section-card">
             <div class="mode-toggle">
-                <button id="qc-m-load" class="mode-btn active" onclick="setMode('QC', 'LOAD')">LOAD</button>
-                <button id="qc-m-dis" class="mode-btn" onclick="setMode('QC', 'DISCHARGE')">DISCHARGE</button>
+                <button id="qc-m-load" class="mode-btn active" onclick="setMode('QC', 'LOADING')">LOADING</button>
+                <button id="qc-m-dis" class="mode-btn" onclick="setMode('QC', 'DISCHARGING')">DISCHARGING</button>
             </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
-                <input type="text" id="qcStaffId" placeholder="Staff ID" style="padding:12px; border:1px solid #ddd; border-radius:10px;">
-                <input type="text" id="qcNo" placeholder="QC No." style="padding:12px; border:1px solid #ddd; border-radius:10px;">
+            
+            <div class="id-inputs">
+                <input type="text" id="qcStaffId" placeholder="STAFF ID">
+                <input type="text" id="qcNo" placeholder="QC NO.">
             </div>
+            
             <div class="timer-container">
                 <div class="cycle-badge">CYCLES: <span id="qc-cycle-count">0</span></div>
                 <div class="timer" id="qc-timer">0.00</div>
             </div>
+            
             <button id="qc-muda" class="muda-btn" onclick="toggleMuda('QC')" disabled>PAUSE (MUDA)</button>
             <button class="reset-btn" onclick="resetCurrentTimer('QC')">RESET CURRENT TIMER</button>
+            
             <div id="qc-btns" class="btn-grid"></div>
-            <button class="muda-btn" onclick="downloadReport('QC')" style="margin-top:25px; background:var(--dark); color:white;">DOWNLOAD QC REPORT</button>
+            
+            <button class="report-btn" onclick="downloadReport('QC')">DOWNLOAD QC REPORT</button>
         </div>
     </div>
 
+    <!-- RTG TIMER SCREEN -->
     <div id="rtg-screen" class="screen">
-        <button class="back-btn" onclick="showScreen('home-screen')">← HOME</button>
+        <button class="back-btn" onclick="showScreen('home-screen')"><i class="fas fa-arrow-left"></i> HOME</button>
         <div class="section-card" style="border-top-color:#0891b2">
             <div class="mode-toggle">
-                <button id="rtg-m-load" class="mode-btn active" onclick="setMode('RTG', 'LOAD')">LOAD</button>
+                <button id="rtg-m-load" class="mode-btn active" onclick="setMode('RTG', 'LOADING')">LOADING</button>
                 <button id="rtg-m-dis" class="mode-btn" onclick="setMode('RTG', 'DISCHARGE')">DISCHARGE</button>
             </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
-                <input type="text" id="rtgStaffId" placeholder="Staff ID" style="padding:12px; border:1px solid #ddd; border-radius:10px;">
-                <input type="text" id="rtgNo" placeholder="RTG No." style="padding:12px; border:1px solid #ddd; border-radius:10px;">
+
+            <div class="id-inputs">
+                <input type="text" id="rtgStaffId" placeholder="STAFF ID">
+                <input type="text" id="rtgNo" placeholder="RTG NO.">
             </div>
+            
             <div class="timer-container">
                 <div class="cycle-badge">CYCLES: <span id="rtg-cycle-count">0</span></div>
                 <div class="timer" id="rtg-timer">0.00</div>
             </div>
+            
             <button id="rtg-muda" class="muda-btn" onclick="toggleMuda('RTG')" disabled>PAUSE (MUDA)</button>
             <button class="reset-btn" onclick="resetCurrentTimer('RTG')">RESET CURRENT TIMER</button>
+            
             <div id="rtg-btns" class="btn-grid"></div>
-            <button class="muda-btn" onclick="downloadReport('RTG')" style="margin-top:25px; background:var(--dark); color:white;">DOWNLOAD RTG REPORT</button>
+            
+            <button class="report-btn" onclick="downloadReport('RTG')" style="background:#0891b2">DOWNLOAD RTG REPORT</button>
         </div>
     </div>
 
@@ -115,18 +153,42 @@
     let masterLogs = [];
     let counts = { QC: 0, RTG: 0 };
     let state = {
-        QC: { mode: 'LOAD', startTime: null, lastTime: null, interval: null, isPaused: false, mudaStart: null },
-        RTG: { mode: 'LOAD', startTime: null, lastTime: null, interval: null, isPaused: false, mudaStart: null }
+        QC: { mode: 'LOADING', startTime: null, lastTime: null, interval: null, isPaused: false, mudaStart: null },
+        RTG: { mode: 'LOADING', startTime: null, lastTime: null, interval: null, isPaused: false, mudaStart: null }
     };
 
+    // EXACT STEPS FROM IMAGE
     const config = {
         QC: {
-            LOAD: ["Park to Truck", "Truck to Lock", "Lock to Sill", "Sill to Vessel", "Vessel to Unlock", "Unlock to Park"],
-            DISCHARGE: ["Park to Vessel", "Vessel to Lock", "Lock to Sill", "Sill to Truck", "Truck to Unlock", "Unlock to Park"]
+            LOADING: [
+                "1. FROM PARK POSITION TO ADJUST ON TRUCK",
+                "2. FROM START ADJUSTING ON TRUCK TO LOCK CONTAINER",
+                "3. FROM LOCK ON CONTAINER TO SILL BEAM",
+                "4. FROM SILL BEAM TO START ADJUSTING ON TARGET ROW",
+                "5. FROM START ADJUSTING ON ROW TO UNLOCK",
+                "6. FROM UNLOCK TO SILL BEAM"
+            ],
+            DISCHARGING: [
+                "1. FROM PARK TO SILL BEAM TO TARGET ROW",
+                "2. FROM START ADJUSTING ON CONTAINER TO LOCK",
+                "3. FROM LOCK TO SILL BEAM",
+                "4. FROM SILL BEAM TO START ADJUSTING ON TRUCK",
+                "5. FROM START ADJUSTING ON TRUCK TO UNLOCK",
+                "6. FROM UNLOCK TRUCK TO SILL BEAM/PARK"
+            ]
         },
         RTG: {
-            LOAD: ["Standby to Lock (Bay)", "Lock to Standby", "Standby to Unlock (Trk)", "Unlock to Standby"],
-            DISCHARGE: ["Park to Lock (Bay)", "Lock (Trk) to Unlock (Bay)", "Unlock (Bay) to Trk Line", "Trk Line to Park"]
+            LOADING: [
+                "1. FROM STANDBY TO LOCK CONTAINER IN BAY",
+                "2. FROM LOCK IN THE BAY TO A-ROW",
+                "3. FROM A-ROW TO UNLOCK ON TRUCK",
+                "4. FROM UNLOCK ON TRUCK TO PARK POSITION"
+            ],
+            DISCHARGE: [
+                "1. FROM PARK POSITION TO LOCK ON TRUCK",
+                "2. FROM LOCK ON TRUCK TO UNLOCK ON TARGET ROW",
+                "3. FROM UNLOCK TO PARK POSITION"
+            ]
         }
     };
 
@@ -139,10 +201,10 @@
     function setMode(crane, mode) {
         if(state[crane].startTime) return;
         state[crane].mode = mode;
-        render(crane);
         const p = crane.toLowerCase();
-        document.getElementById(`${p}-m-load`).className = mode === 'LOAD' ? 'mode-btn active' : 'mode-btn';
-        document.getElementById(`${p}-m-dis`).className = mode === 'DISCHARGE' ? 'mode-btn active' : 'mode-btn';
+        document.getElementById(`${p}-m-load`).className = mode.includes('LOAD') ? 'mode-btn active' : 'mode-btn';
+        document.getElementById(`${p}-m-dis`).className = !mode.includes('LOAD') ? 'mode-btn active' : 'mode-btn';
+        render(crane);
     }
 
     function render(crane) {
@@ -154,7 +216,7 @@
             btn.className = 'btn-step';
             btn.disabled = i !== 0;
             btn.id = `${crane}-s${i+1}`;
-            btn.innerText = (i+1) + ". " + text;
+            btn.innerText = text;
             btn.onclick = () => triggerStep(crane, i + 1);
             container.appendChild(btn);
         });
@@ -163,19 +225,32 @@
     function triggerStep(crane, stepNum) {
         const now = Date.now();
         const s = state[crane];
-        const steps = config[crane][s.mode];
+        const mode = s.mode;
+        const steps = config[crane][mode];
+
+        // Haptic Feedback
+        if (navigator.vibrate) navigator.vibrate(40);
 
         if (stepNum === 1) {
             s.startTime = now;
-            s.currentCycle = { Date: new Date().toLocaleDateString(), Equipment: crane, Unit: document.getElementById(crane.toLowerCase() + 'No').value, Staff: document.getElementById(crane.toLowerCase() + 'StaffId').value, Mode: s.mode };
+            s.currentCycle = { 
+                Date: new Date().toLocaleDateString(), 
+                Time: new Date().toLocaleTimeString(),
+                Equipment: crane, 
+                Unit_No: document.getElementById(crane.toLowerCase() + 'No').value || "N/A", 
+                Staff_ID: document.getElementById(crane.toLowerCase() + 'StaffId').value || "N/A", 
+                Operation: mode 
+            };
             document.getElementById(crane.toLowerCase() + '-muda').disabled = false;
             s.interval = setInterval(() => {
                 document.getElementById(crane.toLowerCase()+'-timer').innerText = ((Date.now() - s.startTime)/1000).toFixed(2);
             }, 50);
         } else {
+            // Record Duration of Previous Step
             s.currentCycle['Step_'+(stepNum-1)] = ((now - s.lastTime) / 1000).toFixed(2);
         }
 
+        // Color Logic: Current Step Gray, Others Orange
         for(let i=1; i<=steps.length; i++) {
             const btn = document.getElementById(`${crane}-s${i}`);
             btn.disabled = true;
@@ -185,16 +260,16 @@
 
         if (stepNum === steps.length) {
             clearInterval(s.interval);
-            // RECORD FINAL STEP DURATION (Step 6 or Step 4)
+            // RECORD FINAL STEP DURATION
             s.currentCycle['Step_'+stepNum] = ((now - s.lastTime) / 1000).toFixed(2);
-            s.currentCycle['Total'] = ((now - s.startTime) / 1000).toFixed(2);
+            s.currentCycle['Total_Cycle_Time'] = ((now - s.startTime) / 1000).toFixed(2);
             
             masterLogs.push({...s.currentCycle});
             counts[crane]++;
             document.getElementById(crane.toLowerCase() + '-cycle-count').innerText = counts[crane];
             
             document.getElementById(crane.toLowerCase() + '-muda').disabled = true;
-            setTimeout(() => resetCrane(crane), 1200);
+            setTimeout(() => resetCrane(crane), 1500);
         } else {
             document.getElementById(`${crane}-s${stepNum+1}`).disabled = false;
         }
@@ -222,7 +297,7 @@
     }
 
     function resetCurrentTimer(crane) {
-        if(confirm("Reset current measurement?")) resetCrane(crane);
+        if(confirm("Discard current measurement? Previous cycles are safe.")) resetCrane(crane);
     }
 
     function resetCrane(crane) {
@@ -238,12 +313,14 @@
 
     function downloadReport(type) {
         const filtered = masterLogs.filter(log => log.Equipment === type);
-        if (filtered.length === 0) return alert("No data recorded.");
+        if (filtered.length === 0) return alert("No recorded cycles found.");
+        
         const headers = Object.keys(filtered[0]).join(",");
         let csv = "data:text/csv;charset=utf-8," + headers + "\n" + filtered.map(r => Object.values(r).join(",")).join("\n");
+        
         const link = document.createElement("a");
         link.href = encodeURI(csv);
-        link.download = `${type}_Report.csv`;
+        link.download = `${type}_Cycle_Report_${new Date().toLocaleDateString().replace(/\//g,'-')}.csv`;
         link.click();
     }
 </script>
