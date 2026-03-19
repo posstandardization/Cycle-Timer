@@ -77,6 +77,7 @@
 
         .id-inputs-generic { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .id-inputs-qc { display: grid; grid-template-columns: 1fr 65px 1.5fr; gap: 8px; margin-bottom: 15px; }
+        .id-inputs-mhc { display: grid; grid-template-columns: 1fr 65px 1.5fr; gap: 8px; margin-bottom: 15px; }
         
         input, select { padding: 12px; border: 1px solid #ced4da; border-radius: 10px; font-size: 0.85rem; width: 100%; box-sizing: border-box; outline: none; background: white; }
         .qc-no-box { text-align: center; }
@@ -301,6 +302,20 @@
                 "3. FROM UNLOCK TO PARK POSITION"
             ]
         },
+        MHC: {
+            LOADING: [
+                "STEP1: Grap touch cargo to grab close",
+                "STEP2: Hoist up to reach unload position",
+                "STEP3: Start open cargo to full unload",
+                "STEP4: Hoist empty grap to grap touch cargo"
+            ],
+            DISCHARGE: [
+                "STEP1: Grap touch cargo on vessel to grab close",
+                "STEP2: Hoist up to reach unload position",
+                "STEP3: Start open cargo to full unload",
+                "STEP4: Hoist empty grap to grap touch cargo on vessel"
+            ]
+        },
         DEFAULT: {
             LOADING: ["1. START OPERATION", "2. IN PROGRESS", "3. COMPLETION"],
             DISCHARGE: ["1. START OPERATION", "2. IN PROGRESS", "3. COMPLETION"]
@@ -325,13 +340,24 @@
             inputDiv.innerHTML = `
                 <input type="text" id="staffId" placeholder="STAFF ID">
                 <input type="text" id="unitNo" class="qc-no-box" placeholder="QC#" maxlength="2">
-                <select id="qcCategory" onchange="renderSteps()">
+                <select id="category" onchange="renderSteps()">
                     <option value="Above deck">Above deck</option>
                     <option value="Below deck">Below deck</option>
                     <option value="Hatch cover">Hatch cover</option>
                     <option value="OOG (OHF)">OOG (OHF)</option>
                     <option value="OOG (Wire Sling)">OOG (Wire Sling)</option>
                     <option value="RORO">RORO</option>
+                </select>
+            `;
+        } else if (equipment === 'MHC') {
+            inputDiv.className = 'id-inputs-mhc';
+            inputDiv.innerHTML = `
+                <input type="text" id="staffId" placeholder="STAFF ID" maxlength="4">
+                <input type="text" id="unitNo" class="qc-no-box" placeholder="MHC#" maxlength="2">
+                <select id="category" onchange="renderSteps()">
+                    <option value="Gotwald">Gotwald</option>
+                    <option value="LHM">LHM</option>
+                    <option value="SHIPCRANE">SHIPCRANE</option>
                 </select>
             `;
         } else {
@@ -379,7 +405,7 @@
         
         let steps = [];
         if (currentCrane === 'QC') {
-            const category = document.getElementById('qcCategory').value;
+            const category = document.getElementById('category').value;
             let key = currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGING';
             
             if (category === 'Hatch cover') {
@@ -391,6 +417,8 @@
             }
             
             steps = config.QC[key] || config.QC[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGING'];
+        } else if (currentCrane === 'MHC') {
+            steps = config.MHC[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'];
         } else {
             steps = config[currentCrane] ? config[currentCrane][currentMode] : config.DEFAULT[currentMode];
         }
@@ -412,12 +440,14 @@
         let steps = [];
         
         if (currentCrane === 'QC') {
-            const category = document.getElementById('qcCategory').value;
+            const category = document.getElementById('category').value;
             let key = currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGING';
             if (category === 'Hatch cover') key = currentMode === 'LOADING' ? 'HATCH_LOADING' : 'HATCH_DISCHARGE';
             else if (category === 'OOG (OHF)') key = currentMode === 'LOADING' ? 'OOG_OHF_LOADING' : 'OOG_OHF_DISCHARGE';
             else if (category === 'OOG (Wire Sling)') key = currentMode === 'LOADING' ? 'OOG_WIRE_LOADING' : 'OOG_WIRE_DISCHARGE';
             steps = config.QC[key] || config.QC[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGING'];
+        } else if (currentCrane === 'MHC') {
+            steps = config.MHC[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'];
         } else {
             steps = config[currentCrane] ? config[currentCrane][currentMode] : config.DEFAULT[currentMode];
         }
@@ -432,7 +462,7 @@
                 Equipment: currentCrane, 
                 Unit_No: document.getElementById('unitNo').value || "N/A", 
                 Staff_ID: document.getElementById('staffId').value || "N/A", 
-                Category: currentCrane === 'QC' ? document.getElementById('qcCategory').value : "N/A",
+                Category: (currentCrane === 'QC' || currentCrane === 'MHC') ? document.getElementById('category').value : "N/A",
                 Operation: currentMode 
             };
             document.getElementById('muda-btn').disabled = false;
