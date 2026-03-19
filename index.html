@@ -16,15 +16,18 @@
             --success: #198754;
         }
         
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 0; display: flex; justify-content: center; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 0; display: flex; justify-content: center; position: relative; min-height: 100vh; }
         
-        .screen { width: 100%; max-width: 500px; min-height: 100vh; background: white; display: none; padding: 20px; box-sizing: border-box; }
+        .screen { width: 100%; max-width: 500px; min-height: 100vh; background: white; display: none; padding: 20px; box-sizing: border-box; position: relative; }
         .active { display: block; }
 
-        /* HOME SCREEN - CLEAN */
-        .home-header { text-align: center; margin-bottom: 60px; margin-top: 50px; }
-        .home-header h1 { font-size: 2.5rem; color: var(--dark); margin: 0; font-weight: 800; }
-        .home-header p { color: #6c757d; font-weight: 500; margin-top: 10px; }
+        /* HOME SCREEN */
+        .logo-container { text-align: center; margin-top: 20px; margin-bottom: 20px; }
+        .logo-img { max-width: 220px; height: auto; }
+        
+        .home-header { text-align: center; margin-bottom: 40px; }
+        .home-header h1 { font-size: 2.2rem; color: var(--dark); margin: 0; font-weight: 800; }
+        .home-header p { color: #6c757d; font-weight: 500; margin-top: 5px; }
         
         .menu-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
         .menu-card { 
@@ -40,6 +43,16 @@
         .menu-card:active { transform: scale(0.97); }
         .rtg-btn { background: #0891b2; }
 
+        .developer-credit { 
+            position: absolute; 
+            bottom: 10px; 
+            right: 15px; 
+            font-size: 0.55rem; 
+            color: #adb5bd; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         /* TIMER SCREEN UI */
         .back-btn { background: #f1f3f5; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; margin-bottom: 20px; color: var(--dark); display: flex; align-items: center; gap: 8px; }
         .section-card { border-top: 10px solid var(--orange); padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
@@ -48,7 +61,6 @@
         .mode-btn { flex: 1; padding: 15px; border-radius: 12px; border: 2px solid #dee2e6; background: white; font-weight: 800; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
         .mode-btn.active { background: var(--dark); color: white; border-color: var(--dark); }
 
-        /* Modified Input Grids */
         .id-inputs-qc { display: grid; grid-template-columns: 1.2fr 75px 1.5fr; gap: 8px; margin-bottom: 15px; }
         .id-inputs-rtg { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         
@@ -82,6 +94,10 @@
 
     <!-- MASTER HOME PAGE -->
     <div id="home-screen" class="screen active">
+        <div class="logo-container">
+            <img src="logo.png" alt="Port of Salalah Logo" class="logo-img" onerror="this.style.display='none'">
+        </div>
+        
         <div class="home-header">
             <h1>Cycle Timer</h1>
             <p>Terminal Operations Dashboard</p>
@@ -97,6 +113,8 @@
                 <i class="fa-solid fa-truck-ramp-box"></i>
             </button>
         </div>
+
+        <div class="developer-credit">DEVLOPED BY : Mr. Golden Micheal.</div>
     </div>
 
     <!-- QC TIMER SCREEN -->
