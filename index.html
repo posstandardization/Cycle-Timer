@@ -48,7 +48,7 @@
         .gct-btn { background: var(--ct-blue); }
         .mr-btn { background: var(--mr-teal); }
 
-        /* EQUIPMENT GRID (Inside CT/GCT) */
+        /* EQUIPMENT GRID */
         .equip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .equip-item { 
             padding: 20px 10px; border-radius: 15px; border: none; background: var(--orange); 
@@ -78,7 +78,7 @@
         .id-inputs-generic { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .id-inputs-qc { display: grid; grid-template-columns: 1fr 65px 1.5fr; gap: 8px; margin-bottom: 15px; }
         .id-inputs-gct { display: grid; grid-template-columns: 1fr 65px 1.5fr; gap: 8px; margin-bottom: 8px; }
-        .id-inputs-loose { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .id-inputs-tt { display: grid; grid-template-columns: 1fr 65px 1.5fr; gap: 8px; margin-bottom: 15px; }
         .full-width-input { grid-column: span 3; margin-top: 5px; }
         
         input, select { padding: 12px; border: 1px solid #ced4da; border-radius: 10px; font-size: 0.85rem; width: 100%; box-sizing: border-box; outline: none; background: white; }
@@ -219,115 +219,54 @@
 
     const config = {
         QC: {
-            LOADING: [
-                "1. FROM PARK POSITION TO ADJUST ON TRUCK",
-                "2. FROM START ADJUSTING ON TRUCK TO LOCK CONTAINER",
-                "3. FROM LOCK ON CONTAINER TO SILL BEAM",
-                "4. FROM SILL BEAM TO START ADJUSTING ON TARGET ROW",
-                "5. FROM START ADJUSTING ON ROW TO UNLOCK",
-                "6. FROM UNLOCK TO SILL BEAM"
-            ],
-            DISCHARGING: [
-                "1. FROM PARK TO SILL BEAM TO TARGET ROW",
-                "2. FROM START ADJUSTING ON CONTAINER TO LOCK",
-                "3. FROM LOCK TO SILL BEAM",
-                "4. FROM SILL BEAM TO START ADJUSTING ON TRUCK",
-                "5. FROM START ADJUSTING ON TRUCK TO UNLOCK",
-                "6. FROM UNLOCK TRUCK TO SILL BEAM/PARK"
-            ],
-            HATCH_DISCHARGE: [
-                "1. From Park position / Sillbeam to target hatch cover location",
-                "2. From Start adjust on hatch cover to Lock",
-                "3. From Lock to sillbeam",
-                "4. From Sillbeam to start Aligning on back reach",
-                "5. From start Aligning on back reach to Unlock",
-                "6. From Unlock to sillbeam / Park position"
-            ],
-            HATCH_LOADING: [
-                "1. From Park position Or Silllbeam TO Adjustment on Hatch cover",
-                "2. From start Adjusting to lock",
-                "3. From lock on Hatch cover to sillbeam",
-                "4. From sillbeam to start adjust on target row",
-                "5. From Start adjust on target row to Unlock",
-                "6. From Unlock to sill beam"
-            ],
-            OOG_OHF_DISCHARGE: [
-                "1. From Park position / Sillbeam to target OOG",
-                "2. From Start adjust on OOG to Lock",
-                "3. From Lock to sillbeam",
-                "4. From Sillbeam to start Adjusting on TT",
-                "5. From start Adjustment on TT to Unlock",
-                "6. From Unlock to sillbeam / Park position"
-            ],
-            OOG_OHF_LOADING: [
-                "1. From Park position Or Silllbeam TO Adjustment on TT",
-                "2. From start Adjusting to lock",
-                "3. From lock on OOG to sillbeam",
-                "4. From sillbeam to start adjust on target row",
-                "5. From Start adjust on target row to Unlock",
-                "6. From Unlock to sill beam"
-            ],
-            OOG_WIRE_DISCHARGE: [
-                "1. From Park position / Sillbeam to target OOG",
-                "2. From Start adjust on OOG to Awaiting attachements",
-                "3. From Awaiting attachements by dowelman to clearance to hoist",
-                "4. From Hoist to sillbeam",
-                "5. From Sillbeam to start Adjusting on TT",
-                "6. From start Adjustment on TT to Landed",
-                "7. From Landed to Remove Attachements",
-                "8. From Remove Attachements to sill beam"
-            ],
-            OOG_WIRE_LOADING: [
-                "1. From Park position Or Silllbeam TO Adjustment on TT",
-                "2. From start Adjusting to Awaiting Attachments",
-                "3. From Awaiting Attachments to clearance to hoist",
-                "4. From Clearance to hoist on OOG to sillbeam",
-                "5. From sillbeam to start adjust on target row",
-                "6. From Start adjust on target row to Landed",
-                "7. From Landed to Remove attachements and clearance to hoist",
-                "8. From Clearance to hoist to sill beam"
-            ]
+            LOADING: ["1. FROM PARK POSITION TO ADJUST ON TRUCK", "2. FROM START ADJUSTING ON TRUCK TO LOCK CONTAINER", "3. FROM LOCK ON CONTAINER TO SILL BEAM", "4. FROM SILL BEAM TO START ADJUSTING ON TARGET ROW", "5. FROM START ADJUSTING ON ROW TO UNLOCK", "6. FROM UNLOCK TO SILL BEAM"],
+            DISCHARGING: ["1. FROM PARK TO SILL BEAM TO TARGET ROW", "2. FROM START ADJUSTING ON CONTAINER TO LOCK", "3. FROM LOCK TO SILL BEAM", "4. FROM SILL BEAM TO START ADJUSTING ON TRUCK", "5. FROM START ADJUSTING ON TRUCK TO UNLOCK", "6. FROM UNLOCK TRUCK TO SILL BEAM/PARK"],
+            HATCH_DISCHARGE: ["1. From Park position / Sillbeam to target hatch cover location", "2. From Start adjust on hatch cover to Lock", "3. From Lock to sillbeam", "4. From Sillbeam to start Aligning on back reach", "5. From start Aligning on back reach to Unlock", "6. From Unlock to sillbeam / Park position"],
+            HATCH_LOADING: ["1. From Park position Or Silllbeam TO Adjustment on Hatch cover", "2. From start Adjusting to lock", "3. From lock on Hatch cover to sillbeam", "4. From sillbeam to start adjust on target row", "5. From Start adjust on target row to Unlock", "6. From Unlock to sill beam"],
+            OOG_OHF_DISCHARGE: ["1. From Park position / Sillbeam to target OOG", "2. From Start adjust on OOG to Lock", "3. From Lock to sillbeam", "4. From Sillbeam to start Adjusting on TT", "5. From start Adjustment on TT to Unlock", "6. From Unlock to sillbeam / Park position"],
+            OOG_OHF_LOADING: ["1. From Park position Or Silllbeam TO Adjustment on TT", "2. From start Adjusting to lock", "3. From lock on OOG to sillbeam", "4. From sillbeam to start adjust on target row", "5. From Start adjust on target row to Unlock", "6. From Unlock to sill beam"],
+            OOG_WIRE_DISCHARGE: ["1. From Park position / Sillbeam to target OOG", "2. From Start adjust on OOG to Awaiting attachements", "3. From Awaiting attachements by dowelman to clearance to hoist", "4. From Hoist to sillbeam", "5. From Sillbeam to start Adjusting on TT", "6. From start Adjustment on TT to Landed", "7. From Landed to Remove Attachements", "8. From Remove Attachements to sill beam"],
+            OOG_WIRE_LOADING: ["1. From Park position Or Silllbeam TO Adjustment on TT", "2. From start Adjusting to Awaiting Attachments", "3. From Awaiting Attachments to clearance to hoist", "4. From Clearance to hoist on OOG to sillbeam", "5. From sillbeam to start adjust on target row", "6. From Start adjust on target row to Landed", "7. From Landed to Remove attachements and clearance to hoist", "8. From Clearance to hoist to sill beam"]
         },
         RTG: {
-            LOADING: [
-                "1. FROM STANDBY TO LOCK CONTAINER IN BAY",
-                "2. FROM LOCK IN THE BAY TO A-ROW",
-                "3. FROM A-ROW TO UNLOCK ON TRUCK",
-                "4. FROM UNLOCK ON TRUCK TO PARK POSITION"
-            ],
-            DISCHARGE: [
-                "1. FROM PARK POSITION TO LOCK ON TRUCK",
-                "2. FROM LOCK ON TRUCK TO UNLOCK ON TARGET ROW",
-                "3. FROM UNLOCK TO PARK POSITION"
-            ]
+            LOADING: ["1. FROM STANDBY TO LOCK CONTAINER IN BAY", "2. FROM LOCK IN THE BAY TO A-ROW", "3. FROM A-ROW TO UNLOCK ON TRUCK", "4. FROM UNLOCK ON TRUCK TO PARK POSITION"],
+            DISCHARGE: ["1. FROM PARK POSITION TO LOCK ON TRUCK", "2. FROM LOCK ON TRUCK TO UNLOCK ON TARGET ROW", "3. FROM UNLOCK TO PARK POSITION"]
+        },
+        TT: {
+            LOADING: {
+                steps: [
+                    "1. Container lifted by QC",
+                    "2. Move to yard RTG Location",
+                    "3. received container from RTG",
+                    "4. Move to PULL position",
+                    "5. move to pinning area",
+                    "6. fixing twistlock",
+                    "7. move to standby Position",
+                    "8. move to under crane"
+                ],
+                optional: [4, 5, 6, 7] // 1-indexed steps
+            },
+            DISCHARGE: {
+                steps: [
+                    "1. Received container from QC",
+                    "2. MOVE TO PINNING STATION",
+                    "3. TWISTLOCKS REMOVED",
+                    "4. MOVE TO RTG",
+                    "5. CONTAINERS discharged",
+                    "6. move to pull position",
+                    "7. Move to standby position",
+                    "8. Move to under crane"
+                ],
+                optional: [2, 3, 6, 7]
+            }
         },
         MHC_LOOSE: {
-            LOADING: [
-                "STEP1: Grap touch cargo to grab close",
-                "STEP2: Hoist up to reach unload position",
-                "STEP3: Start open cargo to full unload",
-                "STEP4: Hoist empty grap to grap touch cargo"
-            ],
-            DISCHARGE: [
-                "STEP1: Grap touch cargo on vessel to grab close",
-                "STEP2: Hoist up to reach unload position",
-                "STEP3: Start open cargo to full unload",
-                "STEP4: Hoist empty grap to grap touch cargo on vessel"
-            ]
+            LOADING: ["STEP1: Grap touch cargo to grab close", "STEP2: Hoist up to reach unload position", "STEP3: Start open cargo to full unload", "STEP4: Hoist empty grap to grap touch cargo"],
+            DISCHARGE: ["STEP1: Grap touch cargo on vessel to grab close", "STEP2: Hoist up to reach unload position", "STEP3: Start open cargo to full unload", "STEP4: Hoist empty grap to grap touch cargo on vessel"]
         },
         BAGGED_CARGO: {
-            LOADING: [
-                "STEP 1: CONNECT SLING TO HOIST UP",
-                "STEP 2: Move cargo to till touch the target area",
-                "STEP 3: disconnect the sling to hoist up",
-                "STEP 4: move empty hook to the Quayside ground"
-            ],
-            DISCHARGE: [
-                "STEP 1: CONNECT SLING TO HOIST UP",
-                "STEP 2: Move cargo to till touch the target area",
-                "STEP 3: disconnect the sling to hoist up",
-                "STEP 4: move empty hook to the vessel target location"
-            ]
+            LOADING: ["STEP 1: CONNECT SLING TO HOIST UP", "STEP 2: Move cargo to till touch the target area", "STEP 3: disconnect the sling to hoist up", "STEP 4: move empty hook to the Quayside ground"],
+            DISCHARGE: ["STEP 1: CONNECT SLING TO HOIST UP", "STEP 2: Move cargo to till touch the target area", "STEP 3: disconnect the sling to hoist up", "STEP 4: move empty hook to the vessel target location"]
         },
         DEFAULT: {
             LOADING: ["1. START OPERATION", "2. IN PROGRESS", "3. COMPLETION"],
@@ -338,9 +277,7 @@
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        if (id === 'ct-ops-screen' || id === 'gct-ops-screen' || id === 'mr-screen') {
-            parentScreen = id;
-        }
+        if (id.includes('ops') || id === 'mr-screen') parentScreen = id;
     }
 
     function startTimer(equipment) {
@@ -362,11 +299,21 @@
                     <option value="RORO">RORO</option>
                 </select>
             `;
+        } else if (equipment === 'TT') {
+            inputDiv.className = 'id-inputs-tt';
+            inputDiv.innerHTML = `
+                <input type="text" id="staffId" placeholder="STAFF ID">
+                <input type="text" id="unitNo" class="qc-no-box" placeholder="TT#" maxlength="3">
+                <select id="ttFilter">
+                    <option value="Single">Single</option>
+                    <option value="Dual">Dual</option>
+                </select>
+            `;
         } else if (equipment === 'MHC_LOOSE') {
-            inputDiv.className = 'id-inputs-loose';
+            inputDiv.className = 'id-inputs-gct';
             inputDiv.innerHTML = `
                 <input type="text" id="staffId" placeholder="STAFF ID" maxlength="4">
-                <input type="text" id="unitNo" placeholder="MHC#" maxlength="2">
+                <input type="text" id="unitNo" class="qc-no-box" placeholder="MHC#" maxlength="2">
                 <select id="category" onchange="renderSteps()">
                     <option value="LHM">LHM</option>
                     <option value="GOTWALD">GOTWALD</option>
@@ -401,23 +348,16 @@
 
         const toggle = document.querySelector('.mode-toggle');
         toggle.style.display = (equipment === 'M&R') ? 'none' : 'flex';
-        
         const card = document.getElementById('timer-card');
         card.style.borderTopColor = (parentScreen === 'gct-ops-screen') ? 'var(--ct-blue)' : 'var(--orange)';
 
         document.getElementById('timer-back-btn').onclick = () => {
-            if (startTime) {
-                if (!confirm("Stop current timer and go back?")) return;
-                resetCrane();
-            }
+            if (startTime) { if (!confirm("Stop current timer and go back?")) return; resetCrane(); }
             showScreen(parentScreen);
         };
-
         document.getElementById('dl-report-btn').onclick = () => downloadReport(equipment);
-        
         document.getElementById('m-load').className = 'mode-btn active';
         document.getElementById('m-dis').className = 'mode-btn';
-        
         resetCrane();
         showScreen('timer-screen');
     }
@@ -433,22 +373,16 @@
     function renderSteps() {
         const container = document.getElementById('step-btns');
         container.innerHTML = '';
-        
         let steps = [];
         if (currentCrane === 'QC') {
-            const categoryElem = document.getElementById('category');
-            const category = categoryElem ? categoryElem.value : 'Above deck';
+            const cat = document.getElementById('category').value;
             let key = currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGING';
-            
-            if (category === 'Hatch cover') {
-                key = currentMode === 'LOADING' ? 'HATCH_LOADING' : 'HATCH_DISCHARGE';
-            } else if (category === 'OOG (OHF)') {
-                key = currentMode === 'LOADING' ? 'OOG_OHF_LOADING' : 'OOG_OHF_DISCHARGE';
-            } else if (category === 'OOG (Wire Sling)') {
-                key = currentMode === 'LOADING' ? 'OOG_WIRE_LOADING' : 'OOG_WIRE_DISCHARGE';
-            }
-            
+            if (cat === 'Hatch cover') key = currentMode === 'LOADING' ? 'HATCH_LOADING' : 'HATCH_DISCHARGE';
+            else if (cat === 'OOG (OHF)') key = currentMode === 'LOADING' ? 'OOG_OHF_LOADING' : 'OOG_OHF_DISCHARGE';
+            else if (cat === 'OOG (Wire Sling)') key = currentMode === 'LOADING' ? 'OOG_WIRE_LOADING' : 'OOG_WIRE_DISCHARGE';
             steps = config.QC[key] || config.QC[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGING'];
+        } else if (currentCrane === 'TT') {
+            steps = config.TT[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'].steps;
         } else if (currentCrane === 'MHC_LOOSE') {
             steps = config.MHC_LOOSE[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'];
         } else if (currentCrane === 'BAGGED_CARGO') {
@@ -472,15 +406,19 @@
     function triggerStep(stepNum) {
         const now = Date.now();
         let steps = [];
+        let optional = [];
         
         if (currentCrane === 'QC') {
-            const categoryElem = document.getElementById('category');
-            const category = categoryElem ? categoryElem.value : 'Above deck';
+            const cat = document.getElementById('category').value;
             let key = currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGING';
-            if (category === 'Hatch cover') key = currentMode === 'LOADING' ? 'HATCH_LOADING' : 'HATCH_DISCHARGE';
-            else if (category === 'OOG (OHF)') key = currentMode === 'LOADING' ? 'OOG_OHF_LOADING' : 'OOG_OHF_DISCHARGE';
-            else if (category === 'OOG (Wire Sling)') key = currentMode === 'LOADING' ? 'OOG_WIRE_LOADING' : 'OOG_WIRE_DISCHARGE';
+            if (cat === 'Hatch cover') key = currentMode === 'LOADING' ? 'HATCH_LOADING' : 'HATCH_DISCHARGE';
+            else if (cat === 'OOG (OHF)') key = currentMode === 'LOADING' ? 'OOG_OHF_LOADING' : 'OOG_OHF_DISCHARGE';
+            else if (cat === 'OOG (Wire Sling)') key = currentMode === 'LOADING' ? 'OOG_WIRE_LOADING' : 'OOG_WIRE_DISCHARGE';
             steps = config.QC[key] || config.QC[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGING'];
+        } else if (currentCrane === 'TT') {
+            const ttCfg = config.TT[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'];
+            steps = ttCfg.steps;
+            optional = ttCfg.optional;
         } else if (currentCrane === 'MHC_LOOSE') {
             steps = config.MHC_LOOSE[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'];
         } else if (currentCrane === 'BAGGED_CARGO') {
@@ -493,26 +431,21 @@
 
         if (stepNum === 1) {
             startTime = now;
-            const categoryElem = document.getElementById('category');
-            const cargoTypeElem = document.getElementById('cargoType');
             currentCycleData = { 
-                Date: new Date().toLocaleDateString(), 
-                Time: new Date().toLocaleTimeString(),
-                Equipment: currentCrane.replace('_', ' '), 
-                Unit_No: document.getElementById('unitNo').value || "N/A", 
+                Date: new Date().toLocaleDateString(), Time: new Date().toLocaleTimeString(),
+                Equipment: currentCrane.replace('_', ' '), Unit_No: document.getElementById('unitNo').value || "N/A", 
                 Staff_ID: document.getElementById('staffId').value || "N/A", 
-                Category: categoryElem ? categoryElem.value : "N/A",
-                Cargo_Type: cargoTypeElem ? cargoTypeElem.value : "N/A",
+                Category: (document.getElementById('category')) ? document.getElementById('category').value : (document.getElementById('ttFilter') ? document.getElementById('ttFilter').value : "N/A"),
+                Cargo_Type: (document.getElementById('cargoType')) ? document.getElementById('cargoType').value : "N/A",
                 Operation: currentMode 
             };
             document.getElementById('muda-btn').disabled = false;
-            activeInterval = setInterval(() => {
-                document.getElementById('main-timer').innerText = ((Date.now() - startTime)/1000).toFixed(2);
-            }, 50);
+            activeInterval = setInterval(() => { document.getElementById('main-timer').innerText = ((Date.now() - startTime)/1000).toFixed(2); }, 50);
         } else {
             currentCycleData['Step_'+(stepNum-1)] = ((now - lastTime) / 1000).toFixed(2);
         }
 
+        // Disable all and remove active highlight
         for(let i=1; i<=steps.length; i++) {
             const btn = document.getElementById(`s${i}`);
             btn.disabled = true;
@@ -525,15 +458,29 @@
             currentCycleData['Step_'+stepNum] = ((now - lastTime) / 1000).toFixed(2);
             currentCycleData['Total_Time'] = ((now - startTime) / 1000).toFixed(2);
             masterLogs.push({...currentCycleData});
-            
             if (!currentCounts[currentCrane]) currentCounts[currentCrane] = 0;
             currentCounts[currentCrane]++;
             document.getElementById('cycle-count').innerText = currentCounts[currentCrane];
-            
             document.getElementById('muda-btn').disabled = true;
             setTimeout(resetCrane, 1500);
         } else {
-            document.getElementById(`s${stepNum+1}`).disabled = false;
+            // Enable next logical step(s)
+            let nextStep = stepNum + 1;
+            document.getElementById(`s${nextStep}`).disabled = false;
+            
+            // If the next steps are optional, also enable the next mandatory step
+            if (optional.includes(nextStep)) {
+                let firstMandatory = steps.length;
+                for (let j = nextStep; j <= steps.length; j++) {
+                    if (!optional.includes(j)) {
+                        firstMandatory = j;
+                        break;
+                    } else {
+                        document.getElementById(`s${j}`).disabled = false;
+                    }
+                }
+                document.getElementById(`s${firstMandatory}`).disabled = false;
+            }
         }
         lastTime = now;
     }
@@ -541,30 +488,17 @@
     function toggleMuda() {
         const btn = document.getElementById('muda-btn');
         if (!isPaused) {
-            isPaused = true;
-            mudaStart = Date.now();
-            btn.classList.add('muda-on');
-            clearInterval(activeInterval);
+            isPaused = true; mudaStart = Date.now(); btn.classList.add('muda-on'); clearInterval(activeInterval);
         } else {
-            isPaused = false;
-            let pauseDuration = (Date.now() - mudaStart);
-            startTime += pauseDuration;
-            lastTime += pauseDuration;
-            btn.classList.remove('muda-on');
-            activeInterval = setInterval(() => {
-                document.getElementById('main-timer').innerText = ((Date.now() - startTime)/1000).toFixed(2);
-            }, 50);
+            isPaused = false; let p = (Date.now() - mudaStart); startTime += p; lastTime += p; btn.classList.remove('muda-on');
+            activeInterval = setInterval(() => { document.getElementById('main-timer').innerText = ((Date.now() - startTime)/1000).toFixed(2); }, 50);
         }
     }
 
-    function resetCurrentTimer() {
-        if(confirm("Discard current measurement?")) resetCrane();
-    }
+    function resetCurrentTimer() { if(confirm("Discard current measurement?")) resetCrane(); }
 
     function resetCrane() {
-        clearInterval(activeInterval);
-        startTime = null;
-        isPaused = false;
+        clearInterval(activeInterval); startTime = null; isPaused = false;
         document.getElementById('main-timer').innerText = "0.00";
         document.getElementById('muda-btn').disabled = true;
         document.getElementById('muda-btn').classList.remove('muda-on');
@@ -573,14 +507,13 @@
     }
 
     function downloadReport(equipment) {
-        const keyToSearch = equipment.replace(' ', '_');
-        const filtered = masterLogs.filter(log => log.Equipment.replace(' ', '_') === keyToSearch);
+        const key = equipment.replace(' ', '_');
+        const filtered = masterLogs.filter(log => log.Equipment.replace(' ', '_') === key);
         if (filtered.length === 0) return alert("No recorded cycles found.");
         const headers = Object.keys(filtered[0]).join(",");
         let csv = "data:text/csv;charset=utf-8," + headers + "\n" + filtered.map(r => Object.values(r).join(",")).join("\n");
         const link = document.createElement("a");
-        link.href = encodeURI(csv);
-        link.download = `${equipment}_Cycle_Report_${new Date().toLocaleDateString().replace(/\//g,'-')}.csv`;
+        link.href = encodeURI(csv); link.download = `${equipment}_Cycle_Report_${new Date().toLocaleDateString().replace(/\//g,'-')}.csv`;
         link.click();
     }
 </script>
