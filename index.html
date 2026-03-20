@@ -49,11 +49,11 @@
 
         /* DEVELOPER CREDIT */
         .developer-credit { 
-            margin-top: 80px; /* Ample space added */
+            margin-top: 80px;
             margin-bottom: 20px;
             text-align: right;
             font-size: 0.65rem; 
-            color: #000000; /* Dark black */
+            color: #000000; 
             font-weight: 700; 
             text-transform: uppercase; 
             letter-spacing: 0.5px;
@@ -244,33 +244,33 @@
     const config = {
         QC: {
             LOADING: [
-                "1. From park position to adjust on truck", 
-                "2. From start adjusting on truck to lock the container on truck", 
-                "3. From lock on container on truck to sill beam", 
-                "4. From sill beam to start adjusting on target row", 
-                "5. From start adjusting on target row to unlock", 
-                "6. From unlock to sill beam"
+                "1. FROM PARK POSITION TO ADJUST ON TRUCK", 
+                "2. FROM START ADJUSTING ON TRUCK TO TO LOCK THE CONTAINER ON TRUCK", 
+                "3. FROM LOCK ON CONTAINER ON TRUCK TO SILL BEAM", 
+                "4. FROM SILL BEAM TO START ADJUSTING ON TARGET ROW", 
+                "5. FROM START ADJUSTING ON TARGET ROW TO UNLOCK", 
+                "6. FROM UNLOCK TO SILL BEAM"
             ],
             DISCHARGE: [
-                "1. From park to sill beam to start target row", 
-                "2. From start adjusting on container to lock", 
-                "3. From lock to sill beam", 
-                "4. From sill beam to start adjusting on truck", 
-                "5. From start adjusting on truck to unlock on truck", 
-                "6. From unlock truck to sill beam/park position"
+                "1. FROM PARK TO SILL BEAM TO START TARGET ROW", 
+                "2. FROM START ADJUSTING ON CONTAINER TO LOCK", 
+                "3. FROM LOCK TO SILL BEAM", 
+                "4. FROM SILL BEAM TO START ADJUSTING ON TRUCK", 
+                "5. FROM START ADJUSTING ON TRUCK TO UNLOCK ON TRUCK", 
+                "6. FROM UNLOCK TRUCK TO SILL BEAM/PARK POSITION"
             ]
         },
         RTG: {
             LOADING: [
-                "1. From park position to lock container in the bay", 
-                "2. From lock in the bay to A-row", 
-                "3. From A-row to unlock on truck", 
-                "4. From unlock on truck to park position"
+                "1. FROM PARK POSITION TO LOCK CONTAINER IN THE BAY", 
+                "2. FROM LOCK IN THE BAY TO A-ROW", 
+                "3. FROM A- ROW TO UNLOCK ON TRUCK", 
+                "4. FROM UNLOCK ON TRUCK TO PARK POSITION"
             ],
             DISCHARGE: [
-                "1. From park position to lock on truck", 
-                "2. From lock on truck to unlock on target row", 
-                "3. From unlock to park position"
+                "1. FROM PARK POSITION TO LOCK ON TRUCK", 
+                "2. FROM LOCK ON TRUCK TO UNLOCK ON TARGET ROW", 
+                "3. FROM UNLOCK TO PARK POSITION"
             ]
         },
         TT: {
@@ -562,7 +562,10 @@
         const filtered = masterLogs.filter(log => log.Equipment.replace(' ', '_') === equipment.replace(' ', '_'));
         if (filtered.length === 0) return alert("No recorded cycles found.");
         
+        // Define metadata headers
         const metaHeaders = ['Date', 'Time', 'Equipment', 'Unit_No', 'Staff_ID', 'Category', 'Cargo_Type', 'Operation'];
+        
+        // Find maximum steps to create consistent headers
         let maxSteps = 0;
         filtered.forEach(log => {
             const steps = Object.keys(log).filter(k => k.startsWith('Step_')).length;
@@ -572,84 +575,42 @@
         const metricHeaders = ['Net_Cycle_Time', 'Gross_Cycle_Time', 'Waiting_Time'];
         const allHeaders = [...metaHeaders, ...stepHeaders, ...metricHeaders];
 
-        // Mobile-Compatible Excel XML / SpreadsheetML Header
-        let tableHtml = `
-        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-        <head>
-        <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Report</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
-        <meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8">
-        <style>
-            table { border-collapse: collapse; font-family: 'Segoe UI', Calibri, sans-serif; font-size: 11pt; }
-            th { background-color: #0070c0; color: #ffffff; border: 0.5pt solid #000000; padding: 4px; text-align: center; font-weight: bold; }
-            td { border: 0.5pt solid #000000; padding: 4px; text-align: center; }
-            .stripe { background-color: #dce6f1; }
-            .summary-header { background-color: #0070c0; color: #ffffff; font-weight: bold; }
-            .metric-label { background-color: #0070c0; color: #ffffff; font-weight: bold; }
-        </style>
-        </head>
-        <body>
-        <table>
-            <thead>
-                <tr>${allHeaders.map(h => `<th>${h.replace(/_/g, ' ')}</th>`).join('')}</tr>
-            </thead>
-            <tbody>`;
+        // Create CSV Content (Most mobile compatible format)
+        let csvRows = [];
+        
+        // Header Row
+        csvRows.push(allHeaders.map(h => `"${h.replace(/_/g, ' ')}"`).join(','));
 
         // Data Rows
-        filtered.forEach((row, index) => {
-            const rowClass = index % 2 !== 0 ? 'stripe' : '';
-            tableHtml += `<tr class="${rowClass}">`;
-            allHeaders.forEach(h => {
-                let val = row[h] !== undefined ? row[h] : "";
-                tableHtml += `<td>${val}</td>`;
-            });
-            tableHtml += `</tr>`;
+        filtered.forEach(row => {
+            let values = allHeaders.map(h => `"${row[h] !== undefined ? row[h] : ''}"`);
+            csvRows.push(values.join(','));
         });
 
-        // Metrics for summary
+        // Add 2 blank lines for spacing before summary
+        csvRows.push("");
+        csvRows.push("");
+
+        // Summary Analytics Section
         const netValues = filtered.map(log => parseFloat(log.Net_Cycle_Time)).filter(v => !isNaN(v));
         const grossValues = filtered.map(log => parseFloat(log.Gross_Cycle_Time)).filter(v => !isNaN(v));
         const waitValues = filtered.map(log => parseFloat(log.Waiting_Time)).filter(v => !isNaN(v));
 
-        // Spacer Row
-        tableHtml += `<tr><td colspan="${allHeaders.length}" style="border:none;">&nbsp;</td></tr>`;
+        csvRows.push(",,,,,,Metric,Net Cycle Time,Gross Cycle Time,Waiting Time");
+        csvRows.push(`,,,,,,Average,${calculateAverage(netValues)},${calculateAverage(grossValues)},${calculateAverage(waitValues)}`);
+        csvRows.push(`,,,,,,Median,${calculateMedian(netValues)},${calculateMedian(grossValues)},${calculateMedian(waitValues)}`);
 
-        // Summary Analytics Section
-        const startCol = Math.max(0, allHeaders.length - 4);
-        tableHtml += `
-            <tr>
-                <td colspan="${startCol}" style="border:none;"></td>
-                <td class="summary-header">Metric</td>
-                <td class="summary-header">Net Cycle Time</td>
-                <td class="summary-header">Gross Cycle Time</td>
-                <td class="summary-header">Waiting Time</td>
-            </tr>
-            <tr>
-                <td colspan="${startCol}" style="border:none;"></td>
-                <td class="metric-label">Average</td>
-                <td>${calculateAverage(netValues)}</td>
-                <td>${calculateAverage(grossValues)}</td>
-                <td>${calculateAverage(waitValues)}</td>
-            </tr>
-            <tr>
-                <td colspan="${startCol}" style="border:none;"></td>
-                <td class="metric-label">Median</td>
-                <td>${calculateMedian(netValues)}</td>
-                <td>${calculateMedian(grossValues)}</td>
-                <td>${calculateMedian(waitValues)}</td>
-            </tr>
-        `;
+        const csvString = csvRows.join('\n');
 
-        tableHtml += `</tbody></table></body></html>`;
-
-        // Create Blob with UTF-8 BOM to ensure compatibility across all mobile browsers
-        const blob = new Blob(['\ufeff', tableHtml], { type: "application/vnd.ms-excel;charset=utf-8" });
+        // Use UTF-8 BOM to ensure mobile office apps recognize characters correctly
+        const blob = new Blob(['\ufeff', csvString], { type: "text/csv;charset=utf-8" });
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
         
         link.href = url;
-        link.download = `${equipment}_Cycle_Report_${new Date().toISOString().slice(0,10)}.xls`;
+        link.download = `${equipment}_Cycle_Report_${new Date().toISOString().slice(0,10)}.csv`;
         
-        // Append to body to trigger properly on mobile browsers
+        // Mobile browsers require appending to document
         document.body.appendChild(link);
         link.click();
         
