@@ -49,11 +49,11 @@
 
         /* DEVELOPER CREDIT */
         .developer-credit { 
-            margin-top: 60px;
+            margin-top: 80px; /* Ample space added */
             margin-bottom: 20px;
             text-align: right;
             font-size: 0.65rem; 
-            color: #000000; 
+            color: #000000; /* Dark black */
             font-weight: 700; 
             text-transform: uppercase; 
             letter-spacing: 0.5px;
@@ -127,8 +127,6 @@
 
     <!-- MASTER HOME PAGE -->
     <div id="home-screen" class="screen active">
-        <!-- Logo removed as per request -->
-        
         <div class="home-header">
             <h1>Cycle Timer</h1>
             <p>Main Selection Dashboard</p>
@@ -549,12 +547,12 @@
     }
 
     function calculateAverage(arr) {
-        if (arr.length === 0) return 0;
+        if (arr.length === 0) return "0.00";
         return (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2);
     }
 
     function calculateMedian(arr) {
-        if (arr.length === 0) return 0;
+        if (arr.length === 0) return "0.00";
         const sorted = [...arr].sort((a, b) => a - b);
         const mid = Math.floor(sorted.length / 2);
         return (sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2).toFixed(2);
@@ -574,17 +572,19 @@
         const metricHeaders = ['Net_Cycle_Time', 'Gross_Cycle_Time', 'Waiting_Time'];
         const allHeaders = [...metaHeaders, ...stepHeaders, ...metricHeaders];
 
-        // HTML/Excel Formatting Template
+        // Mobile-Compatible Excel XML / SpreadsheetML Header
         let tableHtml = `
         <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
         <head>
+        <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Report</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+        <meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8">
         <style>
-            table { border-collapse: collapse; font-family: Calibri, sans-serif; }
-            th { background-color: #0070c0; color: white; border: 1px solid #000; padding: 5px; text-align: center; }
-            td { border: 1px solid #000; padding: 5px; text-align: center; }
+            table { border-collapse: collapse; font-family: 'Segoe UI', Calibri, sans-serif; font-size: 11pt; }
+            th { background-color: #0070c0; color: #ffffff; border: 0.5pt solid #000000; padding: 4px; text-align: center; font-weight: bold; }
+            td { border: 0.5pt solid #000000; padding: 4px; text-align: center; }
             .stripe { background-color: #dce6f1; }
-            .summary-header { background-color: #0070c0; color: white; font-weight: bold; }
-            .metric-label { background-color: #0070c0; color: white; font-weight: bold; }
+            .summary-header { background-color: #0070c0; color: #ffffff; font-weight: bold; }
+            .metric-label { background-color: #0070c0; color: #ffffff; font-weight: bold; }
         </style>
         </head>
         <body>
@@ -599,7 +599,8 @@
             const rowClass = index % 2 !== 0 ? 'stripe' : '';
             tableHtml += `<tr class="${rowClass}">`;
             allHeaders.forEach(h => {
-                tableHtml += `<td>${row[h] || ''}</td>`;
+                let val = row[h] !== undefined ? row[h] : "";
+                tableHtml += `<td>${val}</td>`;
             });
             tableHtml += `</tr>`;
         });
@@ -609,27 +610,28 @@
         const grossValues = filtered.map(log => parseFloat(log.Gross_Cycle_Time)).filter(v => !isNaN(v));
         const waitValues = filtered.map(log => parseFloat(log.Waiting_Time)).filter(v => !isNaN(v));
 
-        // Spacer
+        // Spacer Row
         tableHtml += `<tr><td colspan="${allHeaders.length}" style="border:none;">&nbsp;</td></tr>`;
 
-        // Summary Header Row
+        // Summary Analytics Section
+        const startCol = Math.max(0, allHeaders.length - 4);
         tableHtml += `
             <tr>
-                <td colspan="7" style="border:none;"></td>
+                <td colspan="${startCol}" style="border:none;"></td>
                 <td class="summary-header">Metric</td>
                 <td class="summary-header">Net Cycle Time</td>
                 <td class="summary-header">Gross Cycle Time</td>
                 <td class="summary-header">Waiting Time</td>
             </tr>
             <tr>
-                <td colspan="7" style="border:none;"></td>
+                <td colspan="${startCol}" style="border:none;"></td>
                 <td class="metric-label">Average</td>
                 <td>${calculateAverage(netValues)}</td>
                 <td>${calculateAverage(grossValues)}</td>
                 <td>${calculateAverage(waitValues)}</td>
             </tr>
             <tr>
-                <td colspan="7" style="border:none;"></td>
+                <td colspan="${startCol}" style="border:none;"></td>
                 <td class="metric-label">Median</td>
                 <td>${calculateMedian(netValues)}</td>
                 <td>${calculateMedian(grossValues)}</td>
@@ -639,13 +641,23 @@
 
         tableHtml += `</tbody></table></body></html>`;
 
+        // Create Blob with UTF-8 BOM to ensure compatibility across all mobile browsers
+        const blob = new Blob(['\ufeff', tableHtml], { type: "application/vnd.ms-excel;charset=utf-8" });
         const link = document.createElement("a");
-        const blob = new Blob([tableHtml], { type: "application/vnd.ms-excel" });
-        link.href = URL.createObjectURL(blob);
-        link.download = `${equipment}_Formatted_Report.xls`;
+        const url = URL.createObjectURL(blob);
+        
+        link.href = url;
+        link.download = `${equipment}_Cycle_Report_${new Date().toISOString().slice(0,10)}.xls`;
+        
+        // Append to body to trigger properly on mobile browsers
         document.body.appendChild(link);
         link.click();
-        document.body.removeChild(link);
+        
+        // Cleanup
+        setTimeout(() => {
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        }, 100);
     }
 </script>
 </body>
