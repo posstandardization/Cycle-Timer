@@ -124,7 +124,7 @@
     <!-- MASTER HOME PAGE -->
     <div id="home-screen" class="screen active">
         <div class="logo-container">
-            <img src="logo.png" alt="Port of Salalah Logo" class="logo-img" onerror="this.style.display='none'">
+            <img src="logo.png" alt="Port of Salalah Logo" class="logo-img">
         </div>
         
         <div class="home-header">
@@ -245,76 +245,24 @@
         QC: {
             LOADING: [
                 "1. From park position to adjust on truck", 
-                "2. From start adjusting on truck to lock container", 
-                "3. From lock on container to sill beam", 
+                "2. From start adjusting on truck to lock the container on truck", 
+                "3. From lock on container on truck to sill beam", 
                 "4. From sill beam to start adjusting on target row", 
-                "5. From start adjusting on row to unlock", 
+                "5. From start adjusting on target row to unlock", 
                 "6. From unlock to sill beam"
             ],
-            DISCHARGING: [
-                "1. From park to sill beam to target row", 
+            DISCHARGE: [
+                "1. From park to sill beam to start target row", 
                 "2. From start adjusting on container to lock", 
                 "3. From lock to sill beam", 
                 "4. From sill beam to start adjusting on truck", 
-                "5. From start adjusting on truck to unlock", 
-                "6. From unlock truck to sill beam/park"
-            ],
-            HATCH_DISCHARGE: [
-                "1. From park position / sillbeam to target hatch cover location", 
-                "2. From start adjust on hatch cover to lock", 
-                "3. From lock to sillbeam", 
-                "4. From sillbeam to start aligning on back reach", 
-                "5. From start aligning on back reach to unlock", 
-                "6. From unlock to sillbeam / park position"
-            ],
-            HATCH_LOADING: [
-                "1. From park position or silllbeam to adjustment on hatch cover", 
-                "2. From start adjusting to lock", 
-                "3. From lock on hatch cover to sillbeam", 
-                "4. From sillbeam to start adjust on target row", 
-                "5. From start adjust on target row to unlock", 
-                "6. From unlock to sill beam"
-            ],
-            OOG_OHF_DISCHARGE: [
-                "1. From park position / sillbeam to target OOG", 
-                "2. From start adjust on OOG to lock", 
-                "3. From lock to sillbeam", 
-                "4. From sillbeam to start adjusting on TT", 
-                "5. From start adjustment on TT to unlock", 
-                "6. From unlock to sillbeam / park position"
-            ],
-            OOG_OHF_LOADING: [
-                "1. From park position or silllbeam to adjustment on TT", 
-                "2. From start adjusting to lock", 
-                "3. From lock on OOG to sillbeam", 
-                "4. From sillbeam to start adjust on target row", 
-                "5. From start adjust on target row to unlock", 
-                "6. From unlock to sill beam"
-            ],
-            OOG_WIRE_DISCHARGE: [
-                "1. From park position / sillbeam to target OOG", 
-                "2. From start adjust on OOG to awaiting attachments", 
-                "3. From awaiting attachments by dowelman to clearance to hoist", 
-                "4. From hoist to sillbeam", 
-                "5. From sillbeam to start adjusting on TT", 
-                "6. From start adjustment on TT to landed", 
-                "7. From landed to remove attachments", 
-                "8. From remove attachments to sill beam"
-            ],
-            OOG_WIRE_LOADING: [
-                "1. From park position or silllbeam to adjustment on TT", 
-                "2. From start adjusting to awaiting attachments", 
-                "3. From awaiting attachments to clearance to hoist", 
-                "4. From clearance to hoist on OOG to sillbeam", 
-                "5. From sillbeam to start adjust on target row", 
-                "6. From start adjust on target row to landed", 
-                "7. From landed to remove attachments and clearance to hoist", 
-                "8. From clearance to hoist to sill beam"
+                "5. From start adjusting on truck to unlock on truck", 
+                "6. From unlock truck to sill beam/park position"
             ]
         },
         RTG: {
             LOADING: [
-                "1. From standby to lock container in bay", 
+                "1. From park position to lock container in the bay", 
                 "2. From lock in the bay to A-row", 
                 "3. From A-row to unlock on truck", 
                 "4. From unlock on truck to park position"
@@ -327,59 +275,21 @@
         },
         TT: {
             LOADING: {
-                steps: [
-                    "1. Container lifted by QC", 
-                    "2. Move to yard RTG location", 
-                    "3. Received container from RTG", 
-                    "4. Move to PULL position", 
-                    "5. Move to pinning area", 
-                    "6. Fixing twistlock", 
-                    "7. Move to standby position", 
-                    "8. Move to under crane"
-                ],
+                steps: ["1. Container lifted by QC", "2. Move to yard RTG location", "3. Received container from RTG", "4. Move to PULL position", "5. Move to pinning area", "6. Fixing twistlock", "7. Move to standby position", "8. Move to under crane"],
                 optional: [4, 5, 6, 7]
             },
             DISCHARGE: {
-                steps: [
-                    "1. Received container from QC", 
-                    "2. Move to pinning station", 
-                    "3. Twistlocks removed", 
-                    "4. Move to RTG", 
-                    "5. Containers discharged", 
-                    "6. Move to PULL position", 
-                    "7. Move to standby position", 
-                    "8. Move to under crane"
-                ],
+                steps: ["1. Received container from QC", "2. Move to pinning station", "3. Twistlocks removed", "4. Move to RTG", "5. Containers discharged", "6. Move to PULL position", "7. Move to standby position", "8. Move to under crane"],
                 optional: [2, 3, 6, 7]
             }
         },
         MHC_LOOSE: {
-            LOADING: [
-                "Step 1: Grab touch cargo to grab close", 
-                "Step 2: Hoist up to reach unload position", 
-                "Step 3: Start open cargo to full unload", 
-                "Step 4: Hoist empty grab to grab touch cargo"
-            ],
-            DISCHARGE: [
-                "Step 1: Grab touch cargo on vessel to grab close", 
-                "Step 2: Hoist up to reach unload position", 
-                "Step 3: Start open cargo to full unload", 
-                "Step 4: Hoist empty grab to grab touch cargo on vessel"
-            ]
+            LOADING: ["Step 1: Grab touch cargo to grab close", "Step 2: Hoist up to reach unload position", "Step 3: Start open cargo to full unload", "Step 4: Hoist empty grab to grab touch cargo"],
+            DISCHARGE: ["Step 1: Grab touch cargo on vessel to grab close", "Step 2: Hoist up to reach unload position", "Step 3: Start open cargo to full unload", "Step 4: Hoist empty grab to grab touch cargo on vessel"]
         },
         BAGGED_CARGO: {
-            LOADING: [
-                "Step 1: Connect sling to hoist up", 
-                "Step 2: Move cargo to till touch the target area", 
-                "Step 3: Disconnect the sling to hoist up", 
-                "Step 4: Move empty hook to the quayside ground"
-            ],
-            DISCHARGE: [
-                "Step 1: Connect sling to hoist up", 
-                "Step 2: Move cargo to till touch the target area", 
-                "Step 3: Disconnect the sling to hoist up", 
-                "Step 4: Move empty hook to the vessel target location"
-            ]
+            LOADING: ["Step 1: Connect sling to hoist up", "Step 2: Move cargo to till touch the target area", "Step 3: Disconnect the sling to hoist up", "Step 4: Move empty hook to the quayside ground"],
+            DISCHARGE: ["Step 1: Connect sling to hoist up", "Step 2: Move cargo to till touch the target area", "Step 3: Disconnect the sling to hoist up", "Step 4: Move empty hook to the vessel target location"]
         },
         DEFAULT: {
             LOADING: ["1. Start operation", "2. In progress", "3. Completion"],
@@ -488,12 +398,9 @@
         container.innerHTML = '';
         let steps = [];
         if (currentCrane === 'QC') {
-            const cat = document.getElementById('category').value;
-            let key = currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGING';
-            if (cat === 'Hatch cover') key = currentMode === 'LOADING' ? 'HATCH_LOADING' : 'HATCH_DISCHARGE';
-            else if (cat === 'OOG (OHF)') key = currentMode === 'LOADING' ? 'OOG_OHF_LOADING' : 'OOG_OHF_DISCHARGE';
-            else if (cat === 'OOG (Wire Sling)') key = currentMode === 'LOADING' ? 'OOG_WIRE_LOADING' : 'OOG_WIRE_DISCHARGE';
-            steps = config.QC[key] || config.QC[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGING'];
+            steps = currentMode === 'LOADING' ? config.QC.LOADING : config.QC.DISCHARGE;
+        } else if (currentCrane === 'RTG') {
+            steps = currentMode === 'LOADING' ? config.RTG.LOADING : config.RTG.DISCHARGE;
         } else if (currentCrane === 'TT') {
             steps = config.TT[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'].steps;
         } else if (currentCrane === 'MHC_LOOSE') {
@@ -522,12 +429,9 @@
         let optional = [];
         
         if (currentCrane === 'QC') {
-            const cat = document.getElementById('category').value;
-            let key = currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGING';
-            if (cat === 'Hatch cover') key = currentMode === 'LOADING' ? 'HATCH_LOADING' : 'HATCH_DISCHARGE';
-            else if (cat === 'OOG (OHF)') key = currentMode === 'LOADING' ? 'OOG_OHF_LOADING' : 'OOG_OHF_DISCHARGE';
-            else if (cat === 'OOG (Wire Sling)') key = currentMode === 'LOADING' ? 'OOG_WIRE_LOADING' : 'OOG_WIRE_DISCHARGE';
-            steps = config.QC[key] || config.QC[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGING'];
+            steps = currentMode === 'LOADING' ? config.QC.LOADING : config.QC.DISCHARGE;
+        } else if (currentCrane === 'RTG') {
+            steps = currentMode === 'LOADING' ? config.RTG.LOADING : config.RTG.DISCHARGE;
         } else if (currentCrane === 'TT') {
             const ttCfg = config.TT[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'];
             steps = ttCfg.steps;
@@ -574,7 +478,7 @@
             const finishTime = now;
             currentCycleData['Net_Cycle_Time'] = ((finishTime - startTime) / 1000).toFixed(2);
             currentCycleData['Gross_Cycle_Time'] = ((finishTime - absoluteStartTime) / 1000).toFixed(2);
-            currentCycleData['Total_Waiting_Time'] = (totalWaitingDuration / 1000).toFixed(2);
+            currentCycleData['Waiting_Time'] = (totalWaitingDuration / 1000).toFixed(2);
             
             masterLogs.push({...currentCycleData});
             if (!currentCounts[currentCrane]) currentCounts[currentCrane] = 0;
@@ -642,15 +546,104 @@
         renderSteps();
     }
 
+    function calculateAverage(arr) {
+        if (arr.length === 0) return 0;
+        return (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2);
+    }
+
+    function calculateMedian(arr) {
+        if (arr.length === 0) return 0;
+        const sorted = [...arr].sort((a, b) => a - b);
+        const mid = Math.floor(sorted.length / 2);
+        return (sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2).toFixed(2);
+    }
+
     function downloadReport(equipment) {
-        const key = equipment.replace(' ', '_');
-        const filtered = masterLogs.filter(log => log.Equipment.replace(' ', '_') === key);
+        const filtered = masterLogs.filter(log => log.Equipment.replace(' ', '_') === equipment.replace(' ', '_'));
         if (filtered.length === 0) return alert("No recorded cycles found.");
-        const headers = Object.keys(filtered[0]).join(",");
-        let csv = "data:text/csv;charset=utf-8," + headers + "\n" + filtered.map(r => Object.values(r).join(",")).join("\n");
+        
+        const metaHeaders = ['Date', 'Time', 'Equipment', 'Unit_No', 'Staff_ID', 'Category', 'Cargo_Type', 'Operation'];
+        let maxSteps = 0;
+        filtered.forEach(log => {
+            const steps = Object.keys(log).filter(k => k.startsWith('Step_')).length;
+            if (steps > maxSteps) maxSteps = steps;
+        });
+        const stepHeaders = Array.from({length: maxSteps}, (_, i) => `Step_${i+1}`);
+        const metricHeaders = ['Net_Cycle_Time', 'Gross_Cycle_Time', 'Waiting_Time'];
+        const allHeaders = [...metaHeaders, ...stepHeaders, ...metricHeaders];
+
+        // HTML/Excel Formatting Template
+        let tableHtml = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head>
+        <style>
+            table { border-collapse: collapse; font-family: Calibri, sans-serif; }
+            th { background-color: #0070c0; color: white; border: 1px solid #000; padding: 5px; text-align: center; }
+            td { border: 1px solid #000; padding: 5px; text-align: center; }
+            .stripe { background-color: #dce6f1; }
+            .summary-header { background-color: #0070c0; color: white; font-weight: bold; }
+            .metric-label { background-color: #0070c0; color: white; font-weight: bold; }
+        </style>
+        </head>
+        <body>
+        <table>
+            <thead>
+                <tr>${allHeaders.map(h => `<th>${h.replace(/_/g, ' ')}</th>`).join('')}</tr>
+            </thead>
+            <tbody>`;
+
+        // Data Rows
+        filtered.forEach((row, index) => {
+            const rowClass = index % 2 !== 0 ? 'stripe' : '';
+            tableHtml += `<tr class="${rowClass}">`;
+            allHeaders.forEach(h => {
+                tableHtml += `<td>${row[h] || ''}</td>`;
+            });
+            tableHtml += `</tr>`;
+        });
+
+        // Metrics for summary
+        const netValues = filtered.map(log => parseFloat(log.Net_Cycle_Time)).filter(v => !isNaN(v));
+        const grossValues = filtered.map(log => parseFloat(log.Gross_Cycle_Time)).filter(v => !isNaN(v));
+        const waitValues = filtered.map(log => parseFloat(log.Waiting_Time)).filter(v => !isNaN(v));
+
+        // Spacer
+        tableHtml += `<tr><td colspan="${allHeaders.length}" style="border:none;">&nbsp;</td></tr>`;
+
+        // Summary Header Row
+        tableHtml += `
+            <tr>
+                <td colspan="7" style="border:none;"></td>
+                <td class="summary-header">Metric</td>
+                <td class="summary-header">Net Cycle Time</td>
+                <td class="summary-header">Gross Cycle Time</td>
+                <td class="summary-header">Waiting Time</td>
+            </tr>
+            <tr>
+                <td colspan="7" style="border:none;"></td>
+                <td class="metric-label">Average</td>
+                <td>${calculateAverage(netValues)}</td>
+                <td>${calculateAverage(grossValues)}</td>
+                <td>${calculateAverage(waitValues)}</td>
+            </tr>
+            <tr>
+                <td colspan="7" style="border:none;"></td>
+                <td class="metric-label">Median</td>
+                <td>${calculateMedian(netValues)}</td>
+                <td>${calculateMedian(grossValues)}</td>
+                <td>${calculateMedian(waitValues)}</td>
+            </tr>
+        `;
+
+        tableHtml += `</tbody></table></body></html>`;
+
         const link = document.createElement("a");
-        link.href = encodeURI(csv); link.download = `${equipment}_Cycle_Report_${new Date().toLocaleDateString().replace(/\//g,'-')}.csv`;
+        const blob = new Blob([tableHtml], { type: "application/vnd.ms-excel" });
+        link.href = URL.createObjectURL(blob);
+        link.download = `${equipment}_Formatted_Report.xls`;
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
     }
 </script>
 </body>
