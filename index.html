@@ -575,7 +575,7 @@
         const metricHeaders = ['Net_Cycle_Time', 'Gross_Cycle_Time', 'Waiting_Time'];
         const allHeaders = [...metaHeaders, ...stepHeaders, ...metricHeaders];
 
-        // Create CSV Content (Most mobile compatible format)
+        // Create CSV Content
         let csvRows = [];
         
         // Header Row
@@ -596,13 +596,16 @@
         const grossValues = filtered.map(log => parseFloat(log.Gross_Cycle_Time)).filter(v => !isNaN(v));
         const waitValues = filtered.map(log => parseFloat(log.Waiting_Time)).filter(v => !isNaN(v));
 
-        csvRows.push(",,,,,,Metric,Net Cycle Time,Gross Cycle Time,Waiting Time");
-        csvRows.push(`,,,,,,Average,${calculateAverage(netValues)},${calculateAverage(grossValues)},${calculateAverage(waitValues)}`);
-        csvRows.push(`,,,,,,Median,${calculateMedian(netValues)},${calculateMedian(grossValues)},${calculateMedian(waitValues)}`);
+        const startColIndex = metaHeaders.length - 1; 
+        const padding = Array(startColIndex).fill("").join(',');
+
+        csvRows.push(`${padding},Metric,Net Cycle Time,Gross Cycle Time,Waiting Time`);
+        csvRows.push(`${padding},Average,${calculateAverage(netValues)},${calculateAverage(grossValues)},${calculateAverage(waitValues)}`);
+        csvRows.push(`${padding},Median,${calculateMedian(netValues)},${calculateMedian(grossValues)},${calculateMedian(waitValues)}`);
 
         const csvString = csvRows.join('\n');
 
-        // Use UTF-8 BOM to ensure mobile office apps recognize characters correctly
+        // USE CSV FOR MOBILE COMPATIBILITY - Fixed issues with XLS on mobile
         const blob = new Blob(['\ufeff', csvString], { type: "text/csv;charset=utf-8" });
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
@@ -610,7 +613,6 @@
         link.href = url;
         link.download = `${equipment}_Cycle_Report_${new Date().toISOString().slice(0,10)}.csv`;
         
-        // Mobile browsers require appending to document
         document.body.appendChild(link);
         link.click();
         
