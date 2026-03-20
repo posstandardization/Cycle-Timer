@@ -12,11 +12,16 @@
             --gray-active: #757575; 
             --bg: #f8f9fa; 
             --dark: #212529; 
-            --danger: #dc3545;
-            --success: #198754;
+            --danger: #ef4444;
+            --success: #10b981;
             --ct-blue: #0891b2;
-            --gct-purple: #7c3aed;
             --mr-teal: #0d9488;
+            
+            /* Technical Control Colors */
+            --tech-pause: #f59e0b;
+            --tech-wait: #06b6d4;
+            --tech-reset: #4b5563;
+            --tech-dark-grey: #374151;
         }
         
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 0; display: flex; justify-content: center; position: relative; min-height: 100vh; }
@@ -43,7 +48,6 @@
         .menu-card i { font-size: 2.4rem; opacity: 0.9; }
         .menu-card:active { transform: scale(0.97); }
         
-        /* SPECIFIC MENU COLORS */
         .ct-btn { background: var(--orange); }
         .gct-btn { background: var(--ct-blue); }
         .mr-btn { background: var(--mr-teal); }
@@ -58,13 +62,8 @@
         .equip-item:active { opacity: 0.9; transform: translateY(2px); }
 
         .developer-credit { 
-            position: absolute; 
-            bottom: 10px; 
-            right: 15px; 
-            font-size: 0.55rem; 
-            color: #adb5bd; 
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            position: absolute; bottom: 10px; right: 15px; font-size: 0.55rem; 
+            color: #adb5bd; text-transform: uppercase; letter-spacing: 0.5px;
         }
 
         /* TIMER SCREEN UI */
@@ -76,9 +75,8 @@
         .mode-btn.active { background: var(--dark); color: white; border-color: var(--dark); }
 
         .id-inputs-generic { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .id-inputs-qc { display: grid; grid-template-columns: 1fr 65px 1.5fr; gap: 8px; margin-bottom: 15px; }
-        .id-inputs-gct { display: grid; grid-template-columns: 1fr 65px 1.5fr; gap: 8px; margin-bottom: 8px; }
-        .id-inputs-tt { display: grid; grid-template-columns: 1fr 65px 1.5fr; gap: 8px; margin-bottom: 15px; }
+        .id-inputs-qc, .id-inputs-gct, .id-inputs-tt { display: grid; grid-template-columns: 1fr 65px 1.5fr; gap: 8px; margin-bottom: 8px; }
+        .id-inputs-loose { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .full-width-input { grid-column: span 3; margin-top: 5px; }
         
         input, select { padding: 12px; border: 1px solid #ced4da; border-radius: 10px; font-size: 0.85rem; width: 100%; box-sizing: border-box; outline: none; background: white; }
@@ -88,11 +86,27 @@
         .timer { font-size: 3.5rem; font-weight: 800; font-family: 'Courier New', Courier, monospace; }
         .cycle-badge { position: absolute; top: 10px; right: 10px; background: var(--orange); color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; }
 
-        .muda-btn { width: 100%; padding: 18px; border: none; border-radius: 12px; font-weight: 800; background: #e9ecef; margin-bottom: 8px; cursor: pointer; font-size: 1rem; color: #495057; }
-        .muda-on { background: var(--danger) !important; color: white; animation: pulse 1s infinite; }
-        @keyframes pulse { 50% { opacity: 0.7; } }
+        /* Updated Technical Buttons Styling */
+        .delay-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
         
-        .reset-btn { width: 100%; padding: 12px; border: 2px solid #dee2e6; border-radius: 12px; font-weight: 800; background: white; color: #6c757d; cursor: pointer; margin-bottom: 20px; transition: 0.2s; }
+        .pause-btn, .wait-btn, .reset-btn { 
+            padding: 16px; border: none; border-radius: 12px; font-weight: 800; 
+            cursor: pointer; font-size: 0.9rem; transition: all 0.2s; display: flex; 
+            align-items: center; justify-content: center; gap: 10px;
+            background: var(--tech-dark-grey); /* Dark Grey Background */
+            color: white; /* White Font */
+        }
+
+        .pause-btn:disabled, .wait-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        
+        .pause-on { background: var(--tech-pause) !important; color: white !important; animation: pulse 1.5s infinite; }
+        .wait-on { background: var(--tech-wait) !important; color: white !important; animation: pulse 1.5s infinite; }
+
+        .reset-btn { width: 100%; margin-bottom: 20px; background: var(--tech-reset); }
+        .reset-btn:active { background: #1f2937; }
+        .reset-btn i { color: white; }
+        
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
 
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .btn-step { 
@@ -195,8 +209,17 @@
                 <div class="timer" id="main-timer">0.00</div>
             </div>
             
-            <button id="muda-btn" class="muda-btn" onclick="toggleMuda()" disabled>PAUSE (MUDA)</button>
-            <button class="reset-btn" onclick="resetCurrentTimer()">RESET CURRENT TIMER</button>
+            <div class="delay-controls">
+                <button id="pause-btn" class="pause-btn" onclick="togglePause()" disabled>
+                    <i class="fa-solid fa-pause"></i> PAUSE
+                </button>
+                <button id="wait-btn" class="wait-btn" onclick="toggleWaiting()" disabled>
+                    <i class="fa-solid fa-clock"></i> WAITING
+                </button>
+            </div>
+            <button class="reset-btn" onclick="resetCurrentTimer()">
+                <i class="fa-solid fa-rotate-left"></i> RESET CURRENT TIMER
+            </button>
             
             <div id="step-btns" class="btn-grid"></div>
             
@@ -210,10 +233,13 @@
     let currentMode = 'LOADING';
     let currentCounts = {};
     let activeInterval = null;
-    let startTime = null;
+    let startTime = null;     
+    let absoluteStartTime = null; 
     let lastTime = null;
     let isPaused = false;
-    let mudaStart = null;
+    let isWaiting = false;
+    let delayStart = null;
+    let totalWaitingDuration = 0; 
     let currentCycleData = {};
     let parentScreen = 'home-screen';
 
@@ -234,29 +260,11 @@
         },
         TT: {
             LOADING: {
-                steps: [
-                    "1. Container lifted by QC",
-                    "2. Move to yard RTG Location",
-                    "3. received container from RTG",
-                    "4. Move to PULL position",
-                    "5. move to pinning area",
-                    "6. fixing twistlock",
-                    "7. move to standby Position",
-                    "8. move to under crane"
-                ],
-                optional: [4, 5, 6, 7] // 1-indexed steps
+                steps: ["1. Container lifted by QC", "2. Move to yard RTG Location", "3. received container from RTG", "4. Move to PULL position", "5. move to pinning area", "6. fixing twistlock", "7. move to standby Position", "8. move to under crane"],
+                optional: [4, 5, 6, 7]
             },
             DISCHARGE: {
-                steps: [
-                    "1. Received container from QC",
-                    "2. MOVE TO PINNING STATION",
-                    "3. TWISTLOCKS REMOVED",
-                    "4. MOVE TO RTG",
-                    "5. CONTAINERS discharged",
-                    "6. move to pull position",
-                    "7. Move to standby position",
-                    "8. Move to under crane"
-                ],
+                steps: ["1. Received container from QC", "2. MOVE TO PINNING STATION", "3. TWISTLOCKS REMOVED", "4. MOVE TO RTG", "5. CONTAINERS discharged", "6. move to pull position", "7. Move to standby position", "8. Move to under crane"],
                 optional: [2, 3, 6, 7]
             }
         },
@@ -431,6 +439,8 @@
 
         if (stepNum === 1) {
             startTime = now;
+            absoluteStartTime = now;
+            totalWaitingDuration = 0;
             currentCycleData = { 
                 Date: new Date().toLocaleDateString(), Time: new Date().toLocaleTimeString(),
                 Equipment: currentCrane.replace('_', ' '), Unit_No: document.getElementById('unitNo').value || "N/A", 
@@ -439,13 +449,13 @@
                 Cargo_Type: (document.getElementById('cargoType')) ? document.getElementById('cargoType').value : "N/A",
                 Operation: currentMode 
             };
-            document.getElementById('muda-btn').disabled = false;
+            document.getElementById('pause-btn').disabled = false;
+            document.getElementById('wait-btn').disabled = false;
             activeInterval = setInterval(() => { document.getElementById('main-timer').innerText = ((Date.now() - startTime)/1000).toFixed(2); }, 50);
         } else {
             currentCycleData['Step_'+(stepNum-1)] = ((now - lastTime) / 1000).toFixed(2);
         }
 
-        // Disable all and remove active highlight
         for(let i=1; i<=steps.length; i++) {
             const btn = document.getElementById(`s${i}`);
             btn.disabled = true;
@@ -456,28 +466,26 @@
         if (stepNum === steps.length) {
             clearInterval(activeInterval);
             currentCycleData['Step_'+stepNum] = ((now - lastTime) / 1000).toFixed(2);
-            currentCycleData['Total_Time'] = ((now - startTime) / 1000).toFixed(2);
+            const finishTime = now;
+            currentCycleData['Net_Cycle_Time'] = ((finishTime - startTime) / 1000).toFixed(2);
+            currentCycleData['Gross_Cycle_Time'] = ((finishTime - absoluteStartTime) / 1000).toFixed(2);
+            currentCycleData['Total_Waiting_Time'] = (totalWaitingDuration / 1000).toFixed(2);
+            
             masterLogs.push({...currentCycleData});
             if (!currentCounts[currentCrane]) currentCounts[currentCrane] = 0;
             currentCounts[currentCrane]++;
             document.getElementById('cycle-count').innerText = currentCounts[currentCrane];
-            document.getElementById('muda-btn').disabled = true;
+            document.getElementById('pause-btn').disabled = true;
+            document.getElementById('wait-btn').disabled = true;
             setTimeout(resetCrane, 1500);
         } else {
-            // Enable next logical step(s)
             let nextStep = stepNum + 1;
             document.getElementById(`s${nextStep}`).disabled = false;
-            
-            // If the next steps are optional, also enable the next mandatory step
             if (optional.includes(nextStep)) {
                 let firstMandatory = steps.length;
                 for (let j = nextStep; j <= steps.length; j++) {
-                    if (!optional.includes(j)) {
-                        firstMandatory = j;
-                        break;
-                    } else {
-                        document.getElementById(`s${j}`).disabled = false;
-                    }
+                    if (!optional.includes(j)) { firstMandatory = j; break; }
+                    else { document.getElementById(`s${j}`).disabled = false; }
                 }
                 document.getElementById(`s${firstMandatory}`).disabled = false;
             }
@@ -485,12 +493,33 @@
         lastTime = now;
     }
 
-    function toggleMuda() {
-        const btn = document.getElementById('muda-btn');
+    function togglePause() {
+        if (isWaiting) toggleWaiting(); 
+        const btn = document.getElementById('pause-btn');
+        const now = Date.now();
         if (!isPaused) {
-            isPaused = true; mudaStart = Date.now(); btn.classList.add('muda-on'); clearInterval(activeInterval);
+            isPaused = true; delayStart = now; btn.classList.add('pause-on'); clearInterval(activeInterval);
         } else {
-            isPaused = false; let p = (Date.now() - mudaStart); startTime += p; lastTime += p; btn.classList.remove('muda-on');
+            isPaused = false; 
+            let diff = (now - delayStart); 
+            startTime += diff; lastTime += diff; 
+            btn.classList.remove('pause-on');
+            activeInterval = setInterval(() => { document.getElementById('main-timer').innerText = ((Date.now() - startTime)/1000).toFixed(2); }, 50);
+        }
+    }
+
+    function toggleWaiting() {
+        if (isPaused) togglePause(); 
+        const btn = document.getElementById('wait-btn');
+        const now = Date.now();
+        if (!isWaiting) {
+            isWaiting = true; delayStart = now; btn.classList.add('wait-on'); clearInterval(activeInterval);
+        } else {
+            isWaiting = false; 
+            let diff = (now - delayStart); 
+            totalWaitingDuration += diff;
+            startTime += diff; lastTime += diff; 
+            btn.classList.remove('wait-on');
             activeInterval = setInterval(() => { document.getElementById('main-timer').innerText = ((Date.now() - startTime)/1000).toFixed(2); }, 50);
         }
     }
@@ -498,10 +527,12 @@
     function resetCurrentTimer() { if(confirm("Discard current measurement?")) resetCrane(); }
 
     function resetCrane() {
-        clearInterval(activeInterval); startTime = null; isPaused = false;
+        clearInterval(activeInterval); startTime = null; absoluteStartTime = null; isPaused = false; isWaiting = false; totalWaitingDuration = 0;
         document.getElementById('main-timer').innerText = "0.00";
-        document.getElementById('muda-btn').disabled = true;
-        document.getElementById('muda-btn').classList.remove('muda-on');
+        document.getElementById('pause-btn').disabled = true;
+        document.getElementById('wait-btn').disabled = true;
+        document.getElementById('pause-btn').classList.remove('pause-on');
+        document.getElementById('wait-btn').classList.remove('wait-on');
         document.getElementById('cycle-count').innerText = currentCounts[currentCrane] || 0;
         renderSteps();
     }
