@@ -16,8 +16,6 @@
             --success: #10b981;
             --ct-blue: #0891b2;
             --mr-teal: #0d9488;
-            
-            /* Technical Control Colors */
             --tech-pause: #f59e0b;
             --tech-wait: #06b6d4;
             --tech-reset: #4b5563;
@@ -86,15 +84,15 @@
         .timer { font-size: 3.5rem; font-weight: 800; font-family: 'Courier New', Courier, monospace; }
         .cycle-badge { position: absolute; top: 10px; right: 10px; background: var(--orange); color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; }
 
-        /* Updated Technical Buttons Styling */
+        /* Technical Buttons Styling */
         .delay-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
         
         .pause-btn, .wait-btn, .reset-btn { 
             padding: 16px; border: none; border-radius: 12px; font-weight: 800; 
             cursor: pointer; font-size: 0.9rem; transition: all 0.2s; display: flex; 
             align-items: center; justify-content: center; gap: 10px;
-            background: var(--tech-dark-grey); /* Dark Grey Background */
-            color: white; /* White Font */
+            background: var(--tech-dark-grey); 
+            color: white; 
         }
 
         .pause-btn:disabled, .wait-btn:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -245,40 +243,147 @@
 
     const config = {
         QC: {
-            LOADING: ["1. FROM PARK POSITION TO ADJUST ON TRUCK", "2. FROM START ADJUSTING ON TRUCK TO LOCK CONTAINER", "3. FROM LOCK ON CONTAINER TO SILL BEAM", "4. FROM SILL BEAM TO START ADJUSTING ON TARGET ROW", "5. FROM START ADJUSTING ON ROW TO UNLOCK", "6. FROM UNLOCK TO SILL BEAM"],
-            DISCHARGING: ["1. FROM PARK TO SILL BEAM TO TARGET ROW", "2. FROM START ADJUSTING ON CONTAINER TO LOCK", "3. FROM LOCK TO SILL BEAM", "4. FROM SILL BEAM TO START ADJUSTING ON TRUCK", "5. FROM START ADJUSTING ON TRUCK TO UNLOCK", "6. FROM UNLOCK TRUCK TO SILL BEAM/PARK"],
-            HATCH_DISCHARGE: ["1. From Park position / Sillbeam to target hatch cover location", "2. From Start adjust on hatch cover to Lock", "3. From Lock to sillbeam", "4. From Sillbeam to start Aligning on back reach", "5. From start Aligning on back reach to Unlock", "6. From Unlock to sillbeam / Park position"],
-            HATCH_LOADING: ["1. From Park position Or Silllbeam TO Adjustment on Hatch cover", "2. From start Adjusting to lock", "3. From lock on Hatch cover to sillbeam", "4. From sillbeam to start adjust on target row", "5. From Start adjust on target row to Unlock", "6. From Unlock to sill beam"],
-            OOG_OHF_DISCHARGE: ["1. From Park position / Sillbeam to target OOG", "2. From Start adjust on OOG to Lock", "3. From Lock to sillbeam", "4. From Sillbeam to start Adjusting on TT", "5. From start Adjustment on TT to Unlock", "6. From Unlock to sillbeam / Park position"],
-            OOG_OHF_LOADING: ["1. From Park position Or Silllbeam TO Adjustment on TT", "2. From start Adjusting to lock", "3. From lock on OOG to sillbeam", "4. From sillbeam to start adjust on target row", "5. From Start adjust on target row to Unlock", "6. From Unlock to sill beam"],
-            OOG_WIRE_DISCHARGE: ["1. From Park position / Sillbeam to target OOG", "2. From Start adjust on OOG to Awaiting attachements", "3. From Awaiting attachements by dowelman to clearance to hoist", "4. From Hoist to sillbeam", "5. From Sillbeam to start Adjusting on TT", "6. From start Adjustment on TT to Landed", "7. From Landed to Remove Attachements", "8. From Remove Attachements to sill beam"],
-            OOG_WIRE_LOADING: ["1. From Park position Or Silllbeam TO Adjustment on TT", "2. From start Adjusting to Awaiting Attachments", "3. From Awaiting Attachments to clearance to hoist", "4. From Clearance to hoist on OOG to sillbeam", "5. From sillbeam to start adjust on target row", "6. From Start adjust on target row to Landed", "7. From Landed to Remove attachements and clearance to hoist", "8. From Clearance to hoist to sill beam"]
+            LOADING: [
+                "1. From park position to adjust on truck", 
+                "2. From start adjusting on truck to lock container", 
+                "3. From lock on container to sill beam", 
+                "4. From sill beam to start adjusting on target row", 
+                "5. From start adjusting on row to unlock", 
+                "6. From unlock to sill beam"
+            ],
+            DISCHARGING: [
+                "1. From park to sill beam to target row", 
+                "2. From start adjusting on container to lock", 
+                "3. From lock to sill beam", 
+                "4. From sill beam to start adjusting on truck", 
+                "5. From start adjusting on truck to unlock", 
+                "6. From unlock truck to sill beam/park"
+            ],
+            HATCH_DISCHARGE: [
+                "1. From park position / sillbeam to target hatch cover location", 
+                "2. From start adjust on hatch cover to lock", 
+                "3. From lock to sillbeam", 
+                "4. From sillbeam to start aligning on back reach", 
+                "5. From start aligning on back reach to unlock", 
+                "6. From unlock to sillbeam / park position"
+            ],
+            HATCH_LOADING: [
+                "1. From park position or silllbeam to adjustment on hatch cover", 
+                "2. From start adjusting to lock", 
+                "3. From lock on hatch cover to sillbeam", 
+                "4. From sillbeam to start adjust on target row", 
+                "5. From start adjust on target row to unlock", 
+                "6. From unlock to sill beam"
+            ],
+            OOG_OHF_DISCHARGE: [
+                "1. From park position / sillbeam to target OOG", 
+                "2. From start adjust on OOG to lock", 
+                "3. From lock to sillbeam", 
+                "4. From sillbeam to start adjusting on TT", 
+                "5. From start adjustment on TT to unlock", 
+                "6. From unlock to sillbeam / park position"
+            ],
+            OOG_OHF_LOADING: [
+                "1. From park position or silllbeam to adjustment on TT", 
+                "2. From start adjusting to lock", 
+                "3. From lock on OOG to sillbeam", 
+                "4. From sillbeam to start adjust on target row", 
+                "5. From start adjust on target row to unlock", 
+                "6. From unlock to sill beam"
+            ],
+            OOG_WIRE_DISCHARGE: [
+                "1. From park position / sillbeam to target OOG", 
+                "2. From start adjust on OOG to awaiting attachments", 
+                "3. From awaiting attachments by dowelman to clearance to hoist", 
+                "4. From hoist to sillbeam", 
+                "5. From sillbeam to start adjusting on TT", 
+                "6. From start adjustment on TT to landed", 
+                "7. From landed to remove attachments", 
+                "8. From remove attachments to sill beam"
+            ],
+            OOG_WIRE_LOADING: [
+                "1. From park position or silllbeam to adjustment on TT", 
+                "2. From start adjusting to awaiting attachments", 
+                "3. From awaiting attachments to clearance to hoist", 
+                "4. From clearance to hoist on OOG to sillbeam", 
+                "5. From sillbeam to start adjust on target row", 
+                "6. From start adjust on target row to landed", 
+                "7. From landed to remove attachments and clearance to hoist", 
+                "8. From clearance to hoist to sill beam"
+            ]
         },
         RTG: {
-            LOADING: ["1. FROM STANDBY TO LOCK CONTAINER IN BAY", "2. FROM LOCK IN THE BAY TO A-ROW", "3. FROM A-ROW TO UNLOCK ON TRUCK", "4. FROM UNLOCK ON TRUCK TO PARK POSITION"],
-            DISCHARGE: ["1. FROM PARK POSITION TO LOCK ON TRUCK", "2. FROM LOCK ON TRUCK TO UNLOCK ON TARGET ROW", "3. FROM UNLOCK TO PARK POSITION"]
+            LOADING: [
+                "1. From standby to lock container in bay", 
+                "2. From lock in the bay to A-row", 
+                "3. From A-row to unlock on truck", 
+                "4. From unlock on truck to park position"
+            ],
+            DISCHARGE: [
+                "1. From park position to lock on truck", 
+                "2. From lock on truck to unlock on target row", 
+                "3. From unlock to park position"
+            ]
         },
         TT: {
             LOADING: {
-                steps: ["1. Container lifted by QC", "2. Move to yard RTG Location", "3. received container from RTG", "4. Move to PULL position", "5. move to pinning area", "6. fixing twistlock", "7. move to standby Position", "8. move to under crane"],
+                steps: [
+                    "1. Container lifted by QC", 
+                    "2. Move to yard RTG location", 
+                    "3. Received container from RTG", 
+                    "4. Move to PULL position", 
+                    "5. Move to pinning area", 
+                    "6. Fixing twistlock", 
+                    "7. Move to standby position", 
+                    "8. Move to under crane"
+                ],
                 optional: [4, 5, 6, 7]
             },
             DISCHARGE: {
-                steps: ["1. Received container from QC", "2. MOVE TO PINNING STATION", "3. TWISTLOCKS REMOVED", "4. MOVE TO RTG", "5. CONTAINERS discharged", "6. move to pull position", "7. Move to standby position", "8. Move to under crane"],
+                steps: [
+                    "1. Received container from QC", 
+                    "2. Move to pinning station", 
+                    "3. Twistlocks removed", 
+                    "4. Move to RTG", 
+                    "5. Containers discharged", 
+                    "6. Move to PULL position", 
+                    "7. Move to standby position", 
+                    "8. Move to under crane"
+                ],
                 optional: [2, 3, 6, 7]
             }
         },
         MHC_LOOSE: {
-            LOADING: ["STEP1: Grap touch cargo to grab close", "STEP2: Hoist up to reach unload position", "STEP3: Start open cargo to full unload", "STEP4: Hoist empty grap to grap touch cargo"],
-            DISCHARGE: ["STEP1: Grap touch cargo on vessel to grab close", "STEP2: Hoist up to reach unload position", "STEP3: Start open cargo to full unload", "STEP4: Hoist empty grap to grap touch cargo on vessel"]
+            LOADING: [
+                "Step 1: Grab touch cargo to grab close", 
+                "Step 2: Hoist up to reach unload position", 
+                "Step 3: Start open cargo to full unload", 
+                "Step 4: Hoist empty grab to grab touch cargo"
+            ],
+            DISCHARGE: [
+                "Step 1: Grab touch cargo on vessel to grab close", 
+                "Step 2: Hoist up to reach unload position", 
+                "Step 3: Start open cargo to full unload", 
+                "Step 4: Hoist empty grab to grab touch cargo on vessel"
+            ]
         },
         BAGGED_CARGO: {
-            LOADING: ["STEP 1: CONNECT SLING TO HOIST UP", "STEP 2: Move cargo to till touch the target area", "STEP 3: disconnect the sling to hoist up", "STEP 4: move empty hook to the Quayside ground"],
-            DISCHARGE: ["STEP 1: CONNECT SLING TO HOIST UP", "STEP 2: Move cargo to till touch the target area", "STEP 3: disconnect the sling to hoist up", "STEP 4: move empty hook to the vessel target location"]
+            LOADING: [
+                "Step 1: Connect sling to hoist up", 
+                "Step 2: Move cargo to till touch the target area", 
+                "Step 3: Disconnect the sling to hoist up", 
+                "Step 4: Move empty hook to the quayside ground"
+            ],
+            DISCHARGE: [
+                "Step 1: Connect sling to hoist up", 
+                "Step 2: Move cargo to till touch the target area", 
+                "Step 3: Disconnect the sling to hoist up", 
+                "Step 4: Move empty hook to the vessel target location"
+            ]
         },
         DEFAULT: {
-            LOADING: ["1. START OPERATION", "2. IN PROGRESS", "3. COMPLETION"],
-            DISCHARGE: ["1. START OPERATION", "2. IN PROGRESS", "3. COMPLETION"]
+            LOADING: ["1. Start operation", "2. In progress", "3. Completion"],
+            DISCHARGE: ["1. Start operation", "2. In progress", "3. Completion"]
         }
     };
 
