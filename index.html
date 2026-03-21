@@ -28,9 +28,9 @@
         .active { display: block; }
 
         /* HEADER */
-        .home-header { text-align: center; margin-top: 40px; margin-bottom: 30px; }
-        .home-header h1 { font-size: 2.2rem; color: var(--dark); margin: 0; font-weight: 800; }
-        .home-header p { color: #6c757d; font-weight: 500; margin-top: 5px; }
+        .home-header { text-align: center; margin-top: 15px; margin-bottom: 30px; }
+        .home-header h1 { font-size: 2.5rem; color: var(--dark); margin: 0; font-weight: 800; line-height: 1.2; }
+        .home-header p { color: #6c757d; font-weight: 500; margin-top: 5px; font-size: 1.1rem; }
         
         /* NAVIGATION CARDS */
         .menu-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
@@ -47,14 +47,14 @@
         .gct-btn { background: var(--ct-blue); }
         .mr-btn { background: var(--mr-teal); }
 
-        /* DEVELOPER CREDIT */
+        /* DEVELOPER CREDIT - Gap reduced here */
         .developer-credit { 
-            margin-top: 80px;
-            margin-bottom: 20px;
+            margin-top: 40px; 
+            margin-bottom: 25px;
             text-align: right;
             font-size: 0.65rem; 
             color: #000000; 
-            font-weight: 700; 
+            font-weight: 800; 
             text-transform: uppercase; 
             letter-spacing: 0.5px;
         }
@@ -78,9 +78,6 @@
 
         .id-inputs-generic { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .id-inputs-qc, .id-inputs-gct, .id-inputs-tt { display: grid; grid-template-columns: 1fr 65px 1.5fr; gap: 8px; margin-bottom: 8px; }
-        .id-inputs-loose { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .full-width-input { grid-column: span 3; margin-top: 5px; }
-        
         input, select { padding: 12px; border: 1px solid #ced4da; border-radius: 10px; font-size: 0.85rem; width: 100%; box-sizing: border-box; outline: none; background: white; }
         .qc-no-box { text-align: center; }
 
@@ -88,35 +85,17 @@
         .timer { font-size: 3.5rem; font-weight: 800; font-family: 'Courier New', Courier, monospace; }
         .cycle-badge { position: absolute; top: 10px; right: 10px; background: var(--orange); color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; }
 
-        /* Technical Buttons Styling */
         .delay-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-        
-        .pause-btn, .wait-btn, .reset-btn { 
-            padding: 16px; border: none; border-radius: 12px; font-weight: 800; 
-            cursor: pointer; font-size: 0.9rem; transition: all 0.2s; display: flex; 
-            align-items: center; justify-content: center; gap: 10px;
-            background: var(--tech-dark-grey); 
-            color: white; 
-        }
-
+        .pause-btn, .wait-btn, .reset-btn { padding: 16px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; background: var(--tech-dark-grey); color: white; }
         .pause-btn:disabled, .wait-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        
         .pause-on { background: var(--tech-pause) !important; color: white !important; animation: pulse 1.5s infinite; }
         .wait-on { background: var(--tech-wait) !important; color: white !important; animation: pulse 1.5s infinite; }
-
         .reset-btn { width: 100%; margin-bottom: 20px; background: var(--tech-reset); }
-        .reset-btn:active { background: #1f2937; }
-        .reset-btn i { color: white; }
         
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
 
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .btn-step { 
-            height: 85px; border: none; border-radius: 15px; font-size: 0.75rem; font-weight: 700; 
-            color: var(--white); background: var(--orange); cursor: pointer; 
-            display: flex; align-items: center; justify-content: center; text-align: center; 
-            padding: 8px; line-height: 1.2; transition: background 0.2s;
-        }
+        .btn-step { height: 85px; border: none; border-radius: 15px; font-size: 0.75rem; font-weight: 700; color: var(--white); background: var(--orange); cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; padding: 8px; line-height: 1.2; }
         .step-active { background: var(--gray-active) !important; }
         .btn-step:disabled { opacity: 0.35; cursor: not-allowed; }
 
@@ -147,7 +126,7 @@
             </button>
         </div>
 
-        <div class="developer-credit">Developed By: Mr. Golden Micheal - Port of Salalah.</div>
+        <div class="developer-credit">DEVELOPED BY: MR. GOLDEN MICHEAL - PORT OF SALALAH.</div>
     </div>
 
     <!-- CT OPS MENU SCREEN -->
@@ -221,7 +200,7 @@
             
             <div id="step-btns" class="btn-grid"></div>
             
-            <button class="report-btn" id="dl-report-btn">DOWNLOAD REPORT</button>
+            <button class="report-btn" id="dl-report-btn">DOWNLOAD REPORT (CSV)</button>
         </div>
     </div>
 
@@ -283,14 +262,6 @@
                 optional: [2, 3, 6, 7]
             }
         },
-        MHC_LOOSE: {
-            LOADING: ["Step 1: Grab touch cargo to grab close", "Step 2: Hoist up to reach unload position", "Step 3: Start open cargo to full unload", "Step 4: Hoist empty grab to grab touch cargo"],
-            DISCHARGE: ["Step 1: Grab touch cargo on vessel to grab close", "Step 2: Hoist up to reach unload position", "Step 3: Start open cargo to full unload", "Step 4: Hoist empty grab to grab touch cargo on vessel"]
-        },
-        BAGGED_CARGO: {
-            LOADING: ["Step 1: Connect sling to hoist up", "Step 2: Move cargo to till touch the target area", "Step 3: Disconnect the sling to hoist up", "Step 4: Move empty hook to the quayside ground"],
-            DISCHARGE: ["Step 1: Connect sling to hoist up", "Step 2: Move cargo to till touch the target area", "Step 3: Disconnect the sling to hoist up", "Step 4: Move empty hook to the vessel target location"]
-        },
         DEFAULT: {
             LOADING: ["1. Start operation", "2. In progress", "3. Completion"],
             DISCHARGE: ["1. Start operation", "2. In progress", "3. Completion"]
@@ -306,7 +277,6 @@
     function startTimer(equipment) {
         currentCrane = equipment;
         currentMode = 'LOADING';
-        
         const inputDiv = document.getElementById('input-container');
         if (equipment === 'QC') {
             inputDiv.className = 'id-inputs-qc';
@@ -320,8 +290,7 @@
                     <option value="OOG (OHF)">OOG (OHF)</option>
                     <option value="OOG (Wire Sling)">OOG (Wire Sling)</option>
                     <option value="RORO">RORO</option>
-                </select>
-            `;
+                </select>`;
         } else if (equipment === 'TT') {
             inputDiv.className = 'id-inputs-tt';
             inputDiv.innerHTML = `
@@ -330,55 +299,15 @@
                 <select id="ttFilter">
                     <option value="Single">Single</option>
                     <option value="Dual">Dual</option>
-                </select>
-            `;
-        } else if (equipment === 'MHC_LOOSE') {
-            inputDiv.className = 'id-inputs-gct';
-            inputDiv.innerHTML = `
-                <input type="text" id="staffId" placeholder="STAFF ID" maxlength="4">
-                <input type="text" id="unitNo" class="qc-no-box" placeholder="MHC#" maxlength="2">
-                <select id="category" onchange="renderSteps()">
-                    <option value="LHM">LHM</option>
-                    <option value="GOTWALD">GOTWALD</option>
-                    <option value="SHIPCRANE">SHIPCRANE</option>
-                </select>
-            `;
-        } else if (equipment === 'BAGGED_CARGO') {
-            inputDiv.className = 'id-inputs-gct';
-            inputDiv.innerHTML = `
-                <input type="text" id="staffId" placeholder="STAFF ID" maxlength="4">
-                <input type="text" id="unitNo" class="qc-no-box" placeholder="CRANE#" maxlength="2">
-                <select id="category" onchange="renderSteps()">
-                    <option value="KATO">KATO</option>
-                    <option value="SHIP CRANE">SHIP CRANE</option>
-                    <option value="LHM">LHM</option>
-                </select>
-                <select id="cargoType" class="full-width-input" onchange="renderSteps()">
-                    <option value="Jumbo Bag">Jumbo Bag</option>
-                    <option value="cement">cement</option>
-                    <option value="Dhow">Dhow</option>
-                    <option value="steel pipe">steel pipe</option>
-                    <option value="steel rod">steel rod</option>
-                </select>
-            `;
+                </select>`;
         } else {
             inputDiv.className = 'id-inputs-generic';
             inputDiv.innerHTML = `
                 <input type="text" id="staffId" placeholder="STAFF ID">
-                <input type="text" id="unitNo" placeholder="${equipment} NO.">
-            `;
+                <input type="text" id="unitNo" placeholder="${equipment} NO.">`;
         }
-
-        const toggle = document.querySelector('.mode-toggle');
-        toggle.style.display = (equipment === 'M&R') ? 'none' : 'flex';
-        const card = document.getElementById('timer-card');
-        card.style.borderTopColor = (parentScreen === 'gct-ops-screen') ? 'var(--ct-blue)' : 'var(--orange)';
-
-        document.getElementById('timer-back-btn').onclick = () => {
-            if (startTime) { if (!confirm("Stop current timer and go back?")) return; resetCrane(); }
-            showScreen(parentScreen);
-        };
-        document.getElementById('dl-report-btn').onclick = () => downloadReport(equipment);
+        document.querySelector('.mode-toggle').style.display = (equipment === 'M&R') ? 'none' : 'flex';
+        document.getElementById('timer-card').style.borderTopColor = (parentScreen === 'gct-ops-screen') ? 'var(--ct-blue)' : 'var(--orange)';
         document.getElementById('m-load').className = 'mode-btn active';
         document.getElementById('m-dis').className = 'mode-btn';
         resetCrane();
@@ -397,19 +326,10 @@
         const container = document.getElementById('step-btns');
         container.innerHTML = '';
         let steps = [];
-        if (currentCrane === 'QC') {
-            steps = currentMode === 'LOADING' ? config.QC.LOADING : config.QC.DISCHARGE;
-        } else if (currentCrane === 'RTG') {
-            steps = currentMode === 'LOADING' ? config.RTG.LOADING : config.RTG.DISCHARGE;
-        } else if (currentCrane === 'TT') {
-            steps = config.TT[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'].steps;
-        } else if (currentCrane === 'MHC_LOOSE') {
-            steps = config.MHC_LOOSE[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'];
-        } else if (currentCrane === 'BAGGED_CARGO') {
-            steps = config.BAGGED_CARGO[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'];
-        } else {
-            steps = config[currentCrane] ? config[currentCrane][currentMode] : config.DEFAULT[currentMode];
-        }
+        if (currentCrane === 'QC') steps = currentMode === 'LOADING' ? config.QC.LOADING : config.QC.DISCHARGE;
+        else if (currentCrane === 'RTG') steps = currentMode === 'LOADING' ? config.RTG.LOADING : config.RTG.DISCHARGE;
+        else if (currentCrane === 'TT') steps = config.TT[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'].steps;
+        else steps = config[currentCrane] ? config[currentCrane][currentMode] : config.DEFAULT[currentMode];
         
         steps.forEach((text, i) => {
             const btn = document.createElement('button');
@@ -427,35 +347,19 @@
         const now = Date.now();
         let steps = [];
         let optional = [];
-        
-        if (currentCrane === 'QC') {
-            steps = currentMode === 'LOADING' ? config.QC.LOADING : config.QC.DISCHARGE;
-        } else if (currentCrane === 'RTG') {
-            steps = currentMode === 'LOADING' ? config.RTG.LOADING : config.RTG.DISCHARGE;
-        } else if (currentCrane === 'TT') {
-            const ttCfg = config.TT[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'];
-            steps = ttCfg.steps;
-            optional = ttCfg.optional;
-        } else if (currentCrane === 'MHC_LOOSE') {
-            steps = config.MHC_LOOSE[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'];
-        } else if (currentCrane === 'BAGGED_CARGO') {
-            steps = config.BAGGED_CARGO[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'];
-        } else {
-            steps = config[currentCrane] ? config[currentCrane][currentMode] : config.DEFAULT[currentMode];
-        }
+        if (currentCrane === 'QC') steps = currentMode === 'LOADING' ? config.QC.LOADING : config.QC.DISCHARGE;
+        else if (currentCrane === 'RTG') steps = currentMode === 'LOADING' ? config.RTG.LOADING : config.RTG.DISCHARGE;
+        else if (currentCrane === 'TT') { const ttCfg = config.TT[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE']; steps = ttCfg.steps; optional = ttCfg.optional; }
+        else steps = config[currentCrane] ? config[currentCrane][currentMode] : config.DEFAULT[currentMode];
 
         if (navigator.vibrate) navigator.vibrate(40);
-
         if (stepNum === 1) {
-            startTime = now;
-            absoluteStartTime = now;
-            totalWaitingDuration = 0;
+            startTime = now; absoluteStartTime = now; totalWaitingDuration = 0;
             currentCycleData = { 
                 Date: new Date().toLocaleDateString(), Time: new Date().toLocaleTimeString(),
                 Equipment: currentCrane.replace('_', ' '), Unit_No: document.getElementById('unitNo').value || "N/A", 
                 Staff_ID: document.getElementById('staffId').value || "N/A", 
                 Category: (document.getElementById('category')) ? document.getElementById('category').value : (document.getElementById('ttFilter') ? document.getElementById('ttFilter').value : "N/A"),
-                Cargo_Type: (document.getElementById('cargoType')) ? document.getElementById('cargoType').value : "N/A",
                 Operation: currentMode 
             };
             document.getElementById('pause-btn').disabled = false;
@@ -479,7 +383,6 @@
             currentCycleData['Net_Cycle_Time'] = ((finishTime - startTime) / 1000).toFixed(2);
             currentCycleData['Gross_Cycle_Time'] = ((finishTime - absoluteStartTime) / 1000).toFixed(2);
             currentCycleData['Waiting_Time'] = (totalWaitingDuration / 1000).toFixed(2);
-            
             masterLogs.push({...currentCycleData});
             if (!currentCounts[currentCrane]) currentCounts[currentCrane] = 0;
             currentCounts[currentCrane]++;
@@ -488,69 +391,55 @@
             document.getElementById('wait-btn').disabled = true;
             setTimeout(resetCrane, 1500);
         } else {
-            let nextStep = stepNum + 1;
-            document.getElementById(`s${nextStep}`).disabled = false;
-            if (optional.includes(nextStep)) {
-                let firstMandatory = steps.length;
-                for (let j = nextStep; j <= steps.length; j++) {
-                    if (!optional.includes(j)) { firstMandatory = j; break; }
-                    else { document.getElementById(`s${j}`).disabled = false; }
+            let next = stepNum + 1;
+            document.getElementById(`s${next}`).disabled = false;
+            if (optional.includes(next)) {
+                for (let j = next; j <= steps.length; j++) {
+                    document.getElementById(`s${j}`).disabled = false;
+                    if (!optional.includes(j)) break;
                 }
-                document.getElementById(`s${firstMandatory}`).disabled = false;
             }
         }
         lastTime = now;
     }
 
     function togglePause() {
-        if (isWaiting) toggleWaiting(); 
         const btn = document.getElementById('pause-btn');
         const now = Date.now();
         if (!isPaused) {
+            if (isWaiting) toggleWaiting();
             isPaused = true; delayStart = now; btn.classList.add('pause-on'); clearInterval(activeInterval);
         } else {
-            isPaused = false; 
-            let diff = (now - delayStart); 
-            startTime += diff; lastTime += diff; 
+            isPaused = false; let diff = (now - delayStart); startTime += diff; lastTime += diff;
             btn.classList.remove('pause-on');
             activeInterval = setInterval(() => { document.getElementById('main-timer').innerText = ((Date.now() - startTime)/1000).toFixed(2); }, 50);
         }
     }
 
     function toggleWaiting() {
-        if (isPaused) togglePause(); 
         const btn = document.getElementById('wait-btn');
         const now = Date.now();
         if (!isWaiting) {
+            if (isPaused) togglePause();
             isWaiting = true; delayStart = now; btn.classList.add('wait-on'); clearInterval(activeInterval);
         } else {
-            isWaiting = false; 
-            let diff = (now - delayStart); 
-            totalWaitingDuration += diff;
-            startTime += diff; lastTime += diff; 
+            isWaiting = false; let diff = (now - delayStart); totalWaitingDuration += diff; startTime += diff; lastTime += diff;
             btn.classList.remove('wait-on');
             activeInterval = setInterval(() => { document.getElementById('main-timer').innerText = ((Date.now() - startTime)/1000).toFixed(2); }, 50);
         }
     }
 
     function resetCurrentTimer() { if(confirm("Discard current measurement?")) resetCrane(); }
-
     function resetCrane() {
         clearInterval(activeInterval); startTime = null; absoluteStartTime = null; isPaused = false; isWaiting = false; totalWaitingDuration = 0;
         document.getElementById('main-timer').innerText = "0.00";
-        document.getElementById('pause-btn').disabled = true;
-        document.getElementById('wait-btn').disabled = true;
-        document.getElementById('pause-btn').classList.remove('pause-on');
-        document.getElementById('wait-btn').classList.remove('wait-on');
+        document.getElementById('pause-btn').disabled = true; document.getElementById('wait-btn').disabled = true;
+        document.getElementById('pause-btn').classList.remove('pause-on'); document.getElementById('wait-btn').classList.remove('wait-on');
         document.getElementById('cycle-count').innerText = currentCounts[currentCrane] || 0;
         renderSteps();
     }
 
-    function calculateAverage(arr) {
-        if (arr.length === 0) return "0.00";
-        return (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2);
-    }
-
+    function calculateAverage(arr) { if (arr.length === 0) return "0.00"; return (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2); }
     function calculateMedian(arr) {
         if (arr.length === 0) return "0.00";
         const sorted = [...arr].sort((a, b) => a - b);
@@ -562,10 +451,7 @@
         const filtered = masterLogs.filter(log => log.Equipment.replace(' ', '_') === equipment.replace(' ', '_'));
         if (filtered.length === 0) return alert("No recorded cycles found.");
         
-        // Define metadata headers
-        const metaHeaders = ['Date', 'Time', 'Equipment', 'Unit_No', 'Staff_ID', 'Category', 'Cargo_Type', 'Operation'];
-        
-        // Find maximum steps to create consistent headers
+        const metaHeaders = ['Date', 'Time', 'Equipment', 'Unit_No', 'Staff_ID', 'Category', 'Operation'];
         let maxSteps = 0;
         filtered.forEach(log => {
             const steps = Object.keys(log).filter(k => k.startsWith('Step_')).length;
@@ -575,52 +461,30 @@
         const metricHeaders = ['Net_Cycle_Time', 'Gross_Cycle_Time', 'Waiting_Time'];
         const allHeaders = [...metaHeaders, ...stepHeaders, ...metricHeaders];
 
-        // Create CSV Content
         let csvRows = [];
-        
-        // Header Row
         csvRows.push(allHeaders.map(h => `"${h.replace(/_/g, ' ')}"`).join(','));
-
-        // Data Rows
         filtered.forEach(row => {
-            let values = allHeaders.map(h => `"${row[h] !== undefined ? row[h] : ''}"`);
-            csvRows.push(values.join(','));
+            csvRows.push(allHeaders.map(h => `"${row[h] || ''}"`).join(','));
         });
 
-        // Add 2 blank lines for spacing before summary
-        csvRows.push("");
-        csvRows.push("");
+        csvRows.push(""); csvRows.push("");
 
-        // Summary Analytics Section
-        const netValues = filtered.map(log => parseFloat(log.Net_Cycle_Time)).filter(v => !isNaN(v));
-        const grossValues = filtered.map(log => parseFloat(log.Gross_Cycle_Time)).filter(v => !isNaN(v));
-        const waitValues = filtered.map(log => parseFloat(log.Waiting_Time)).filter(v => !isNaN(v));
+        const nets = filtered.map(log => parseFloat(log.Net_Cycle_Time)).filter(v => !isNaN(v));
+        const grosses = filtered.map(log => parseFloat(log.Gross_Cycle_Time)).filter(v => !isNaN(v));
+        const waits = filtered.map(log => parseFloat(log.Waiting_Time)).filter(v => !isNaN(v));
 
-        const startColIndex = metaHeaders.length - 1; 
-        const padding = Array(startColIndex).fill("").join(',');
-
+        const padding = Array(metaHeaders.length - 1).fill("").join(',');
         csvRows.push(`${padding},Metric,Net Cycle Time,Gross Cycle Time,Waiting Time`);
-        csvRows.push(`${padding},Average,${calculateAverage(netValues)},${calculateAverage(grossValues)},${calculateAverage(waitValues)}`);
-        csvRows.push(`${padding},Median,${calculateMedian(netValues)},${calculateMedian(grossValues)},${calculateMedian(waitValues)}`);
+        csvRows.push(`${padding},Average,${calculateAverage(nets)},${calculateAverage(grosses)},${calculateAverage(waits)}`);
+        csvRows.push(`${padding},Median,${calculateMedian(nets)},${calculateMedian(grosses)},${calculateMedian(waits)}`);
 
-        const csvString = csvRows.join('\n');
-
-        // USE CSV FOR MOBILE COMPATIBILITY - Fixed issues with XLS on mobile
-        const blob = new Blob(['\ufeff', csvString], { type: "text/csv;charset=utf-8" });
+        const blob = new Blob(['\ufeff', csvRows.join('\n')], { type: "text/csv;charset=utf-8" });
         const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        
-        link.href = url;
+        link.href = URL.createObjectURL(blob);
         link.download = `${equipment}_Cycle_Report_${new Date().toISOString().slice(0,10)}.csv`;
-        
         document.body.appendChild(link);
         link.click();
-        
-        // Cleanup
-        setTimeout(() => {
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-        }, 100);
+        document.body.removeChild(link);
     }
 </script>
 </body>
