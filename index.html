@@ -23,7 +23,6 @@
         .screen { width: 100%; max-width: 500px; min-height: 100vh; background: white; display: none; padding: 20px; box-sizing: border-box; position: relative; }
         .active { display: block; }
 
-        /* HOME NAVIGATION CARDS */
         .menu-card { 
             padding: 24px; border-radius: 20px; border: none; color: white; cursor: pointer; 
             display: flex; align-items: center; justify-content: space-between; 
@@ -32,7 +31,6 @@
         }
         .menu-card:active { transform: scale(0.97); }
         
-        /* STEP BUTTONS - Dark Grey to Black */
         .btn-step { 
             height: 85px; border: none; border-radius: 15px; 
             font-size: 0.75rem; font-weight: 700; color: white; 
@@ -40,14 +38,11 @@
             justify-content: center; text-align: center; padding: 8px; 
             line-height: 1.2; transition: all 0.2s; 
         }
-        /* Default state: Dark Grey */
         .step-available { background-color: #4b5563 !important; } 
-        /* Pressed/Active state: Black */
         .step-active { background-color: #000000 !important; } 
         
         .btn-step:disabled { opacity: 0.35; cursor: not-allowed; filter: grayscale(30%); }
 
-        /* EQUIPMENT GRID */
         .equip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .equip-item { 
             padding: 20px 10px; border-radius: 15px; border: none; background: var(--orange); 
@@ -56,23 +51,22 @@
         }
         .equip-item:active { opacity: 0.9; transform: translateY(2px); }
 
-        /* MANUAL SETUP STYLES - DARK OUTLINES */
-        .manual-setup-input { border: 2px solid #0f172a; padding: 14px; border-radius: 12px; width: 100%; font-weight: 700; outline: none; background: #fff; }
-        .manual-setup-input:focus { border-color: #38bdf8; }
-        .manual-setup-label { font-size: 0.65rem; font-weight: 900; text-transform: uppercase; color: #1e293b; margin-bottom: 4px; display: block; }
+        .dark-input { border: 2px solid #0f172a; padding: 14px; border-radius: 12px; width: 100%; font-weight: 700; outline: none; background: #fff; color: #000; }
+        .dark-input:focus { border-color: #38bdf8; }
+        .setup-label { font-size: 0.65rem; font-weight: 900; text-transform: uppercase; color: #1e293b; margin-bottom: 4px; display: block; }
 
-        /* TOAST & MODAL */
         #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--dark); color: white; padding: 12px 25px; border-radius: 30px; font-weight: 600; font-size: 0.9rem; display: none; z-index: 2000; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         #custom-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
         #custom-modal { background: white; padding: 25px; border-radius: 15px; max-width: 300px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
     
-        /* Active Mode Style */
         .mode-active { background-color: #000000 !important; color: white !important; border-color: #000000 !important; }
+
+        .admin-only { display: none !important; }
+        .logged-in .admin-only { display: block !important; }
     </style>
 </head>
-<body>
+<body id="app-body">
 
-    <!-- OVERLAYS -->
     <div id="custom-modal-overlay">
         <div id="custom-modal">
             <h3 id="modal-title" class="text-lg font-black uppercase">Confirmation</h3>
@@ -85,11 +79,41 @@
     </div>
     <div id="toast">Message</div>
 
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="screen">
+        <button class="bg-slate-100 px-4 py-2 rounded-lg font-black text-xs mb-10" onclick="showScreen('home-screen')">
+            <i class="fas fa-arrow-left"></i> BACK
+        </button>
+        <div class="text-center mb-8">
+            <div class="w-20 h-20 bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-4 text-white">
+                <i class="fas fa-lock text-3xl"></i>
+            </div>
+            <h2 class="text-2xl font-black text-slate-900 uppercase">Admin Login</h2>
+            <p class="text-slate-400 font-bold text-xs">ENTER PIN TO ACCESS ADMIN FEATURES</p>
+        </div>
+        <div class="space-y-4">
+            <input type="password" id="adminPin" placeholder="Enter PIN" class="dark-input text-center text-2xl tracking-[10px]">
+            <button onclick="attemptLogin()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl active:scale-95 transition">
+                LOGIN
+            </button>
+        </div>
+    </div>
+
     <!-- HOME SCREEN -->
     <div id="home-screen" class="screen active">
-        <div class="text-center mt-4 mb-8">
-            <h1 class="text-4xl font-black text-[#212529]">Cycle Timer</h1>
-            <p class="text-slate-400 font-bold uppercase tracking-widest text-xs mt-1">Main Selection Dashboard</p>
+        <div class="flex justify-between items-center mt-2 mb-6">
+             <div class="text-left">
+                <h1 class="text-4xl font-black text-[#212529]">Cycle Timer</h1>
+                <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Main selection dashboard</p>
+            </div>
+            <div class="flex gap-2">
+                <button id="login-btn" onclick="showScreen('login-screen')" class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-500">
+                    <i class="fas fa-user-lock"></i>
+                </button>
+                <button id="logout-btn" onclick="logout()" class="admin-only w-12 h-12 bg-red-50 rounded-full flex items-center justify-center text-red-500 hidden">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 gap-4">
@@ -105,8 +129,8 @@
                 <span>M&R</span>
                 <i class="fa-solid fa-screwdriver-wrench"></i>
             </button>
-            <button class="menu-card bg-slate-600" onclick="showScreen('manual-setup-screen')">
-                <span>MANUAL</span>
+            <button class="menu-card bg-slate-600" onclick="openQuickManual()">
+                <span>MANUAL SETUP</span>
                 <i class="fa-solid fa-keyboard"></i>
             </button>
         </div>
@@ -118,59 +142,114 @@
 
     <!-- MANUAL SETUP SCREEN -->
     <div id="manual-setup-screen" class="screen">
-        <button class="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-lg font-black text-xs mb-6" onclick="showScreen('home-screen')">
-            <i class="fas fa-arrow-left"></i> BACK
-        </button>
-        <div class="space-y-6">
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="manual-setup-label">Equipment ID</label>
-                    <input type="text" id="manualEquipId" placeholder="ID" class="manual-setup-input">
-                </div>
-                <div>
-                    <label class="manual-setup-label">Staff ID</label>
-                    <input type="text" id="manualStaffId" placeholder="Staff" class="manual-setup-input">
-                </div>
-            </div>
-            <div>
-                <label class="manual-setup-label">Process Title</label>
-                <input type="text" id="manualProcessTitle" placeholder="Process Name" class="manual-setup-input">
-            </div>
-            <hr class="border-slate-100">
-            <div>
-                <label class="manual-setup-label">Add Steps <span class="text-red-500">*</span></label>
-                <div class="flex gap-2">
-                    <input type="text" id="manualStepInput" placeholder="New step name..." class="manual-setup-input">
-                    <button onclick="addManualStep()" class="bg-blue-600 text-white px-6 rounded-xl font-black uppercase text-xs active:scale-95 transition">Add</button>
-                </div>
-            </div>
-            <div id="manualStepList" class="space-y-2 max-h-[250px] overflow-y-auto"></div>
-            <button onclick="openManualTimer()" class="w-full bg-[#1e293b] text-white py-6 rounded-[20px] font-black uppercase tracking-widest text-lg shadow-xl active:scale-95 transition mt-4">
-                DONE - OPEN TIMER
+        <div class="flex justify-between items-center mb-6">
+            <button class="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-lg font-black text-xs" onclick="showScreen(window.parentScreen)">
+                <i class="fas fa-arrow-left"></i> BACK
             </button>
+            <div id="auth-status-container">
+                <button id="google-login-btn" onclick="loginWithGoogle()" class="flex items-center gap-2 bg-white border-2 border-slate-900 px-4 py-2 rounded-lg font-black text-[10px] uppercase shadow-sm">
+                    <i class="fab fa-google text-red-500"></i> Login to Save
+                </button>
+                <div id="user-profile" class="hidden flex items-center gap-2">
+                    <span id="user-email" class="text-[9px] font-black text-slate-500"></span>
+                    <button onclick="logoutGoogle()" class="text-red-500 font-black text-[9px] underline uppercase">Logout</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <h2 id="setup-title" class="text-xl font-black uppercase text-slate-900">Equipment Setup</h2>
+            
+            <div id="history-section" class="hidden">
+                <label class="setup-label">Cloud History</label>
+                <div id="history-list" class="flex flex-col gap-2 max-h-[120px] overflow-y-auto mb-4 bg-slate-50 p-3 rounded-xl border border-dashed border-slate-300">
+                    <p class="text-[10px] text-slate-400 italic">Fetching history...</p>
+                </div>
+            </div>
+
+            <div id="equip-name-group">
+                <label class="setup-label">Equipment Name</label>
+                <input type="text" id="manualEquipId" placeholder="e.g. Crane 05" class="dark-input">
+            </div>
+
+            <div id="staff-id-group">
+                <label class="setup-label">Staff ID</label>
+                <input type="text" id="manualStaffId" placeholder="Enter Staff ID" class="dark-input">
+            </div>
+
+            <div id="process-type-group" class="admin-only hidden">
+                <label class="setup-label">Process Type</label>
+                <select id="processTypeSelect" class="dark-input mb-2" onchange="toggleManualProcessInput()">
+                    <option value="LOADING">Loading</option>
+                    <option value="DISCHARGE">Unloading</option>
+                    <option value="BOTH">Both (Load/Unload)</option>
+                    <option value="MANUAL">Other - Type manually</option>
+                </select>
+                <input type="text" id="manualProcessTypeInput" placeholder="Enter process type..." class="dark-input hidden">
+            </div>
+
+            <div id="filter-setup-group" class="admin-only hidden bg-slate-50 p-4 rounded-2xl border-2 border-slate-900">
+                <label class="setup-label">Filters (Optional)</label>
+                <input type="text" id="filterTitle" placeholder="Filter Title" class="dark-input mb-2">
+                <div class="flex gap-2">
+                    <input type="text" id="filterItemInput" placeholder="Add option" class="dark-input">
+                    <button onclick="addFilterItem()" class="bg-slate-800 text-white px-4 rounded-xl font-black uppercase text-[10px]">Add</button>
+                </div>
+                <div id="filterList" class="flex flex-wrap gap-2 mt-2"></div>
+            </div>
+
+            <div id="process-title-group">
+                <label class="setup-label">Process Title</label>
+                <input type="text" id="manualProcessTitle" placeholder="e.g. Custom Log" class="dark-input">
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-2xl border-2 border-slate-900">
+                <label class="setup-label">Steps <span class="text-red-500">*</span></label>
+                <div class="flex gap-2">
+                    <input type="text" id="manualStepInput" placeholder="Step name..." class="dark-input">
+                    <button onclick="addManualStep()" class="bg-blue-600 text-white px-4 rounded-xl font-black uppercase text-[10px]">Add</button>
+                </div>
+                <div id="manualStepList" class="space-y-2 mt-4 max-h-[200px] overflow-y-auto pr-1"></div>
+            </div>
+            
+            <div class="space-y-3">
+                <div class="flex gap-2">
+                    <button id="run-once-btn" onclick="openManualTimer()" class="flex-1 bg-[#1e293b] text-white py-6 rounded-[24px] font-black uppercase tracking-widest text-sm shadow-xl active:scale-95 transition">
+                        RUN TIMER
+                    </button>
+                    <button id="cloud-save-btn" onclick="saveToCloud()" class="hidden bg-blue-600 text-white px-6 rounded-[24px] font-black uppercase text-[10px] shadow-xl active:scale-95 transition">
+                        <i class="fas fa-cloud-upload-alt mb-1"></i><br>SAVE
+                    </button>
+                </div>
+                <button id="save-list-btn" onclick="saveAndAddEquipment()" class="admin-only w-full bg-[#0d9488] text-white py-4 rounded-[24px] font-black uppercase tracking-widest text-[10px] shadow-md active:scale-95 transition hidden">
+                    PERMANENT CLOUD SAVE (ADMIN)
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- UNIFIED TIMER SCREEN -->
+    <!-- TIMER SCREEN -->
     <div id="timer-screen" class="screen">
-        <!-- Top Bar -->
         <div class="flex justify-between items-center mb-4">
-            <button id="timer-home-btn" class="flex items-center gap-1 text-slate-500 font-bold hover:text-slate-800 transition text-xs">
-                <i class="fas fa-home w-4 h-4"></i> HOME
-            </button>
+            <div class="flex gap-3 items-center">
+                <button id="timer-home-btn" onclick="goHome()" class="flex items-center gap-1 text-slate-500 font-bold hover:text-slate-800 transition text-xs">
+                    <i class="fas fa-home w-4 h-4"></i> HOME
+                </button>
+                <button onclick="editCurrentEquipment()" class="admin-only bg-slate-800 text-white px-3 py-1 rounded-lg font-black text-[9px] uppercase hidden">
+                    <i class="fas fa-edit mr-1"></i> Edit Settings
+                </button>
+            </div>
             <div id="dateDisplay" class="text-[10px] font-black text-slate-400 uppercase tracking-widest"></div>
         </div>
 
-        <!-- Dynamic Operation Inputs -->
         <div id="standard-inputs" class="mb-4">
-            <div class="mode-toggle flex gap-3 mb-3">
+            <div class="mode-toggle flex gap-3 mb-3" id="modeToggleContainer">
                 <button id="m-load" class="flex-1 py-4 rounded-2xl border-2 border-slate-900 bg-white font-black text-xs" onclick="updateMode('LOADING')">LOADING</button>
                 <button id="m-dis" class="flex-1 py-4 rounded-2xl border-2 border-slate-200 bg-white font-black text-xs" onclick="updateMode('DISCHARGE')">DISCHARGE</button>
             </div>
             <div id="dynamic-inputs" class="space-y-2"></div>
         </div>
 
-        <!-- Timer Display -->
         <div class="timer-container shadow-2xl bg-[#212529] rounded-[24px] p-8 relative w-full mb-4">
             <div class="absolute top-3 right-3 bg-[#ff9f00] text-white px-3 py-1 rounded-lg font-black text-[0.7rem] uppercase">
                 Cycles: <span id="cycle-count">0</span>
@@ -178,27 +257,22 @@
             <div id="main-timer" class="font-black text-[#00d2ff] text-center leading-none text-[5.5rem]">0.00</div>
         </div>
 
-        <!-- Controls (Pause/Wait) -->
         <div class="grid grid-cols-2 gap-3 mb-3">
             <button id="pause-btn" onclick="togglePause()" class="bg-[#adb5bd] text-white py-4 rounded-2xl font-black uppercase tracking-wider active:scale-95 transition">Pause</button>
             <button id="wait-btn" onclick="toggleWaiting()" class="bg-[#adb5bd] text-white py-4 rounded-2xl font-black uppercase tracking-wider active:scale-95 transition">Waiting</button>
         </div>
 
-        <!-- Reset Controls -->
         <div class="grid grid-cols-2 gap-3 mb-4">
             <button onclick="undoLastCycle()" class="bg-[#495057] text-white py-4 text-[10px] uppercase font-black rounded-xl active:scale-95 transition">Reset Last Cycle</button>
             <button onclick="resetFullSession()" class="bg-[#64748b] text-white py-4 text-[10px] uppercase font-black rounded-xl active:scale-95 transition">Reset Full</button>
         </div>
 
-        <!-- Steps Grid -->
         <div id="step-grid" class="grid grid-cols-2 gap-3 pt-2"></div>
 
-        <!-- Large Stop & Record Button -->
         <button id="stop-cycle-btn" onclick="stopCycle()" class="w-full py-6 bg-[#e11d48] text-white text-2xl font-black uppercase tracking-widest mt-4 shadow-xl active:scale-95 transition rounded-[20px] hidden">
             STOP & RECORD
         </button>
 
-        <!-- Download Action -->
         <button onclick="downloadReport()" class="w-full py-5 bg-[#212529] text-white text-lg font-black uppercase tracking-widest mt-6 shadow-xl active:scale-95 transition rounded-2xl">
             Download Report (CSV)
         </button>
@@ -208,55 +282,59 @@
         </div>
     </div>
 
-    <!-- CYCLE RECORDED SUCCESS MODAL -->
-    <div id="recordModal" class="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-50 hidden">
-        <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl text-center mx-4 w-full max-sm">
-            <div class="w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-check text-3xl"></i>
-            </div>
-            <h2 class="text-2xl font-black text-slate-800 uppercase">Cycle Recorded!</h2>
-            <p class="text-slate-500 font-bold uppercase text-xs mt-2">Ready for next cycle</p>
-        </div>
-    </div>
-
-    <!-- OPERATIONS SCREENS -->
+    <!-- CT/GCT/MR SCREENS -->
     <div id="ct-ops-screen" class="screen">
         <button class="bg-slate-100 px-4 py-2 rounded-lg font-black text-xs mb-6" onclick="showScreen('home-screen')"><i class="fas fa-arrow-left"></i> BACK</button>
         <h2 class="text-center text-xl font-black text-[#ff9800] uppercase mb-6">CT OPERATIONS</h2>
-        <div class="equip-grid">
-            <button class="equip-item" onclick="initTimer('QC')">QC</button>
-            <button class="equip-item" onclick="initTimer('RTG')">RTG</button>
-            <button class="equip-item" onclick="initTimer('TT')">TT</button>
-            <button class="equip-item" onclick="initTimer('EH')">EH</button>
-            <button class="equip-item" onclick="initTimer('RS')">RS</button>
-            <button class="equip-item" onclick="initTimer('FLT')">FLT</button>
-            <button class="equip-item" onclick="initTimer('LASHER')">LASHER</button>
-            <button class="equip-item" onclick="initTimer('DOWELMAN')">DOWELMAN</button>
-        </div>
+        <div class="equip-grid" id="ct-grid"></div>
+        <button class="admin-only w-full bg-slate-700 text-white font-black py-4 rounded-xl mt-4 hidden" onclick="openAdminNew()">
+            <i class="fa-solid fa-plus-circle mr-2"></i> ADD NEW
+        </button>
     </div>
 
     <div id="gct-ops-screen" class="screen">
         <button class="bg-slate-100 px-4 py-2 rounded-lg font-black text-xs mb-6" onclick="showScreen('home-screen')"><i class="fas fa-arrow-left"></i> BACK</button>
         <h2 class="text-center text-xl font-black text-[#0891b2] uppercase mb-6">GCT OPERATIONS</h2>
-        <div class="equip-grid">
-            <button class="equip-item bg-[#0891b2]" onclick="initTimer('MHC_LOOSE')">MHC Loose cargo</button>
-            <button class="equip-item bg-[#0891b2]" onclick="initTimer('LASHER')">LASHER</button>
-            <button class="equip-item bg-[#0891b2]" onclick="initTimer('BAGGED_CARGO')">Crane- bagged cargo</button>
-            <button class="equip-item bg-[#0891b2]" onclick="initTimer('FLT')">FLT</button>
-            <button class="equip-item bg-[#0891b2]" onclick="initTimer('RTG')">RTG</button>
-            <button class="equip-item bg-[#0891b2]" onclick="initTimer('RS')">RS</button>
-        </div>
+        <div class="equip-grid" id="gct-grid"></div>
+        <button class="admin-only w-full bg-slate-700 text-white font-black py-4 rounded-xl mt-4 hidden" onclick="openAdminNew()">
+            <i class="fa-solid fa-plus-circle mr-2"></i> ADD NEW
+        </button>
     </div>
 
     <div id="mr-screen" class="screen">
         <button class="bg-slate-100 px-4 py-2 rounded-lg font-black text-xs mb-6" onclick="showScreen('home-screen')"><i class="fas fa-arrow-left"></i> BACK</button>
         <h2 class="text-center text-xl font-black text-[#0d9488] uppercase mb-6">M&R</h2>
-        <div class="equip-grid">
-            <button class="equip-item bg-[#0d9488] col-span-2" onclick="initTimer('M&R')">M&R LOG</button>
-        </div>
+        <div class="equip-grid" id="mr-grid"></div>
+        <button class="admin-only w-full bg-slate-700 text-white font-black py-4 rounded-xl mt-4 hidden" onclick="openAdminNew()">
+            <i class="fa-solid fa-plus-circle mr-2"></i> ADD NEW
+        </button>
     </div>
 
-<script>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, doc, setDoc, getDocs, addDoc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // GLOBAL UI HELPER
+    function showToast(msg, type = '') {
+        const t = document.getElementById('toast');
+        if (t) {
+            t.innerText = msg;
+            t.className = type ? `toast-${type}` : '';
+            t.style.display = 'block';
+            setTimeout(() => { t.style.display = 'none'; }, 2500);
+        }
+    }
+    window.showToast = showToast;
+
+    // CONFIGS
+    const firebaseConfig = JSON.parse(__firebase_config);
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // STATE
     let logs = [];
     let currentCrane = '';
     let currentMode = 'LOADING';
@@ -272,184 +350,224 @@
     let delayStart = null;
     let currentCycleData = {};
     let manualSteps = [];
+    let filterItems = [];
     let isManualMode = false;
+    let isLoggedIn = false;
+    let currentUser = null;
+    let currentEditingEquip = null;
+    let isAdvancedSetup = false;
+
+    // PERSISTENT CUSTOM EQUIPMENT
+    let customEquipments = { 'ct-ops-screen': [], 'gct-ops-screen': [], 'mr-screen': [] };
+
+    window.parentScreen = 'home-screen';
+
+    const baseEquipments = {
+        'ct-ops-screen': ['QC', 'RTG', 'TT', 'EH', 'RS', 'FLT', 'LASHER', 'DOWELMAN'],
+        'gct-ops-screen': ['MHC_LOOSE', 'LASHER', 'BAGGED_CARGO', 'FLT', 'RTG', 'RS'],
+        'mr-screen': ['M&R']
+    };
 
     const config = {
         QC: {
-            LOADING: ["1. FROM PARK POSITION TO ADJUST ON TRUCK", "2. FROM START ADJUSTING ON TRUCK TO TO LOCK THE CONTAINER ON TRUCK", "3. FROM LOCK ON CONTAINER ON TRUCK TO SILL BEAM", "4. FROM SILL BEAM TO START ADJUSTING ON TARGET ROW", "5. FROM START ADJUSTING ON TARGET ROW TO UNLOCK", "6. FROM UNLOCK TO SILL BEAM"],
-            DISCHARGE: ["1. FROM PARK TO SILL BEAM TO START TARGET ROW", "2. FROM START ADJUSTING ON CONTAINER TO LOCK", "3. FROM LOCK TO SILL BEAM", "4. FROM SILL BEAM TO START ADJUSTING ON TRUCK", "5. FROM START ADJUSTING ON TRUCK TO UNLOCK ON TRUCK", "6. FROM UNLOCK TRUCK TO SILL BEAM/PARK POSITION"]
+            LOADING: ["1. FROM PARK POSITION TO ADJUST ON TRUCK", "2. FROM START ADJUSTING ON TRUCK TO TO LOCK THE CONTAINER ON TRUCK", "3. FROM LOCK ON CONTAINER ON TRUCK TO SILL BEAM", "4. FROM SILL BEAM TO START ADJUSTING ON TARGET ROW", "5. FROM START ADJUSTING ON TARGET ROW TO UNLOCK"],
+            DISCHARGE: ["1. FROM PARK TO SILL BEAM TO START TARGET ROW", "2. FROM START ADJUSTING ON CONTAINER TO LOCK", "3. FROM LOCK TO SILL BEAM", "4. FROM SILL BEAM TO START ADJUSTING ON TRUCK", "5. FROM START ADJUSTING ON TRUCK TO UNLOCK ON TRUCK"]
         },
         RTG: {
-            LOADING: ["1. FROM PARK POSITION TO LOCK CONTAINER IN THE BAY", "2. FROM LOCK IN THE BAY TO A-ROW", "3. FROM A- ROW TO UNLOCK ON TRUCK", "4. FROM UNLOCK ON TRUCK TO PARK POSITION"],
-            DISCHARGE: ["1. FROM PARK POSITION TO LOCK ON TRUCK", "2. FROM LOCK ON TRUCK TO UNLOCK ON TARGET ROW", "3. FROM UNLOCK TO PARK POSITION"]
+            LOADING: ["1. FROM PARK POSITION TO LOCK CONTAINER IN THE BAY", "2. FROM LOCK IN THE BAY TO A-ROW", "3. FROM A- ROW TO UNLOCK ON TRUCK"],
+            DISCHARGE: ["1. FROM PARK POSITION TO LOCK ON TRUCK", "2. FROM LOCK ON TRUCK TO UNLOCK ON TARGET ROW"]
         },
         TT: {
-            LOADING: ["1. Container lifted by QC", "2. Move to yard RTG location", "3. Received container from RTG", "4. Move to PULL position", "5. Move to pinning area", "6. Fixing twistlock", "7. Move to standby position", "8. Move to under crane"],
-            DISCHARGE: ["1. Received container from QC", "2. Move to pinning station", "3. Twistlocks removed", "4. Move to RTG", "5. Containers discharged", "6. Move to PULL position", "7. Move to standby position", "8. Move to under crane"]
+            LOADING: ["1. Container lifted by QC", "2. Move to yard RTG location", "3. Received container from RTG", "4. Move to PULL position", "5. Move to pinning area", "6. Fixing twistlock", "7. Move to standby position"],
+            DISCHARGE: ["1. Received container from QC", "2. Move to pinning station", "3. Twistlocks removed", "4. Move to RTG", "5. Containers discharged", "6. Move to PULL position", "7. Move to standby position"]
         },
-        DEFAULT: ["1. Start operation", "2. In progress", "3. Completion"]
+        DEFAULT: ["1. Start operation", "2. In progress"]
     };
 
-    function showToast(msg, type = '') {
-        const t = document.getElementById('toast');
-        t.innerText = msg;
-        t.className = type ? `toast-${type}` : '';
-        t.style.display = 'block';
-        setTimeout(() => { t.style.display = 'none'; }, 2500);
-    }
+    // AUTH
+    const initAuth = async () => {
+        try {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+        } catch (e) { console.error("Auth error", e); }
+    };
 
-    function openModal(title, msg, onConfirm) {
-        document.getElementById('modal-title').innerText = title;
-        document.getElementById('modal-msg').innerText = msg;
-        document.getElementById('custom-modal-overlay').style.display = 'flex';
-        document.getElementById('modal-confirm-btn').onclick = () => { onConfirm(); closeModal(); };
-    }
-
-    function closeModal() { document.getElementById('custom-modal-overlay').style.display = 'none'; }
-
-    function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        document.getElementById('dateDisplay').innerText = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-    }
-
-    function initTimer(equipment) {
-        isManualMode = false;
-        currentCrane = equipment;
-        currentMode = 'LOADING';
-        const inputDiv = document.getElementById('dynamic-inputs');
-        inputDiv.innerHTML = '';
+    onAuthStateChanged(auth, (user) => {
+        currentUser = user;
+        const profile = document.getElementById('user-profile');
+        const loginBtn = document.getElementById('google-login-btn');
+        const cloudBtn = document.getElementById('cloud-save-btn');
+        const historySec = document.getElementById('history-section');
         
-        const darkInputClass = "p-3 border-2 border-slate-900 rounded-xl text-xs font-black outline-none bg-white text-slate-900 placeholder-slate-500";
+        if (user) {
+            // Rule 3: Start Firestore listeners after auth
+            setupPublicEquipmentListener();
 
-        if (equipment === 'QC') {
-            inputDiv.innerHTML = `
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="staffId" placeholder="STAFF ID" class="${darkInputClass}">
-                    <input type="text" id="unitNo" placeholder="QC#" class="${darkInputClass} text-center">
-                </div>
-                <select id="category" onchange="renderSteps()" class="${darkInputClass} w-full">
-                    <option value="Above deck">Above deck</option>
-                    <option value="Below deck">Below deck</option>
-                    <option value="Hatch cover">Hatch cover</option>
-                    <option value="OOG">OOG</option>
-                </select>`;
-        } else {
-            inputDiv.innerHTML = `
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="staffId" placeholder="STAFF ID" class="${darkInputClass}">
-                    <input type="text" id="unitNo" placeholder="UNIT NO" class="${darkInputClass}">
-                </div>`;
+            if (!user.isAnonymous) {
+                if (profile) profile.classList.remove('hidden');
+                if (loginBtn) loginBtn.classList.add('hidden');
+                if (cloudBtn) cloudBtn.classList.remove('hidden');
+                if (historySec) historySec.classList.remove('hidden');
+                const emailEl = document.getElementById('user-email');
+                if (emailEl) emailEl.innerText = user.email;
+                fetchHistory();
+            } else {
+                if (profile) profile.classList.add('hidden');
+                if (loginBtn) loginBtn.classList.remove('hidden');
+                if (cloudBtn) cloudBtn.classList.add('hidden');
+                if (historySec) historySec.classList.add('hidden');
+            }
         }
+    });
+    initAuth();
 
-        document.getElementById('standard-inputs').classList.remove('hidden');
-        document.getElementById('timer-home-btn').onclick = goHome;
+    // FIRESTORE PERMANENT EQUIPMENT SYNC
+    function setupPublicEquipmentListener() {
+        if (!currentUser) return;
+        // Rule 1: artifacts/{appId}/public/data/{collectionName}
+        const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'customEquipment');
         
-        // Ensure Loading is selected by default
-        updateMode('LOADING');
-        
-        resetCurrentTimerUI();
-        renderSteps();
-        showScreen('timer-screen');
+        onSnapshot(collectionRef, (snapshot) => {
+            // Reset local custom lists
+            customEquipments = { 'ct-ops-screen': [], 'gct-ops-screen': [], 'mr-screen': [] };
+            
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.category && customEquipments[data.category]) {
+                    customEquipments[data.category].push({ id: doc.id, ...data });
+                }
+            });
+            
+            // Refresh grid if on an equipment screen
+            if (window.parentScreen && window.parentScreen !== 'home-screen') {
+                renderEquipmentGrid(window.parentScreen);
+            }
+        }, (error) => console.error("Equipment sync error:", error));
     }
 
-    function updateMode(mode) {
-        // Only allow change if timer hasn't started
+    // NAVIGATION
+    window.showScreen = (id) => {
+        if (!id) id = 'home-screen';
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        const target = document.getElementById(id);
+        if (target) {
+            target.classList.add('active');
+            if (id.includes('ops') || id === 'mr-screen') {
+                window.parentScreen = id;
+                renderEquipmentGrid(id);
+            } else if (id === 'home-screen') {
+                window.parentScreen = 'home-screen';
+            }
+        }
+        const dateEl = document.getElementById('dateDisplay');
+        if (dateEl) dateEl.innerText = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    };
+
+    window.goHome = () => {
+        if (startTime) {
+            openModal("Exit?", "Discard current measurement?", () => { 
+                resetCurrentTimerUI(); 
+                window.showScreen(window.parentScreen); 
+            });
+        } else {
+            window.showScreen(window.parentScreen);
+        }
+    };
+
+    // EQUIPMENT GRID
+    function renderEquipmentGrid(screenId) {
+        let gridId = (screenId === 'ct-ops-screen' ? 'ct-grid' : (screenId === 'gct-ops-screen' ? 'gct-grid' : 'mr-grid'));
+        let bgColor = (screenId === 'ct-ops-screen' ? 'var(--orange)' : (screenId === 'gct-ops-screen' ? 'var(--ct-blue)' : 'var(--mr-teal)'));
+        const grid = document.getElementById(gridId);
+        if (!grid) return;
+        grid.innerHTML = '';
+        
+        const allNames = Array.from(new Set([...baseEquipments[screenId], ...customEquipments[screenId].map(c => c.name)]));
+        allNames.forEach(name => {
+            const btn = document.createElement('button');
+            btn.className = 'equip-item' + (name === 'M&R' ? ' col-span-2' : '');
+            btn.style.background = bgColor;
+            btn.innerText = name;
+            const customData = customEquipments[screenId].find(c => c.name === name);
+            btn.onclick = () => initTimer(name, customData);
+            grid.appendChild(btn);
+        });
+    }
+
+    // TIMER LOGIC
+    window.initTimer = (equipment, customData = null) => {
+        isManualMode = false; currentCrane = equipment; currentEditingEquip = customData; 
+        const inputDiv = document.getElementById('dynamic-inputs');
+        if (!inputDiv) return;
+        inputDiv.innerHTML = '';
+        const darkInputClass = "p-3 border-2 border-slate-900 rounded-xl text-xs font-black outline-none bg-white text-slate-900";
+        if (customData) {
+            isManualMode = true; manualSteps = customData.steps;
+            const modeToggle = document.getElementById('modeToggleContainer');
+            if (modeToggle) {
+                if (customData.processType === 'BOTH') modeToggle.classList.remove('hidden');
+                else { modeToggle.classList.add('hidden'); currentMode = customData.processType || 'MANUAL'; }
+            }
+            if (customData.filterTitle && customData.filterOptions && customData.filterOptions.length > 0) {
+                let opts = customData.filterOptions.map(o => `<option value="${o}">${o}</option>`).join('');
+                inputDiv.innerHTML = `<div class="grid grid-cols-1 gap-2"><label class="setup-label text-slate-500">${customData.filterTitle}</label><select id="customFilter" class="${darkInputClass}">${opts}</select><input type="text" id="unitNo" placeholder="Equipment ID/No" class="${darkInputClass}"></div>`;
+            } else {
+                inputDiv.innerHTML = `<input type="text" id="unitNo" placeholder="Equipment ID/No" class="${darkInputClass}">`;
+            }
+        } else {
+            const modeToggle = document.getElementById('modeToggleContainer');
+            if (modeToggle) modeToggle.classList.remove('hidden');
+            if (equipment === 'QC') {
+                inputDiv.innerHTML = `<div class="grid grid-cols-2 gap-2"><input type="text" id="staffId" placeholder="STAFF ID" class="${darkInputClass}"><input type="text" id="unitNo" placeholder="QC#" class="${darkInputClass} text-center"></div><select id="category" onchange="renderSteps()" class="${darkInputClass} w-full"><option value="Above deck">Above deck</option><option value="Below deck">Below deck</option><option value="Hatch cover">Hatch cover</option><option value="OOG">OOG</option></select>`;
+            } else {
+                inputDiv.innerHTML = `<div class="grid grid-cols-2 gap-2"><input type="text" id="staffId" placeholder="STAFF ID" class="${darkInputClass}"><input type="text" id="unitNo" placeholder="UNIT NO" class="${darkInputClass}"></div>`;
+            }
+            updateMode('LOADING');
+        }
+        resetCurrentTimerUI(); renderSteps(); window.showScreen('timer-screen');
+    };
+
+    window.updateMode = (mode) => {
         if (startTime) return;
         currentMode = mode;
-        
-        // CSS Toggle for Loading/Discharge
-        const loadBtn = document.getElementById('m-load');
-        const disBtn = document.getElementById('m-dis');
-        
-        if (mode === 'LOADING') {
-            loadBtn.className = 'flex-1 py-4 rounded-2xl border-2 border-slate-900 font-black text-xs mode-active';
-            disBtn.className = 'flex-1 py-4 rounded-2xl border-2 border-slate-200 bg-white font-black text-xs text-slate-400';
-        } else {
-            disBtn.className = 'flex-1 py-4 rounded-2xl border-2 border-slate-900 font-black text-xs mode-active';
-            loadBtn.className = 'flex-1 py-4 rounded-2xl border-2 border-slate-200 bg-white font-black text-xs text-slate-400';
+        const l = document.getElementById('m-load'); const d = document.getElementById('m-dis');
+        if (l && d) {
+            if (mode === 'LOADING') { l.className = 'flex-1 py-4 rounded-2xl border-2 border-slate-900 font-black text-xs mode-active'; d.className = 'flex-1 py-4 rounded-2xl border-2 border-slate-200 bg-white font-black text-xs text-slate-400'; }
+            else { d.className = 'flex-1 py-4 rounded-2xl border-2 border-slate-900 font-black text-xs mode-active'; l.className = 'flex-1 py-4 rounded-2xl border-2 border-slate-200 bg-white font-black text-xs text-slate-400'; }
         }
-        
         renderSteps();
-    }
+    };
 
     function renderSteps() {
-        const grid = document.getElementById('step-grid');
+        const grid = document.getElementById('step-grid'); if (!grid) return;
         grid.innerHTML = '';
-        let steps = isManualMode ? manualSteps : (config[currentCrane]?.[currentMode] || config[currentCrane] || config.DEFAULT);
-        currentSteps = steps;
-
-        steps.forEach((text, i) => {
-            const btn = document.createElement('button');
-            btn.id = `s${i+1}`;
-            btn.className = 'btn-step step-available'; // Start as Dark Grey
-            btn.innerText = text;
-            btn.disabled = (i !== 0);
-            btn.onclick = () => triggerStep(i + 1);
-            grid.appendChild(btn);
+        currentSteps = isManualMode ? manualSteps : (config[currentCrane]?.[currentMode] || config[currentCrane] || config.DEFAULT);
+        currentSteps.forEach((text, i) => {
+            const btn = document.createElement('button'); btn.id = `s${i+1}`; btn.className = 'btn-step step-available'; btn.innerText = text; btn.disabled = (i !== 0); btn.onclick = () => triggerStep(i + 1); grid.appendChild(btn);
         });
     }
 
     function triggerStep(num) {
         const now = Date.now();
-        if (navigator.vibrate) navigator.vibrate(40);
-
-        const stopBtn = document.getElementById('stop-cycle-btn');
-        if (num === 1 && !stopBtn.classList.contains('hidden')) {
-            finalizeCycleSilently(now);
-        }
-
+        const stopBtnEl = document.getElementById('stop-cycle-btn');
+        if (num === 1 && stopBtnEl && !stopBtnEl.classList.contains('hidden')) finalizeCycleSilently(now);
         if (num === 1) {
             startTime = now; absoluteStartTime = now; lastTime = now; totalWaitingDuration = 0;
-            currentCycleData = isManualMode ? {
-                Date: new Date().toLocaleDateString(), Time: new Date().toLocaleTimeString(),
-                Equipment: document.getElementById('manualEquipId').value || "Manual",
-                Staff_ID: document.getElementById('manualStaffId').value || "N/A",
-                Process: document.getElementById('manualProcessTitle').value || "Custom"
-            } : {
-                Date: new Date().toLocaleDateString(), Time: new Date().toLocaleTimeString(),
-                Equipment: currentCrane,
-                Staff_ID: document.getElementById('staffId')?.value || "N/A",
-                Unit_No: document.getElementById('unitNo')?.value || "N/A",
-                Operation: currentMode
-            };
-
-            activeInterval = setInterval(() => {
-                document.getElementById('main-timer').innerText = ((Date.now() - startTime) / 1000).toFixed(2);
-            }, 50);
-            document.getElementById('pause-btn').disabled = false;
-            document.getElementById('wait-btn').disabled = false;
-            document.getElementById('session-status').innerText = "RECORDING - IN PROGRESS";
-            document.getElementById('stop-cycle-btn').classList.add('hidden');
-        } else {
-            currentCycleData[`Step_${num - 1}`] = ((now - lastTime) / 1000).toFixed(2);
-        }
-
-        const btns = document.querySelectorAll('.btn-step');
-        btns.forEach(b => { 
-            b.disabled = true; 
-            b.classList.remove('step-active');
-            b.classList.add('step-available');
-        });
-        
-        // Active Step becomes BLACK
-        const activeBtn = document.getElementById(`s${num}`);
-        activeBtn.classList.remove('step-available');
-        activeBtn.classList.add('step-active');
-        activeBtn.disabled = false;
-
-        if (num === currentSteps.length) {
-            document.getElementById('stop-cycle-btn').classList.remove('hidden');
-            document.getElementById('stop-cycle-btn').disabled = false;
-            document.getElementById('session-status').innerText = "LAST STEP - STOP OR RESTART";
-            document.getElementById('s1').disabled = false; 
-            document.getElementById('s1').classList.add('opacity-100');
-        } else {
-            const next = document.getElementById(`s${num + 1}`);
-            if (next) next.disabled = false;
-        }
+            const filterVal = document.getElementById('customFilter')?.value || "N/A";
+            currentCycleData = isManualMode ? { Date: new Date().toLocaleDateString(), Time: new Date().toLocaleTimeString(), Equipment: currentCrane, Filter: filterVal, Unit_No: document.getElementById('unitNo')?.value || "N/A", Operation: currentMode } : { Date: new Date().toLocaleDateString(), Time: new Date().toLocaleTimeString(), Equipment: currentCrane, Staff_ID: document.getElementById('staffId')?.value || "N/A", Unit_No: document.getElementById('unitNo')?.value || "N/A", Operation: currentMode };
+            activeInterval = setInterval(() => { const mainTimer = document.getElementById('main-timer'); if (mainTimer) mainTimer.innerText = ((Date.now() - startTime) / 1000).toFixed(2); }, 50);
+            if (stopBtnEl) stopBtnEl.classList.add('hidden');
+        } else { currentCycleData[`Step_${num - 1}`] = ((now - lastTime) / 1000).toFixed(2); }
+        document.querySelectorAll('.btn-step').forEach(b => { b.disabled = true; b.classList.remove('step-active'); b.classList.add('step-available'); });
+        const act = document.getElementById(`s${num}`); if (act) { act.classList.replace('step-available', 'step-active'); act.disabled = false; }
+        if (num === currentSteps.length) { if (stopBtnEl) stopBtnEl.classList.remove('hidden'); const s1 = document.getElementById('s1'); if (s1) s1.disabled = false; }
+        else { const next = document.getElementById(`s${num + 1}`); if (next) next.disabled = false; }
         lastTime = now;
     }
+    window.triggerStep = triggerStep;
 
     function finalizeCycleSilently(now) {
         clearInterval(activeInterval);
@@ -457,167 +575,256 @@
         currentCycleData['Net_Cycle_Time'] = ((now - startTime) / 1000).toFixed(2);
         currentCycleData['Gross_Cycle_Time'] = ((now - absoluteStartTime) / 1000).toFixed(2);
         currentCycleData['Waiting_Time'] = (totalWaitingDuration / 1000).toFixed(2);
-
-        logs.push({ ...currentCycleData });
-        cycleCount++;
-        document.getElementById('cycle-count').innerText = cycleCount;
-        showToast("Cycle Saved!", "success");
+        logs.push({ ...currentCycleData }); cycleCount++;
+        const cycleCountEl = document.getElementById('cycle-count'); if (cycleCountEl) cycleCountEl.innerText = cycleCount;
     }
 
-    function stopCycle() {
-        const now = Date.now();
-        finalizeCycleSilently(now);
-        document.getElementById('recordModal').classList.remove('hidden');
-        setTimeout(() => {
-            document.getElementById('recordModal').classList.add('hidden');
-            resetCurrentTimerUI();
-        }, 1200);
-    }
+    window.stopCycle = () => {
+        finalizeCycleSilently(Date.now());
+        const recordModalEl = document.getElementById('recordModal');
+        if (recordModalEl) recordModalEl.classList.remove('hidden');
+        setTimeout(() => { if (recordModalEl) recordModalEl.classList.add('hidden'); resetCurrentTimerUI(); }, 1000);
+    };
 
-    function togglePause() {
+    window.togglePause = () => {
         if (!startTime) return;
-        const btn = document.getElementById('pause-btn');
-        if (!isPaused) {
-            if (isWaiting) toggleWaiting();
-            isPaused = true; delayStart = Date.now(); btn.classList.add('bg-amber-500'); clearInterval(activeInterval);
-        } else {
-            isPaused = false; let diff = (Date.now() - delayStart); startTime += diff; lastTime += diff;
-            btn.classList.remove('bg-amber-500');
-            activeInterval = setInterval(() => { document.getElementById('main-timer').innerText = ((Date.now() - startTime) / 1000).toFixed(2); }, 50);
-        }
-    }
+        const pBtn = document.getElementById('pause-btn');
+        if (!isPaused) { if (isWaiting) toggleWaiting(); isPaused = true; delayStart = Date.now(); if (pBtn) pBtn.classList.add('bg-amber-500'); clearInterval(activeInterval); }
+        else { isPaused = false; let d = Date.now() - delayStart; startTime += d; lastTime += d; if (pBtn) pBtn.classList.remove('bg-amber-500'); activeInterval = setInterval(() => { const mainTimer = document.getElementById('main-timer'); if (mainTimer) mainTimer.innerText = ((Date.now() - startTime) / 1000).toFixed(2); }, 50); }
+    };
 
-    function toggleWaiting() {
+    window.toggleWaiting = () => {
         if (!startTime) return;
-        const btn = document.getElementById('wait-btn');
-        if (!isWaiting) {
-            if (isPaused) togglePause();
-            isWaiting = true; delayStart = Date.now(); btn.classList.add('bg-cyan-500'); clearInterval(activeInterval);
-        } else {
-            isWaiting = false; let diff = (Date.now() - delayStart); totalWaitingDuration += diff; startTime += diff; lastTime += diff;
-            btn.classList.remove('bg-cyan-500');
-            activeInterval = setInterval(() => { document.getElementById('main-timer').innerText = ((Date.now() - startTime) / 1000).toFixed(2); }, 50);
-        }
-    }
-
-    function undoLastCycle() {
-        if (logs.length > 0) {
-            openModal("Undo Cycle", "Remove last recorded cycle?", () => {
-                logs.pop();
-                cycleCount = Math.max(0, cycleCount - 1);
-                document.getElementById('cycle-count').innerText = cycleCount;
-                resetCurrentTimerUI();
-                showToast("Cycle Removed", "success");
-            });
-        }
-    }
-
-    function resetFullSession() {
-        openModal("Reset Full", "Delete ALL cycle records for this session?", () => {
-            logs = [];
-            cycleCount = 0;
-            document.getElementById('cycle-count').innerText = "0";
-            resetCurrentTimerUI();
-            showToast("Session Cleared", "success");
-        });
-    }
+        const wBtn = document.getElementById('wait-btn');
+        if (!isWaiting) { if (isPaused) togglePause(); isWaiting = true; delayStart = Date.now(); if (wBtn) wBtn.classList.add('bg-cyan-500'); clearInterval(activeInterval); }
+        else { isWaiting = false; let d = Date.now() - delayStart; totalWaitingDuration += d; startTime += d; lastTime += d; if (wBtn) wBtn.classList.remove('bg-cyan-500'); activeInterval = setInterval(() => { const mainTimer = document.getElementById('main-timer'); if (mainTimer) mainTimer.innerText = ((Date.now() - startTime) / 1000).toFixed(2); }, 50); }
+    };
 
     function resetCurrentTimerUI() {
-        clearInterval(activeInterval);
-        startTime = null; absoluteStartTime = null; isPaused = false; isWaiting = false; totalWaitingDuration = 0;
-        document.getElementById('main-timer').innerText = "0.00";
-        document.getElementById('stop-cycle-btn').classList.add('hidden');
-        document.getElementById('pause-btn').classList.remove('bg-amber-500');
-        document.getElementById('wait-btn').classList.remove('bg-cyan-500');
-        document.getElementById('session-status').innerText = "Waiting - Click Step 1";
+        clearInterval(activeInterval); startTime = null; isPaused = false; isWaiting = false;
+        const mainTimer = document.getElementById('main-timer'); if (mainTimer) mainTimer.innerText = "0.00";
+        const stopBtnEl = document.getElementById('stop-cycle-btn'); if (stopBtnEl) stopBtnEl.classList.add('hidden');
+        const pBtn = document.getElementById('pause-btn'); const wBtn = document.getElementById('wait-btn');
+        if (pBtn) pBtn.classList.remove('bg-amber-500'); if (wBtn) wBtn.classList.remove('bg-cyan-500');
         renderSteps();
     }
+    window.resetCurrentTimerUI = resetCurrentTimerUI;
 
-    function goHome() {
-        if (startTime) openModal("Exit?", "Discard current measurement?", () => { resetCurrentTimerUI(); showScreen('home-screen'); });
-        else showScreen('home-screen');
-    }
+    // CLOUD / SETUP
+    window.loginWithGoogle = async () => {
+        const provider = new GoogleAuthProvider();
+        try {
+            await signInWithPopup(auth, provider);
+            showToast("Logged in with Google", "success");
+        } catch (e) { showToast("Login failed", "error"); }
+    };
 
-    function getAverage(vals) {
-        if (!vals.length) return "0.00";
-        return (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2);
-    }
+    window.logoutGoogle = () => {
+        signOut(auth);
+        signInAnonymously(auth);
+        showToast("Logged Out");
+    };
 
-    function getMedian(vals) {
-        if (!vals.length) return "0.00";
-        const sorted = [...vals].sort((a, b) => a - b);
-        const mid = Math.floor(sorted.length / 2);
-        return (sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2).toFixed(2);
-    }
+    window.saveToCloud = async () => {
+        if (!currentUser || currentUser.isAnonymous) return showToast("Login required", "error");
+        const name = document.getElementById('manualEquipId').value.trim();
+        const staff = document.getElementById('manualStaffId').value.trim();
+        const procTitle = document.getElementById('manualProcessTitle').value.trim();
+        if (!name || manualSteps.length === 0) return showToast("Name and Steps required", "error");
+        const setupData = { name, staffId: staff, processTitle: procTitle, steps: [...manualSteps], timestamp: Date.now() };
+        try {
+            const collectionRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'manualSetups');
+            await addDoc(collectionRef, setupData);
+            showToast("Saved to Cloud!", "success");
+            fetchHistory();
+        } catch (e) { showToast("Save failed", "error"); console.error(e); }
+    };
 
-    function downloadReport() {
-        if (logs.length === 0) return showToast("No recorded cycles.", "error");
+    window.fetchHistory = async () => {
+        if (!currentUser || currentUser.isAnonymous) return;
+        const listEl = document.getElementById('history-list');
+        if (listEl) listEl.innerHTML = '<p class="text-[10px] text-slate-400 italic">Syncing...</p>';
+        try {
+            const collectionRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'manualSetups');
+            const snapshot = await getDocs(collectionRef);
+            if (listEl) {
+                listEl.innerHTML = '';
+                const docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                docs.sort((a, b) => b.timestamp - a.timestamp);
+                if (docs.length === 0) { listEl.innerHTML = '<p class="text-[10px] text-slate-400 italic">No saved setups yet.</p>'; return; }
+                docs.forEach(data => {
+                    const item = document.createElement('div');
+                    item.className = "flex justify-between items-center bg-white p-2 rounded-lg border border-slate-200 shadow-sm cursor-pointer hover:bg-slate-50";
+                    item.innerHTML = `<div><div class="font-black text-[10px] uppercase">${data.name}</div><div class="text-[8px] text-slate-500">${data.processTitle}</div></div><i class="fas fa-chevron-right text-[8px]"></i>`;
+                    item.onclick = () => {
+                        document.getElementById('manualEquipId').value = data.name || '';
+                        document.getElementById('manualStaffId').value = data.staffId || '';
+                        document.getElementById('manualProcessTitle').value = data.processTitle || '';
+                        manualSteps = [...data.steps];
+                        renderManualSetupList();
+                        showToast("Setup Loaded!");
+                    };
+                    listEl.appendChild(item);
+                });
+            }
+        } catch (e) { console.error(e); }
+    };
+
+    window.openQuickManual = () => {
+        isAdvancedSetup = false; manualSteps = []; filterItems = [];
+        window.parentScreen = 'home-screen';
+        document.getElementById('staff-id-group').classList.remove('hidden');
+        document.getElementById('process-title-group').classList.remove('hidden');
+        document.getElementById('process-type-group').classList.add('hidden');
+        document.getElementById('filter-setup-group').classList.add('hidden');
+        document.getElementById('run-once-btn').classList.remove('hidden');
+        document.getElementById('save-list-btn').classList.add('hidden');
+        document.getElementById('setup-title').innerText = "Manual Log Setup";
+        resetSetupFields(); window.showScreen('manual-setup-screen');
+    };
+
+    window.openAdminNew = () => {
+        isAdvancedSetup = true; manualSteps = []; filterItems = [];
+        document.getElementById('staff-id-group').classList.add('hidden');
+        document.getElementById('process-title-group').classList.add('hidden');
+        document.getElementById('process-type-group').classList.remove('hidden');
+        document.getElementById('filter-setup-group').classList.remove('hidden');
+        document.getElementById('run-once-btn').classList.add('hidden');
+        document.getElementById('save-list-btn').classList.remove('hidden');
+        document.getElementById('setup-title').innerText = "Add Equipment Configuration";
+        resetSetupFields(); window.showScreen('manual-setup-screen');
+    };
+
+    window.editCurrentEquipment = () => {
+        if (!isLoggedIn) return;
+        isAdvancedSetup = true;
+        let d = currentEditingEquip || { name: currentCrane, processType: currentMode, steps: config[currentCrane]?.[currentMode] || config.DEFAULT };
+        document.getElementById('manualEquipId').value = d.name;
+        manualSteps = [...(d.steps || [])];
+        document.getElementById('staff-id-group').classList.add('hidden');
+        document.getElementById('process-title-group').classList.add('hidden');
+        document.getElementById('process-type-group').classList.remove('hidden');
+        document.getElementById('filter-setup-group').classList.remove('hidden');
+        document.getElementById('run-once-btn').classList.add('hidden');
+        document.getElementById('save-list-btn').classList.remove('hidden');
+        renderManualSetupList(); window.showScreen('manual-setup-screen');
+    };
+
+    // PERMANENT ADMIN CLOUD SAVE
+    window.saveAndAddEquipment = async () => {
+        if (!isLoggedIn) return showToast("Admin access required", "error");
+        if (!currentUser) return showToast("Authenticating...", "error");
+
+        const name = document.getElementById('manualEquipId').value.trim();
+        const procTypeSelect = document.getElementById('processTypeSelect');
+        const procManualInput = document.getElementById('manualProcessTypeInput');
+        const processType = (procTypeSelect.value === 'MANUAL' ? procManualInput.value.trim() : procTypeSelect.value);
         
-        let allKeysSet = new Set();
-        logs.forEach(log => Object.keys(log).forEach(k => allKeysSet.add(k)));
-        const headers = Array.from(allKeysSet);
+        if (!name || manualSteps.length === 0) return showToast("Name and steps required.", "error");
 
-        let csvRows = [headers.map(h => `"${h}"`).join(',')];
-        logs.forEach(log => {
-            csvRows.push(headers.map(h => `"${log[h] || '0.00'}"`).join(','));
-        });
+        const equipData = {
+            name,
+            processType,
+            filterTitle: document.getElementById('filterTitle').value.trim(),
+            filterOptions: [...filterItems],
+            steps: [...manualSteps],
+            category: window.parentScreen,
+            updatedAt: Date.now()
+        };
 
-        csvRows.push("");
-        csvRows.push("");
-        const metrics = ['Net_Cycle_Time', 'Gross_Cycle_Time', 'Waiting_Time'];
-        csvRows.push(`"Metric","${metrics[0]}","${metrics[1]}","${metrics[2]}"`);
-
-        const netVals = logs.map(l => parseFloat(l.Net_Cycle_Time) || 0);
-        const grossVals = logs.map(l => parseFloat(l.Gross_Cycle_Time) || 0);
-        const waitVals = logs.map(l => parseFloat(l.Waiting_Time) || 0);
-
-        csvRows.push(`"Average","${getAverage(netVals)}","${getAverage(grossVals)}","${getAverage(waitVals)}"`);
-        csvRows.push(`"Median","${getMedian(netVals)}","${getMedian(grossVals)}","${getMedian(waitVals)}"`);
-
-        const blob = new Blob(['\ufeff', csvRows.join('\n')], { type: "text/csv;charset=utf-8" });
-        const link = document.createElement("a");
-        const filename = `${isManualMode ? 'Manual' : currentCrane}_Report_${new Date().toISOString().slice(0,10)}.csv`;
-        
-        link.href = URL.createObjectURL(blob);
-        link.setAttribute("download", filename);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        showToast("Report Exported (CSV)", "success");
-    }
-
-    function addManualStep() {
-        const input = document.getElementById('manualStepInput');
-        if (input.value.trim()) {
-            manualSteps.push(input.value.trim());
-            renderManualSetupList();
-            input.value = '';
+        try {
+            // Rule 1: artifacts/{appId}/public/data/{collectionName}
+            // Use name as ID to overwrite/update properly
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'customEquipment', name.replace(/\s/g, '_'));
+            await setDoc(docRef, equipData);
+            
+            showToast(`${name} Saved Permanently!`, "success");
+            window.showScreen(window.parentScreen);
+        } catch (e) {
+            console.error(e);
+            showToast("Permanent Save Failed", "error");
         }
+    };
+
+    window.openManualTimer = () => {
+        const name = document.getElementById('manualEquipId').value.trim() || "Manual";
+        const d = { name, processType: document.getElementById('manualProcessTitle').value || "Quick Log", steps: [...manualSteps], staffId: document.getElementById('manualStaffId').value };
+        if (manualSteps.length === 0) return showToast("Add steps first.", "error");
+        window.initTimer(name, d);
+    };
+
+    function resetSetupFields() {
+        document.getElementById('manualEquipId').value = ''; 
+        document.getElementById('manualStaffId').value = ''; 
+        document.getElementById('manualProcessTitle').value = ''; 
+        document.getElementById('manualProcessTypeInput').value = ''; 
+        document.getElementById('filterTitle').value = '';
+        renderManualSetupList(); renderFilterList();
     }
 
-    function renderManualSetupList() {
-        const list = document.getElementById('manualStepList');
-        list.innerHTML = '';
-        manualSteps.forEach((s, i) => {
-            const div = document.createElement('div');
-            div.className = 'flex justify-between items-center bg-slate-50 p-3 rounded-lg border-2 border-slate-900 mb-2';
-            div.innerHTML = `<span class="font-bold text-slate-900 text-xs">${i+1}. ${s}</span><button onclick="manualSteps.splice(${i}, 1); renderManualSetupList();" class="text-red-500 font-black text-[10px]">REMOVE</button>`;
-            list.appendChild(div);
-        });
-    }
+    window.addManualStep = () => { 
+        let i = document.getElementById('manualStepInput'); 
+        if (i && i.value.trim()) { manualSteps.push(i.value.trim()); renderManualSetupList(); i.value = ''; } 
+    };
 
-    function openManualTimer() {
-        if (manualSteps.length === 0) return showToast("Add at least one step.", "error");
-        isManualMode = true;
-        document.getElementById('standard-inputs').classList.add('hidden');
-        document.getElementById('timer-home-btn').onclick = goHome;
-        cycleCount = 0;
-        logs = [];
-        document.getElementById('cycle-count').innerText = "0";
-        resetCurrentTimerUI();
-        showScreen('timer-screen');
+    function renderManualSetupList() { 
+        const l = document.getElementById('manualStepList'); if (!l) return;
+        l.innerHTML = ''; 
+        manualSteps.forEach((s, i) => { 
+            const d = document.createElement('div'); d.className = 'flex justify-between items-center bg-white p-3 rounded-lg border-2 border-slate-900 mb-2'; d.innerHTML = `<span class="font-bold text-xs">${i+1}. ${s}</span><button onclick="manualSteps.splice(${i}, 1); renderManualSetupList();" class="text-red-500 font-black text-[10px]">REMOVE</button>`; l.appendChild(d); 
+        }); 
     }
+    window.renderManualSetupList = renderManualSetupList;
+
+    function renderFilterList() { 
+        const l = document.getElementById('filterList'); if (!l) return; l.innerHTML = ''; 
+        filterItems.forEach((item, i) => { 
+            const s = document.createElement('span'); s.className = 'bg-slate-200 px-3 py-1 rounded-full font-black text-[10px] flex items-center gap-2 border-2 border-slate-900'; s.innerHTML = `${item} <i class="fas fa-times cursor-pointer" onclick="filterItems.splice(${i}, 1); renderFilterList();"></i>`; l.appendChild(s); 
+        }); 
+    }
+    window.renderFilterList = renderFilterList;
+
+    window.addFilterItem = () => { 
+        let i = document.getElementById('filterItemInput'); 
+        if (i && i.value.trim()) { filterItems.push(i.value.trim()); renderFilterList(); i.value = ''; } 
+    };
+
+    window.toggleManualProcessInput = () => { 
+        const pManualInput = document.getElementById('manualProcessTypeInput'); 
+        const pTypeSelect = document.getElementById('processTypeSelect'); 
+        if (pManualInput && pTypeSelect) { pManualInput.classList.toggle('hidden', pTypeSelect.value !== 'MANUAL'); } 
+    };
+
+    window.attemptLogin = () => {
+        if (document.getElementById('adminPin').value === '1234') {
+            isLoggedIn = true;
+            document.getElementById('app-body').classList.add('logged-in');
+            document.getElementById('login-btn').classList.add('hidden');
+            document.getElementById('logout-btn').classList.remove('hidden');
+            document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+            showToast("Admin Access Granted", "success");
+            window.showScreen('home-screen');
+        } else { showToast("Invalid PIN", "error"); }
+        document.getElementById('adminPin').value = '';
+    };
+
+    window.logout = () => {
+        isLoggedIn = false;
+        document.getElementById('app-body').classList.remove('logged-in');
+        document.getElementById('login-btn').classList.remove('hidden');
+        document.getElementById('logout-btn').classList.add('hidden');
+        document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+        showToast("Logged Out");
+        window.showScreen('home-screen');
+    };
+
+    window.undoLastCycle = () => { if (logs.length > 0) openModal("Undo?", "Remove last cycle?", () => { logs.pop(); cycleCount = Math.max(0, cycleCount-1); document.getElementById('cycle-count').innerText = cycleCount; resetCurrentTimerUI(); }); };
+    window.resetFullSession = () => { openModal("Reset?", "Delete all records?", () => { logs = []; cycleCount = 0; document.getElementById('cycle-count').innerText = "0"; resetCurrentTimerUI(); }); };
+    window.downloadReport = () => { if (logs.length === 0) return showToast("No logs.", "error"); const keys = Array.from(new Set(logs.flatMap(l => Object.keys(l)))); let csv = [keys.map(k => `"${k}"`).join(',')]; logs.forEach(l => csv.push(keys.map(k => `"${l[k] || '0.00'}"`).join(','))); const blob = new Blob(['\ufeff', csv.join('\n')], { type: "text/csv" }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `Report_${new Date().toISOString().slice(0,10)}.csv`; link.click(); };
+    window.closeModal = () => { document.getElementById('custom-modal-overlay').style.display = 'none'; };
+    window.openModal = (title, msg, onConfirm) => { document.getElementById('modal-title').innerText = title; document.getElementById('modal-msg').innerText = msg; document.getElementById('custom-modal-overlay').style.display = 'flex'; document.getElementById('modal-confirm-btn').onclick = () => { onConfirm(); closeModal(); }; };
+
+    window.onload = function() { window.showScreen('home-screen'); };
 </script>
 </body>
 </html>
