@@ -327,12 +327,22 @@
     }
     window.showToast = showToast;
 
-    // CONFIGS
-    const firebaseConfig = JSON.parse(__firebase_config);
+    // DEFENSIVE CONFIG LOADING (Crucial for GitHub)
+    let firebaseConfig = {};
+    try {
+        firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+    } catch (e) {
+        console.warn("Firebase config not defined. Cloud features disabled.");
+    }
+    
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+
+    let app, auth, db;
+    if (firebaseConfig) {
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+    }
 
     // STATE
     let logs = [];
@@ -384,8 +394,9 @@
         DEFAULT: ["1. Start operation", "2. In progress"]
     };
 
-    // AUTH
+    // AUTH (Defensive)
     const initAuth = async () => {
+        if (!auth) return;
         try {
             if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                 await signInWithCustomToken(auth, __initial_auth_token);
@@ -395,53 +406,49 @@
         } catch (e) { console.error("Auth error", e); }
     };
 
-    onAuthStateChanged(auth, (user) => {
-        currentUser = user;
-        const profile = document.getElementById('user-profile');
-        const loginBtn = document.getElementById('google-login-btn');
-        const cloudBtn = document.getElementById('cloud-save-btn');
-        const historySec = document.getElementById('history-section');
-        
-        if (user) {
-            // Rule 3: Start Firestore listeners after auth
-            setupPublicEquipmentListener();
+    if (auth) {
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            const profile = document.getElementById('user-profile');
+            const loginBtn = document.getElementById('google-login-btn');
+            const cloudBtn = document.getElementById('cloud-save-btn');
+            const historySec = document.getElementById('history-section');
+            
+            if (user) {
+                setupPublicEquipmentListener();
 
-            if (!user.isAnonymous) {
-                if (profile) profile.classList.remove('hidden');
-                if (loginBtn) loginBtn.classList.add('hidden');
-                if (cloudBtn) cloudBtn.classList.remove('hidden');
-                if (historySec) historySec.classList.remove('hidden');
-                const emailEl = document.getElementById('user-email');
-                if (emailEl) emailEl.innerText = user.email;
-                fetchHistory();
-            } else {
-                if (profile) profile.classList.add('hidden');
-                if (loginBtn) loginBtn.classList.remove('hidden');
-                if (cloudBtn) cloudBtn.classList.add('hidden');
-                if (historySec) historySec.classList.add('hidden');
+                if (!user.isAnonymous) {
+                    if (profile) profile.classList.remove('hidden');
+                    if (loginBtn) loginBtn.classList.add('hidden');
+                    if (cloudBtn) cloudBtn.classList.remove('hidden');
+                    if (historySec) historySec.classList.remove('hidden');
+                    const emailEl = document.getElementById('user-email');
+                    if (emailEl) emailEl.innerText = user.email;
+                    fetchHistory();
+                } else {
+                    if (profile) profile.classList.add('hidden');
+                    if (loginBtn) loginBtn.classList.remove('hidden');
+                    if (cloudBtn) cloudBtn.classList.add('hidden');
+                    if (historySec) historySec.classList.add('hidden');
+                }
             }
-        }
-    });
-    initAuth();
+        });
+        initAuth();
+    }
 
-    // FIRESTORE PERMANENT EQUIPMENT SYNC
+    // FIRESTORE SYNC (Defensive)
     function setupPublicEquipmentListener() {
-        if (!currentUser) return;
-        // Rule 1: artifacts/{appId}/public/data/{collectionName}
+        if (!currentUser || !db) return;
         const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'customEquipment');
         
         onSnapshot(collectionRef, (snapshot) => {
-            // Reset local custom lists
             customEquipments = { 'ct-ops-screen': [], 'gct-ops-screen': [], 'mr-screen': [] };
-            
             snapshot.forEach(doc => {
                 const data = doc.data();
                 if (data.category && customEquipments[data.category]) {
                     customEquipments[data.category].push({ id: doc.id, ...data });
                 }
             });
-            
-            // Refresh grid if on an equipment screen
             if (window.parentScreen && window.parentScreen !== 'home-screen') {
                 renderEquipmentGrid(window.parentScreen);
             }
@@ -610,8 +617,9 @@
     }
     window.resetCurrentTimerUI = resetCurrentTimerUI;
 
-    // CLOUD / SETUP
+    // CLOUD (Defensive)
     window.loginWithGoogle = async () => {
+        if (!auth) return showToast("Firebase not configured", "error");
         const provider = new GoogleAuthProvider();
         try {
             await signInWithPopup(auth, provider);
@@ -620,13 +628,14 @@
     };
 
     window.logoutGoogle = () => {
+        if (!auth) return;
         signOut(auth);
         signInAnonymously(auth);
         showToast("Logged Out");
     };
 
     window.saveToCloud = async () => {
-        if (!currentUser || currentUser.isAnonymous) return showToast("Login required", "error");
+        if (!db || !currentUser || currentUser.isAnonymous) return showToast("Login required", "error");
         const name = document.getElementById('manualEquipId').value.trim();
         const staff = document.getElementById('manualStaffId').value.trim();
         const procTitle = document.getElementById('manualProcessTitle').value.trim();
@@ -641,7 +650,7 @@
     };
 
     window.fetchHistory = async () => {
-        if (!currentUser || currentUser.isAnonymous) return;
+        if (!db || !currentUser || currentUser.isAnonymous) return;
         const listEl = document.getElementById('history-list');
         if (listEl) listEl.innerHTML = '<p class="text-[10px] text-slate-400 italic">Syncing...</p>';
         try {
@@ -710,10 +719,9 @@
         renderManualSetupList(); window.showScreen('manual-setup-screen');
     };
 
-    // PERMANENT ADMIN CLOUD SAVE
     window.saveAndAddEquipment = async () => {
         if (!isLoggedIn) return showToast("Admin access required", "error");
-        if (!currentUser) return showToast("Authenticating...", "error");
+        if (!db) return showToast("Firebase not configured", "error");
 
         const name = document.getElementById('manualEquipId').value.trim();
         const procTypeSelect = document.getElementById('processTypeSelect');
@@ -733,11 +741,8 @@
         };
 
         try {
-            // Rule 1: artifacts/{appId}/public/data/{collectionName}
-            // Use name as ID to overwrite/update properly
             const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'customEquipment', name.replace(/\s/g, '_'));
             await setDoc(docRef, equipData);
-            
             showToast(`${name} Saved Permanently!`, "success");
             window.showScreen(window.parentScreen);
         } catch (e) {
