@@ -99,6 +99,18 @@
         .step-active { background: var(--gray-active) !important; }
         .btn-step:disabled { opacity: 0.35; cursor: not-allowed; }
 
+        /* STOP BUTTON */
+        .stop-cycle-btn { 
+            width: 100%; padding: 22px; border: none; border-radius: 15px; 
+            background: var(--danger); color: white; font-weight: 900; 
+            margin-top: 15px; cursor: pointer; font-size: 1.2rem; 
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+            transition: 0.2s;
+        }
+        .stop-cycle-btn:disabled { background: #fee2e2; color: #f87171; cursor: not-allowed; opacity: 0.6; box-shadow: none; }
+        .stop-cycle-btn:active { transform: scale(0.98); }
+
         .report-btn { width: 100%; padding: 18px; border: none; border-radius: 15px; background: var(--dark); color: white; font-weight: 800; margin-top: 25px; cursor: pointer; font-size: 1rem; }
 
         /* CUSTOM MODAL & TOAST */
@@ -225,6 +237,10 @@
             </button>
             
             <div id="step-btns" class="btn-grid"></div>
+
+            <button class="stop-cycle-btn" id="stop-cycle-btn" onclick="stopCycle()" disabled>
+                <i class="fa-solid fa-stop"></i> STOP CYCLE
+            </button>
             
             <button class="report-btn" id="dl-report-btn">DOWNLOAD REPORT (CSV)</button>
         </div>
@@ -241,6 +257,7 @@
     let lastTime = null;
     let isPaused = false;
     let isWaiting = false;
+    let isLastStepActive = false;
     let delayStart = null;
     let totalWaitingDuration = 0; 
     let currentCycleData = {};
@@ -416,6 +433,7 @@
         else steps = config[currentCrane] ? config[currentCrane][currentMode] : config.DEFAULT[currentMode];
 
         if (navigator.vibrate) navigator.vibrate(40);
+        
         if (stepNum === 1) {
             startTime = now; absoluteStartTime = now; totalWaitingDuration = 0;
             currentCycleData = { 
@@ -429,9 +447,11 @@
             document.getElementById('wait-btn').disabled = false;
             activeInterval = setInterval(() => { document.getElementById('main-timer').innerText = ((Date.now() - startTime)/1000).toFixed(2); }, 50);
         } else {
+            // Record previous step duration
             currentCycleData['Step_'+(stepNum-1)] = ((now - lastTime) / 1000).toFixed(2);
         }
 
+        // Handle button styles
         for(let i=1; i<=steps.length; i++) {
             const btn = document.getElementById(`s${i}`);
             if (btn) {
@@ -442,22 +462,11 @@
         document.getElementById(`s${stepNum}`).classList.add('step-active');
 
         if (stepNum === steps.length) {
-            clearInterval(activeInterval);
-            currentCycleData['Step_'+stepNum] = ((now - lastTime) / 1000).toFixed(2);
-            const finishTime = now;
-            currentCycleData['Net_Cycle_Time'] = ((finishTime - startTime) / 1000).toFixed(2);
-            currentCycleData['Gross_Cycle_Time'] = ((finishTime - absoluteStartTime) / 1000).toFixed(2);
-            currentCycleData['Waiting_Time'] = (totalWaitingDuration / 1000).toFixed(2);
-            masterLogs.push({...currentCycleData});
-            if (!currentCounts[currentCrane]) currentCounts[currentCrane] = 0;
-            currentCounts[currentCrane]++;
-            document.getElementById('cycle-count').innerText = currentCounts[currentCrane];
-            document.getElementById('pause-btn').disabled = true;
-            document.getElementById('wait-btn').disabled = true;
-            
-            showToast("Cycle Saved Successfully!", "success");
-            setTimeout(resetCrane, 1500);
+            // Final step reached - record continuously until STOP
+            isLastStepActive = true;
+            document.getElementById('stop-cycle-btn').disabled = false;
         } else {
+            // Handle next step activation
             let next = stepNum + 1;
             const nextBtn = document.getElementById(`s${next}`);
             if (nextBtn) nextBtn.disabled = false;
@@ -470,6 +479,38 @@
             }
         }
         lastTime = now;
+    }
+
+    function stopCycle() {
+        const now = Date.now();
+        let steps = [];
+        if (currentCrane === 'QC') steps = currentMode === 'LOADING' ? config.QC.LOADING : config.QC.DISCHARGE;
+        else if (currentCrane === 'RTG') steps = currentMode === 'LOADING' ? config.RTG.LOADING : config.RTG.DISCHARGE;
+        else if (currentCrane === 'TT') steps = config.TT[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'].steps;
+        else steps = config[currentCrane] ? config[currentCrane][currentMode] : config.DEFAULT[currentMode];
+
+        clearInterval(activeInterval);
+        
+        // Record final step duration
+        currentCycleData['Step_'+steps.length] = ((now - lastTime) / 1000).toFixed(2);
+        
+        const finishTime = now;
+        currentCycleData['Net_Cycle_Time'] = ((finishTime - startTime) / 1000).toFixed(2);
+        currentCycleData['Gross_Cycle_Time'] = ((finishTime - absoluteStartTime) / 1000).toFixed(2);
+        currentCycleData['Waiting_Time'] = (totalWaitingDuration / 1000).toFixed(2);
+        
+        masterLogs.push({...currentCycleData});
+        
+        if (!currentCounts[currentCrane]) currentCounts[currentCrane] = 0;
+        currentCounts[currentCrane]++;
+        document.getElementById('cycle-count').innerText = currentCounts[currentCrane];
+        
+        document.getElementById('pause-btn').disabled = true;
+        document.getElementById('wait-btn').disabled = true;
+        document.getElementById('stop-cycle-btn').disabled = true;
+        
+        showToast("Cycle Saved Successfully!", "success");
+        setTimeout(resetCrane, 1500);
     }
 
     function togglePause() {
@@ -505,10 +546,19 @@
     }
 
     function resetCrane() {
-        clearInterval(activeInterval); startTime = null; absoluteStartTime = null; isPaused = false; isWaiting = false; totalWaitingDuration = 0;
+        clearInterval(activeInterval); 
+        startTime = null; 
+        absoluteStartTime = null; 
+        isPaused = false; 
+        isWaiting = false; 
+        isLastStepActive = false;
+        totalWaitingDuration = 0;
         document.getElementById('main-timer').innerText = "0.00";
-        document.getElementById('pause-btn').disabled = true; document.getElementById('wait-btn').disabled = true;
-        document.getElementById('pause-btn').classList.remove('pause-on'); document.getElementById('wait-btn').classList.remove('wait-on');
+        document.getElementById('pause-btn').disabled = true; 
+        document.getElementById('wait-btn').disabled = true;
+        document.getElementById('stop-cycle-btn').disabled = true;
+        document.getElementById('pause-btn').classList.remove('pause-on'); 
+        document.getElementById('wait-btn').classList.remove('wait-on');
         document.getElementById('cycle-count').innerText = currentCounts[currentCrane] || 0;
         renderSteps();
     }
