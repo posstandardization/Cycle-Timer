@@ -327,7 +327,7 @@
     }
     window.showToast = showToast;
 
-    // DEFENSIVE CONFIG LOADING (Crucial for GitHub)
+    // DEFENSIVE CONFIG LOADING
     let firebaseConfig = {};
     try {
         firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
@@ -394,7 +394,7 @@
         DEFAULT: ["1. Start operation", "2. In progress"]
     };
 
-    // AUTH (Defensive)
+    // AUTH
     const initAuth = async () => {
         if (!auth) return;
         try {
@@ -436,7 +436,7 @@
         initAuth();
     }
 
-    // FIRESTORE SYNC (Defensive)
+    // FIRESTORE SYNC
     function setupPublicEquipmentListener() {
         if (!currentUser || !db) return;
         const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'customEquipment');
@@ -617,7 +617,7 @@
     }
     window.resetCurrentTimerUI = resetCurrentTimerUI;
 
-    // CLOUD (Defensive)
+    // CLOUD
     window.loginWithGoogle = async () => {
         if (!auth) return showToast("Firebase not configured", "error");
         const provider = new GoogleAuthProvider();
@@ -825,7 +825,45 @@
 
     window.undoLastCycle = () => { if (logs.length > 0) openModal("Undo?", "Remove last cycle?", () => { logs.pop(); cycleCount = Math.max(0, cycleCount-1); document.getElementById('cycle-count').innerText = cycleCount; resetCurrentTimerUI(); }); };
     window.resetFullSession = () => { openModal("Reset?", "Delete all records?", () => { logs = []; cycleCount = 0; document.getElementById('cycle-count').innerText = "0"; resetCurrentTimerUI(); }); };
-    window.downloadReport = () => { if (logs.length === 0) return showToast("No logs.", "error"); const keys = Array.from(new Set(logs.flatMap(l => Object.keys(l)))); let csv = [keys.map(k => `"${k}"`).join(',')]; logs.forEach(l => csv.push(keys.map(k => `"${l[k] || '0.00'}"`).join(','))); const blob = new Blob(['\ufeff', csv.join('\n')], { type: "text/csv" }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `Report_${new Date().toISOString().slice(0,10)}.csv`; link.click(); };
+    
+    // DOWNLOAD REPORT WITH SUMMARY
+    window.downloadReport = () => { 
+        if (logs.length === 0) return showToast("No logs.", "error"); 
+        
+        // 1. Prepare Data Rows
+        const keys = Array.from(new Set(logs.flatMap(l => Object.keys(l)))); 
+        let csvRows = [keys.map(k => `"${k}"`).join(',')]; 
+        logs.forEach(l => csvRows.push(keys.map(k => `"${l[k] || '0.00'}"`).join(','))); 
+
+        // 2. Summary Calculations
+        const totalCycles = logs.length;
+        const totalNet = logs.reduce((acc, l) => acc + parseFloat(l.Net_Cycle_Time || 0), 0);
+        const totalGross = logs.reduce((acc, l) => acc + parseFloat(l.Gross_Cycle_Time || 0), 0);
+        const totalWait = logs.reduce((acc, l) => acc + parseFloat(l.Waiting_Time || 0), 0);
+
+        const avgNet = (totalNet / totalCycles).toFixed(2);
+        const avgGross = (totalGross / totalCycles).toFixed(2);
+        const avgWait = (totalWait / totalCycles).toFixed(2);
+
+        // 3. Append Summary Section
+        csvRows.push(""); // Empty line for separation
+        csvRows.push('"SESSION SUMMARY STATS"');
+        csvRows.push(`"Metric","Value"`);
+        csvRows.push(`"Total Cycles Recorded","${totalCycles}"`);
+        csvRows.push(`"Average Net Cycle Time","${avgNet} s"`);
+        csvRows.push(`"Average Gross Cycle Time","${avgGross} s"`);
+        csvRows.push(`"Total Cumulative Waiting Time","${totalWait.toFixed(2)} s"`);
+        csvRows.push(`"Average Waiting Time per Cycle","${avgWait} s"`);
+        csvRows.push(`"Total Session Gross Time","${totalGross.toFixed(2)} s"`);
+
+        // 4. Trigger Download
+        const blob = new Blob(['\ufeff', csvRows.join('\n')], { type: "text/csv" }); 
+        const link = document.createElement("a"); 
+        link.href = URL.createObjectURL(blob); 
+        link.download = `Cycle_Report_${new Date().toISOString().slice(0,10)}.csv`; 
+        link.click(); 
+    };
+
     window.closeModal = () => { document.getElementById('custom-modal-overlay').style.display = 'none'; };
     window.openModal = (title, msg, onConfirm) => { document.getElementById('modal-title').innerText = title; document.getElementById('modal-msg').innerText = msg; document.getElementById('custom-modal-overlay').style.display = 'flex'; document.getElementById('modal-confirm-btn').onclick = () => { onConfirm(); closeModal(); }; };
 
