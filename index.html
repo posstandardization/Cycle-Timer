@@ -4,22 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cycle Timer Master</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root { 
             --orange: #ff9800; 
             --white: #ffffff; 
-            --gray-active: #757575; 
             --bg: #f8f9fa; 
             --dark: #212529; 
-            --danger: #ef4444;
+            --danger: #ef4444; 
             --success: #10b981;
             --ct-blue: #0891b2;
             --mr-teal: #0d9488;
-            --tech-pause: #f59e0b;
-            --tech-wait: #06b6d4;
-            --tech-reset: #4b5563;
-            --tech-dark-grey: #374151;
         }
         
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 0; display: flex; justify-content: center; position: relative; min-height: 100vh; }
@@ -27,37 +23,29 @@
         .screen { width: 100%; max-width: 500px; min-height: 100vh; background: white; display: none; padding: 20px; box-sizing: border-box; position: relative; }
         .active { display: block; }
 
-        /* HEADER */
-        .home-header { text-align: center; margin-top: 15px; margin-bottom: 30px; }
-        .home-header h1 { font-size: 2.5rem; color: var(--dark); margin: 0; font-weight: 800; line-height: 1.2; }
-        .home-header p { color: #6c757d; font-weight: 500; margin-top: 5px; font-size: 1.1rem; }
-        
-        /* NAVIGATION CARDS */
-        .menu-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        /* HOME NAVIGATION CARDS */
         .menu-card { 
-            padding: 30px; border-radius: 20px; border: none; color: white; cursor: pointer; 
+            padding: 24px; border-radius: 20px; border: none; color: white; cursor: pointer; 
             display: flex; align-items: center; justify-content: space-between; 
-            font-size: 1.4rem; font-weight: 800; background: var(--orange); 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1); transition: transform 0.1s;
+            font-size: 1.3rem; font-weight: 800; transition: transform 0.1s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
         }
-        .menu-card i { font-size: 2.4rem; opacity: 0.9; }
         .menu-card:active { transform: scale(0.97); }
         
-        .ct-btn { background: var(--orange); }
-        .gct-btn { background: var(--ct-blue); }
-        .mr-btn { background: var(--mr-teal); }
-
-        /* DEVELOPER CREDIT */
-        .developer-credit { 
-            margin-top: 40px; 
-            margin-bottom: 25px;
-            text-align: right;
-            font-size: 0.65rem; 
-            color: #000000; 
-            font-weight: 800; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px;
+        /* STEP BUTTONS - Dark Grey to Black */
+        .btn-step { 
+            height: 85px; border: none; border-radius: 15px; 
+            font-size: 0.75rem; font-weight: 700; color: white; 
+            cursor: pointer; display: flex; align-items: center; 
+            justify-content: center; text-align: center; padding: 8px; 
+            line-height: 1.2; transition: all 0.2s; 
         }
+        /* Default state: Dark Grey */
+        .step-available { background-color: #4b5563 !important; } 
+        /* Pressed/Active state: Black */
+        .step-active { background-color: #000000 !important; } 
+        
+        .btn-step:disabled { opacity: 0.35; cursor: not-allowed; filter: grayscale(30%); }
 
         /* EQUIPMENT GRID */
         .equip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -68,250 +56,240 @@
         }
         .equip-item:active { opacity: 0.9; transform: translateY(2px); }
 
-        /* TIMER SCREEN UI */
-        .back-btn { background: #f1f3f5; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; margin-bottom: 20px; color: var(--dark); display: flex; align-items: center; gap: 8px; }
-        .section-card { border-top: 10px solid var(--orange); padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        
-        .mode-toggle { display: flex; gap: 10px; margin-bottom: 20px; }
-        .mode-btn { flex: 1; padding: 15px; border-radius: 12px; border: 2px solid #dee2e6; background: white; font-weight: 800; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
-        .mode-btn.active { background: var(--dark); color: white; border-color: var(--dark); }
+        /* MANUAL SETUP STYLES - DARK OUTLINES */
+        .manual-setup-input { border: 2px solid #0f172a; padding: 14px; border-radius: 12px; width: 100%; font-weight: 700; outline: none; background: #fff; }
+        .manual-setup-input:focus { border-color: #38bdf8; }
+        .manual-setup-label { font-size: 0.65rem; font-weight: 900; text-transform: uppercase; color: #1e293b; margin-bottom: 4px; display: block; }
 
-        .id-inputs-generic { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .id-inputs-qc, .id-inputs-gct, .id-inputs-tt { display: grid; grid-template-columns: 1fr 65px 1.5fr; gap: 8px; margin-bottom: 8px; }
-        input, select { padding: 12px; border: 1px solid #ced4da; border-radius: 10px; font-size: 0.85rem; width: 100%; box-sizing: border-box; outline: none; background: white; }
-        .qc-no-box { text-align: center; }
-
-        .timer-container { background: var(--dark); color: #0dcaf0; padding: 25px; border-radius: 15px; text-align: center; margin: 15px 0; position: relative; }
-        .timer { font-size: 3.5rem; font-weight: 800; font-family: 'Courier New', Courier, monospace; }
-        .cycle-badge { position: absolute; top: 10px; right: 10px; background: var(--orange); color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; }
-
-        .delay-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-        .pause-btn, .wait-btn, .reset-btn { padding: 16px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; background: var(--tech-dark-grey); color: white; }
-        .pause-btn:disabled, .wait-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        .pause-on { background: var(--tech-pause) !important; color: white !important; animation: pulse 1.5s infinite; }
-        .wait-on { background: var(--tech-wait) !important; color: white !important; animation: pulse 1.5s infinite; }
-        .reset-btn { width: 100%; margin-bottom: 20px; background: var(--tech-reset); }
-        
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
-
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .btn-step { height: 85px; border: none; border-radius: 15px; font-size: 0.75rem; font-weight: 700; color: var(--white); background: var(--orange); cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; padding: 8px; line-height: 1.2; }
-        .step-active { background: var(--gray-active) !important; }
-        .btn-step:disabled { opacity: 0.35; cursor: not-allowed; }
-
-        /* STOP BUTTON */
-        .stop-cycle-btn { 
-            width: 100%; padding: 22px; border: none; border-radius: 15px; 
-            background: var(--danger); color: white; font-weight: 900; 
-            margin-top: 15px; cursor: pointer; font-size: 1.2rem; 
-            display: flex; align-items: center; justify-content: center; gap: 12px;
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
-            transition: 0.2s;
-        }
-        .stop-cycle-btn:disabled { background: #fee2e2; color: #f87171; cursor: not-allowed; opacity: 0.6; box-shadow: none; }
-        .stop-cycle-btn:active { transform: scale(0.98); }
-
-        .report-btn { width: 100%; padding: 18px; border: none; border-radius: 15px; background: var(--dark); color: white; font-weight: 800; margin-top: 25px; cursor: pointer; font-size: 1rem; }
-
-        /* CUSTOM MODAL & TOAST */
+        /* TOAST & MODAL */
+        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--dark); color: white; padding: 12px 25px; border-radius: 30px; font-weight: 600; font-size: 0.9rem; display: none; z-index: 2000; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         #custom-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
         #custom-modal { background: white; padding: 25px; border-radius: 15px; max-width: 300px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-        #custom-modal h3 { margin-top: 0; color: var(--dark); }
-        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
-        .modal-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: 800; cursor: pointer; }
-        .btn-confirm { background: var(--danger); color: white; }
-        .btn-cancel { background: #e9ecef; color: var(--dark); }
-
-        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--dark); color: white; padding: 12px 25px; border-radius: 30px; font-weight: 600; font-size: 0.9rem; display: none; z-index: 2000; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .toast-success { background: var(--success) !important; }
-        .toast-error { background: var(--danger) !important; }
+    
+        /* Active Mode Style */
+        .mode-active { background-color: #000000 !important; color: white !important; border-color: #000000 !important; }
     </style>
 </head>
 <body>
 
-    <!-- MODAL & TOAST -->
+    <!-- OVERLAYS -->
     <div id="custom-modal-overlay">
         <div id="custom-modal">
-            <h3 id="modal-title">Confirmation</h3>
-            <p id="modal-msg">Are you sure?</p>
-            <div class="modal-btns">
-                <button class="modal-btn btn-cancel" onclick="closeModal()">CANCEL</button>
-                <button class="modal-btn btn-confirm" id="modal-confirm-btn">YES</button>
+            <h3 id="modal-title" class="text-lg font-black uppercase">Confirmation</h3>
+            <p id="modal-msg" class="text-slate-500 mt-2 font-bold">Are you sure?</p>
+            <div class="flex gap-3 mt-6">
+                <button class="flex-1 py-3 bg-slate-100 rounded-xl font-black text-xs" onclick="closeModal()">CANCEL</button>
+                <button class="flex-1 py-3 bg-red-500 text-white rounded-xl font-black text-xs" id="modal-confirm-btn">YES</button>
             </div>
         </div>
     </div>
     <div id="toast">Message</div>
 
-    <!-- MASTER HOME PAGE -->
+    <!-- HOME SCREEN -->
     <div id="home-screen" class="screen active">
-        <div class="home-header">
-            <h1>Cycle Timer</h1>
-            <p>Main Selection Dashboard</p>
+        <div class="text-center mt-4 mb-8">
+            <h1 class="text-4xl font-black text-[#212529]">Cycle Timer</h1>
+            <p class="text-slate-400 font-bold uppercase tracking-widest text-xs mt-1">Main Selection Dashboard</p>
         </div>
 
-        <div class="menu-grid">
-            <button class="menu-card ct-btn" onclick="showScreen('ct-ops-screen')">
+        <div class="grid grid-cols-1 gap-4">
+            <button class="menu-card bg-[#ff9800]" onclick="showScreen('ct-ops-screen')">
                 <span>CT OPS</span>
                 <i class="fa-solid fa-ship"></i>
             </button>
-            <button class="menu-card gct-btn" onclick="showScreen('gct-ops-screen')">
+            <button class="menu-card bg-[#0891b2]" onclick="showScreen('gct-ops-screen')">
                 <span>GCT OPS</span>
                 <i class="fa-solid fa-boxes-stacked"></i>
             </button>
-            <button class="menu-card mr-btn" onclick="showScreen('mr-screen')">
+            <button class="menu-card bg-[#0d9488]" onclick="showScreen('mr-screen')">
                 <span>M&R</span>
                 <i class="fa-solid fa-screwdriver-wrench"></i>
             </button>
+            <button class="menu-card bg-slate-600" onclick="showScreen('manual-setup-screen')">
+                <span>MANUAL</span>
+                <i class="fa-solid fa-keyboard"></i>
+            </button>
         </div>
 
-        <div class="developer-credit">DEVELOPED BY: MR. GOLDEN MICHEAL - PORT OF SALALAH.</div>
-    </div>
-
-    <!-- CT OPS MENU SCREEN -->
-    <div id="ct-ops-screen" class="screen">
-        <button class="back-btn" onclick="showScreen('home-screen')"><i class="fas fa-arrow-left"></i> BACK</button>
-        <h2 style="text-align:center; color: var(--orange);">CT OPERATIONS</h2>
-        <div class="equip-grid">
-            <button class="equip-item" onclick="startTimer('QC')">QC</button>
-            <button class="equip-item" onclick="startTimer('RTG')">RTG</button>
-            <button class="equip-item" onclick="startTimer('TT')">TT</button>
-            <button class="equip-item" onclick="startTimer('EH')">EH</button>
-            <button class="equip-item" onclick="startTimer('RS')">RS</button>
-            <button class="equip-item" onclick="startTimer('FLT')">FLT</button>
-            <button class="equip-item" onclick="startTimer('LASHER')">LASHER</button>
-            <button class="equip-item" onclick="startTimer('DOWELMAN')">DOWELMAN</button>
+        <div class="text-right mt-10 text-[10px] font-black text-black uppercase tracking-widest">
+            Developed By: Mr. Golden Micheal - Port of Salalah.
         </div>
     </div>
 
-    <!-- GCT OPS MENU SCREEN -->
-    <div id="gct-ops-screen" class="screen">
-        <button class="back-btn" onclick="showScreen('home-screen')"><i class="fas fa-arrow-left"></i> BACK</button>
-        <h2 style="text-align:center; color: var(--ct-blue);">GCT OPERATIONS</h2>
-        <div class="equip-grid">
-            <button class="equip-item" style="background:var(--ct-blue)" onclick="startTimer('MHC_LOOSE')">MHC Loose cargo</button>
-            <button class="equip-item" style="background:var(--ct-blue)" onclick="startTimer('LASHER')">LASHER</button>
-            <button class="equip-item" style="background:var(--ct-blue)" onclick="startTimer('BAGGED_CARGO')">Crane- bagged cargo</button>
-            <button class="equip-item" style="background:var(--ct-blue)" onclick="startTimer('FLT')">FLT</button>
-            <button class="equip-item" style="background:var(--ct-blue)" onclick="startTimer('RTG')">RTG</button>
-            <button class="equip-item" style="background:var(--ct-blue)" onclick="startTimer('RS')">RS</button>
+    <!-- MANUAL SETUP SCREEN -->
+    <div id="manual-setup-screen" class="screen">
+        <button class="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-lg font-black text-xs mb-6" onclick="showScreen('home-screen')">
+            <i class="fas fa-arrow-left"></i> BACK
+        </button>
+        <div class="space-y-6">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="manual-setup-label">Equipment ID</label>
+                    <input type="text" id="manualEquipId" placeholder="ID" class="manual-setup-input">
+                </div>
+                <div>
+                    <label class="manual-setup-label">Staff ID</label>
+                    <input type="text" id="manualStaffId" placeholder="Staff" class="manual-setup-input">
+                </div>
+            </div>
+            <div>
+                <label class="manual-setup-label">Process Title</label>
+                <input type="text" id="manualProcessTitle" placeholder="Process Name" class="manual-setup-input">
+            </div>
+            <hr class="border-slate-100">
+            <div>
+                <label class="manual-setup-label">Add Steps <span class="text-red-500">*</span></label>
+                <div class="flex gap-2">
+                    <input type="text" id="manualStepInput" placeholder="New step name..." class="manual-setup-input">
+                    <button onclick="addManualStep()" class="bg-blue-600 text-white px-6 rounded-xl font-black uppercase text-xs active:scale-95 transition">Add</button>
+                </div>
+            </div>
+            <div id="manualStepList" class="space-y-2 max-h-[250px] overflow-y-auto"></div>
+            <button onclick="openManualTimer()" class="w-full bg-[#1e293b] text-white py-6 rounded-[20px] font-black uppercase tracking-widest text-lg shadow-xl active:scale-95 transition mt-4">
+                DONE - OPEN TIMER
+            </button>
         </div>
     </div>
 
-    <!-- M&R SCREEN -->
-    <div id="mr-screen" class="screen">
-        <button class="back-btn" onclick="showScreen('home-screen')"><i class="fas fa-arrow-left"></i> BACK</button>
-        <h2 style="text-align:center; color: var(--mr-teal);">M&R</h2>
-        <div class="equip-grid">
-            <button class="equip-item" style="background:var(--mr-teal); grid-column: span 2;" onclick="startTimer('M&R')">M&R LOG</button>
-        </div>
-    </div>
-
-    <!-- GENERIC TIMER SCREEN -->
+    <!-- UNIFIED TIMER SCREEN -->
     <div id="timer-screen" class="screen">
-        <button id="timer-back-btn" class="back-btn"><i class="fas fa-arrow-left"></i> BACK</button>
-        <div class="section-card" id="timer-card">
-            <div class="mode-toggle">
-                <button id="m-load" class="mode-btn active" onclick="updateMode('LOADING')">LOADING</button>
-                <button id="m-dis" class="mode-btn" onclick="updateMode('DISCHARGE')">DISCHARGE</button>
-            </div>
-            
-            <div id="input-container">
-                <!-- Inputs injected dynamically -->
-            </div>
-            
-            <div class="timer-container">
-                <div class="cycle-badge">CYCLES: <span id="cycle-count">0</span></div>
-                <div class="timer" id="main-timer">0.00</div>
-            </div>
-            
-            <div class="delay-controls">
-                <button id="pause-btn" class="pause-btn" onclick="togglePause()" disabled>
-                    <i class="fa-solid fa-pause"></i> PAUSE
-                </button>
-                <button id="wait-btn" class="wait-btn" onclick="toggleWaiting()" disabled>
-                    <i class="fa-solid fa-clock"></i> WAITING
-                </button>
-            </div>
-            <button class="reset-btn" onclick="resetCurrentTimer()">
-                <i class="fa-solid fa-rotate-left"></i> RESET CURRENT TIMER
+        <!-- Top Bar -->
+        <div class="flex justify-between items-center mb-4">
+            <button id="timer-home-btn" class="flex items-center gap-1 text-slate-500 font-bold hover:text-slate-800 transition text-xs">
+                <i class="fas fa-home w-4 h-4"></i> HOME
             </button>
-            
-            <div id="step-btns" class="btn-grid"></div>
+            <div id="dateDisplay" class="text-[10px] font-black text-slate-400 uppercase tracking-widest"></div>
+        </div>
 
-            <button class="stop-cycle-btn" id="stop-cycle-btn" onclick="stopCycle()" disabled>
-                <i class="fa-solid fa-stop"></i> STOP CYCLE
-            </button>
-            
-            <button class="report-btn" id="dl-report-btn">DOWNLOAD REPORT (CSV)</button>
+        <!-- Dynamic Operation Inputs -->
+        <div id="standard-inputs" class="mb-4">
+            <div class="mode-toggle flex gap-3 mb-3">
+                <button id="m-load" class="flex-1 py-4 rounded-2xl border-2 border-slate-900 bg-white font-black text-xs" onclick="updateMode('LOADING')">LOADING</button>
+                <button id="m-dis" class="flex-1 py-4 rounded-2xl border-2 border-slate-200 bg-white font-black text-xs" onclick="updateMode('DISCHARGE')">DISCHARGE</button>
+            </div>
+            <div id="dynamic-inputs" class="space-y-2"></div>
+        </div>
+
+        <!-- Timer Display -->
+        <div class="timer-container shadow-2xl bg-[#212529] rounded-[24px] p-8 relative w-full mb-4">
+            <div class="absolute top-3 right-3 bg-[#ff9f00] text-white px-3 py-1 rounded-lg font-black text-[0.7rem] uppercase">
+                Cycles: <span id="cycle-count">0</span>
+            </div>
+            <div id="main-timer" class="font-black text-[#00d2ff] text-center leading-none text-[5.5rem]">0.00</div>
+        </div>
+
+        <!-- Controls (Pause/Wait) -->
+        <div class="grid grid-cols-2 gap-3 mb-3">
+            <button id="pause-btn" onclick="togglePause()" class="bg-[#adb5bd] text-white py-4 rounded-2xl font-black uppercase tracking-wider active:scale-95 transition">Pause</button>
+            <button id="wait-btn" onclick="toggleWaiting()" class="bg-[#adb5bd] text-white py-4 rounded-2xl font-black uppercase tracking-wider active:scale-95 transition">Waiting</button>
+        </div>
+
+        <!-- Reset Controls -->
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <button onclick="undoLastCycle()" class="bg-[#495057] text-white py-4 text-[10px] uppercase font-black rounded-xl active:scale-95 transition">Reset Last Cycle</button>
+            <button onclick="resetFullSession()" class="bg-[#64748b] text-white py-4 text-[10px] uppercase font-black rounded-xl active:scale-95 transition">Reset Full</button>
+        </div>
+
+        <!-- Steps Grid -->
+        <div id="step-grid" class="grid grid-cols-2 gap-3 pt-2"></div>
+
+        <!-- Large Stop & Record Button -->
+        <button id="stop-cycle-btn" onclick="stopCycle()" class="w-full py-6 bg-[#e11d48] text-white text-2xl font-black uppercase tracking-widest mt-4 shadow-xl active:scale-95 transition rounded-[20px] hidden">
+            STOP & RECORD
+        </button>
+
+        <!-- Download Action -->
+        <button onclick="downloadReport()" class="w-full py-5 bg-[#212529] text-white text-lg font-black uppercase tracking-widest mt-6 shadow-xl active:scale-95 transition rounded-2xl">
+            Download Report (CSV)
+        </button>
+
+        <div id="session-status" class="text-center text-[10px] font-black text-slate-400 uppercase tracking-widest py-4">
+            Waiting - Click Step 1
+        </div>
+    </div>
+
+    <!-- CYCLE RECORDED SUCCESS MODAL -->
+    <div id="recordModal" class="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-50 hidden">
+        <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl text-center mx-4 w-full max-sm">
+            <div class="w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-check text-3xl"></i>
+            </div>
+            <h2 class="text-2xl font-black text-slate-800 uppercase">Cycle Recorded!</h2>
+            <p class="text-slate-500 font-bold uppercase text-xs mt-2">Ready for next cycle</p>
+        </div>
+    </div>
+
+    <!-- OPERATIONS SCREENS -->
+    <div id="ct-ops-screen" class="screen">
+        <button class="bg-slate-100 px-4 py-2 rounded-lg font-black text-xs mb-6" onclick="showScreen('home-screen')"><i class="fas fa-arrow-left"></i> BACK</button>
+        <h2 class="text-center text-xl font-black text-[#ff9800] uppercase mb-6">CT OPERATIONS</h2>
+        <div class="equip-grid">
+            <button class="equip-item" onclick="initTimer('QC')">QC</button>
+            <button class="equip-item" onclick="initTimer('RTG')">RTG</button>
+            <button class="equip-item" onclick="initTimer('TT')">TT</button>
+            <button class="equip-item" onclick="initTimer('EH')">EH</button>
+            <button class="equip-item" onclick="initTimer('RS')">RS</button>
+            <button class="equip-item" onclick="initTimer('FLT')">FLT</button>
+            <button class="equip-item" onclick="initTimer('LASHER')">LASHER</button>
+            <button class="equip-item" onclick="initTimer('DOWELMAN')">DOWELMAN</button>
+        </div>
+    </div>
+
+    <div id="gct-ops-screen" class="screen">
+        <button class="bg-slate-100 px-4 py-2 rounded-lg font-black text-xs mb-6" onclick="showScreen('home-screen')"><i class="fas fa-arrow-left"></i> BACK</button>
+        <h2 class="text-center text-xl font-black text-[#0891b2] uppercase mb-6">GCT OPERATIONS</h2>
+        <div class="equip-grid">
+            <button class="equip-item bg-[#0891b2]" onclick="initTimer('MHC_LOOSE')">MHC Loose cargo</button>
+            <button class="equip-item bg-[#0891b2]" onclick="initTimer('LASHER')">LASHER</button>
+            <button class="equip-item bg-[#0891b2]" onclick="initTimer('BAGGED_CARGO')">Crane- bagged cargo</button>
+            <button class="equip-item bg-[#0891b2]" onclick="initTimer('FLT')">FLT</button>
+            <button class="equip-item bg-[#0891b2]" onclick="initTimer('RTG')">RTG</button>
+            <button class="equip-item bg-[#0891b2]" onclick="initTimer('RS')">RS</button>
+        </div>
+    </div>
+
+    <div id="mr-screen" class="screen">
+        <button class="bg-slate-100 px-4 py-2 rounded-lg font-black text-xs mb-6" onclick="showScreen('home-screen')"><i class="fas fa-arrow-left"></i> BACK</button>
+        <h2 class="text-center text-xl font-black text-[#0d9488] uppercase mb-6">M&R</h2>
+        <div class="equip-grid">
+            <button class="equip-item bg-[#0d9488] col-span-2" onclick="initTimer('M&R')">M&R LOG</button>
         </div>
     </div>
 
 <script>
-    let masterLogs = [];
+    let logs = [];
     let currentCrane = '';
     let currentMode = 'LOADING';
-    let currentCounts = {};
+    let currentSteps = [];
+    let cycleCount = 0;
     let activeInterval = null;
     let startTime = null;     
     let absoluteStartTime = null; 
     let lastTime = null;
     let isPaused = false;
     let isWaiting = false;
-    let isLastStepActive = false;
-    let delayStart = null;
     let totalWaitingDuration = 0; 
+    let delayStart = null;
     let currentCycleData = {};
-    let parentScreen = 'home-screen';
+    let manualSteps = [];
+    let isManualMode = false;
 
     const config = {
         QC: {
-            LOADING: [
-                "1. FROM PARK POSITION TO ADJUST ON TRUCK", 
-                "2. FROM START ADJUSTING ON TRUCK TO TO LOCK THE CONTAINER ON TRUCK", 
-                "3. FROM LOCK ON CONTAINER ON TRUCK TO SILL BEAM", 
-                "4. FROM SILL BEAM TO START ADJUSTING ON TARGET ROW", 
-                "5. FROM START ADJUSTING ON TARGET ROW TO UNLOCK", 
-                "6. FROM UNLOCK TO SILL BEAM"
-            ],
-            DISCHARGE: [
-                "1. FROM PARK TO SILL BEAM TO START TARGET ROW", 
-                "2. FROM START ADJUSTING ON CONTAINER TO LOCK", 
-                "3. FROM LOCK TO SILL BEAM", 
-                "4. FROM SILL BEAM TO START ADJUSTING ON TRUCK", 
-                "5. FROM START ADJUSTING ON TRUCK TO UNLOCK ON TRUCK", 
-                "6. FROM UNLOCK TRUCK TO SILL BEAM/PARK POSITION"
-            ]
+            LOADING: ["1. FROM PARK POSITION TO ADJUST ON TRUCK", "2. FROM START ADJUSTING ON TRUCK TO TO LOCK THE CONTAINER ON TRUCK", "3. FROM LOCK ON CONTAINER ON TRUCK TO SILL BEAM", "4. FROM SILL BEAM TO START ADJUSTING ON TARGET ROW", "5. FROM START ADJUSTING ON TARGET ROW TO UNLOCK", "6. FROM UNLOCK TO SILL BEAM"],
+            DISCHARGE: ["1. FROM PARK TO SILL BEAM TO START TARGET ROW", "2. FROM START ADJUSTING ON CONTAINER TO LOCK", "3. FROM LOCK TO SILL BEAM", "4. FROM SILL BEAM TO START ADJUSTING ON TRUCK", "5. FROM START ADJUSTING ON TRUCK TO UNLOCK ON TRUCK", "6. FROM UNLOCK TRUCK TO SILL BEAM/PARK POSITION"]
         },
         RTG: {
-            LOADING: [
-                "1. FROM PARK POSITION TO LOCK CONTAINER IN THE BAY", 
-                "2. FROM LOCK IN THE BAY TO A-ROW", 
-                "3. FROM A- ROW TO UNLOCK ON TRUCK", 
-                "4. FROM UNLOCK ON TRUCK TO PARK POSITION"
-            ],
-            DISCHARGE: [
-                "1. FROM PARK POSITION TO LOCK ON TRUCK", 
-                "2. FROM LOCK ON TRUCK TO UNLOCK ON TARGET ROW", 
-                "3. FROM UNLOCK TO PARK POSITION"
-            ]
+            LOADING: ["1. FROM PARK POSITION TO LOCK CONTAINER IN THE BAY", "2. FROM LOCK IN THE BAY TO A-ROW", "3. FROM A- ROW TO UNLOCK ON TRUCK", "4. FROM UNLOCK ON TRUCK TO PARK POSITION"],
+            DISCHARGE: ["1. FROM PARK POSITION TO LOCK ON TRUCK", "2. FROM LOCK ON TRUCK TO UNLOCK ON TARGET ROW", "3. FROM UNLOCK TO PARK POSITION"]
         },
         TT: {
-            LOADING: {
-                steps: ["1. Container lifted by QC", "2. Move to yard RTG location", "3. Received container from RTG", "4. Move to PULL position", "5. Move to pinning area", "6. Fixing twistlock", "7. Move to standby position", "8. Move to under crane"],
-                optional: [4, 5, 6, 7]
-            },
-            DISCHARGE: {
-                steps: ["1. Received container from QC", "2. Move to pinning station", "3. Twistlocks removed", "4. Move to RTG", "5. Containers discharged", "6. Move to PULL position", "7. Move to standby position", "8. Move to under crane"],
-                optional: [2, 3, 6, 7]
-            }
+            LOADING: ["1. Container lifted by QC", "2. Move to yard RTG location", "3. Received container from RTG", "4. Move to PULL position", "5. Move to pinning area", "6. Fixing twistlock", "7. Move to standby position", "8. Move to under crane"],
+            DISCHARGE: ["1. Received container from QC", "2. Move to pinning station", "3. Twistlocks removed", "4. Move to RTG", "5. Containers discharged", "6. Move to PULL position", "7. Move to standby position", "8. Move to under crane"]
         },
-        DEFAULT: {
-            LOADING: ["1. Start operation", "2. In progress", "3. Completion"],
-            DISCHARGE: ["1. Start operation", "2. In progress", "3. Completion"]
-        }
+        DEFAULT: ["1. Start operation", "2. In progress", "3. Completion"]
     };
 
-    // UTILITIES
     function showToast(msg, type = '') {
         const t = document.getElementById('toast');
         t.innerText = msg;
@@ -324,303 +302,321 @@
         document.getElementById('modal-title').innerText = title;
         document.getElementById('modal-msg').innerText = msg;
         document.getElementById('custom-modal-overlay').style.display = 'flex';
-        document.getElementById('modal-confirm-btn').onclick = () => {
-            onConfirm();
-            closeModal();
-        };
+        document.getElementById('modal-confirm-btn').onclick = () => { onConfirm(); closeModal(); };
     }
 
-    function closeModal() {
-        document.getElementById('custom-modal-overlay').style.display = 'none';
-    }
+    function closeModal() { document.getElementById('custom-modal-overlay').style.display = 'none'; }
 
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        if (id.includes('ops') || id === 'mr-screen') parentScreen = id;
+        document.getElementById('dateDisplay').innerText = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
     }
 
-    function startTimer(equipment) {
+    function initTimer(equipment) {
+        isManualMode = false;
         currentCrane = equipment;
         currentMode = 'LOADING';
-        const inputDiv = document.getElementById('input-container');
+        const inputDiv = document.getElementById('dynamic-inputs');
+        inputDiv.innerHTML = '';
+        
+        const darkInputClass = "p-3 border-2 border-slate-900 rounded-xl text-xs font-black outline-none bg-white text-slate-900 placeholder-slate-500";
+
         if (equipment === 'QC') {
-            inputDiv.className = 'id-inputs-qc';
             inputDiv.innerHTML = `
-                <input type="text" id="staffId" placeholder="STAFF ID">
-                <input type="text" id="unitNo" class="qc-no-box" placeholder="QC#" maxlength="2">
-                <select id="category" onchange="renderSteps()">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="staffId" placeholder="STAFF ID" class="${darkInputClass}">
+                    <input type="text" id="unitNo" placeholder="QC#" class="${darkInputClass} text-center">
+                </div>
+                <select id="category" onchange="renderSteps()" class="${darkInputClass} w-full">
                     <option value="Above deck">Above deck</option>
                     <option value="Below deck">Below deck</option>
                     <option value="Hatch cover">Hatch cover</option>
-                    <option value="OOG (OHF)">OOG (OHF)</option>
-                    <option value="OOG (Wire Sling)">OOG (Wire Sling)</option>
-                    <option value="RORO">RORO</option>
-                </select>`;
-        } else if (equipment === 'TT') {
-            inputDiv.className = 'id-inputs-tt';
-            inputDiv.innerHTML = `
-                <input type="text" id="staffId" placeholder="STAFF ID">
-                <input type="text" id="unitNo" class="qc-no-box" placeholder="TT#" maxlength="3">
-                <select id="ttFilter">
-                    <option value="Single">Single</option>
-                    <option value="Dual">Dual</option>
+                    <option value="OOG">OOG</option>
                 </select>`;
         } else {
-            inputDiv.className = 'id-inputs-generic';
             inputDiv.innerHTML = `
-                <input type="text" id="staffId" placeholder="STAFF ID">
-                <input type="text" id="unitNo" placeholder="${equipment} NO.">`;
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="staffId" placeholder="STAFF ID" class="${darkInputClass}">
+                    <input type="text" id="unitNo" placeholder="UNIT NO" class="${darkInputClass}">
+                </div>`;
         }
-        document.querySelector('.mode-toggle').style.display = (equipment === 'M&R') ? 'none' : 'flex';
-        document.getElementById('timer-card').style.borderTopColor = (parentScreen === 'gct-ops-screen') ? 'var(--ct-blue)' : 'var(--orange)';
-        document.getElementById('m-load').className = 'mode-btn active';
-        document.getElementById('m-dis').className = 'mode-btn';
+
+        document.getElementById('standard-inputs').classList.remove('hidden');
+        document.getElementById('timer-home-btn').onclick = goHome;
         
-        document.getElementById('timer-back-btn').onclick = () => {
-            if (startTime) {
-                openModal("Exit Timer", "Discard current measurement and go back?", () => {
-                    resetCrane();
-                    showScreen(parentScreen);
-                });
-            } else {
-                showScreen(parentScreen);
-            }
-        };
-
-        document.getElementById('dl-report-btn').onclick = () => downloadReport(equipment);
-
-        resetCrane();
+        // Ensure Loading is selected by default
+        updateMode('LOADING');
+        
+        resetCurrentTimerUI();
+        renderSteps();
         showScreen('timer-screen');
     }
 
     function updateMode(mode) {
+        // Only allow change if timer hasn't started
         if (startTime) return;
         currentMode = mode;
-        document.getElementById('m-load').className = mode === 'LOADING' ? 'mode-btn active' : 'mode-btn';
-        document.getElementById('m-dis').className = mode === 'DISCHARGE' ? 'mode-btn active' : 'mode-btn';
+        
+        // CSS Toggle for Loading/Discharge
+        const loadBtn = document.getElementById('m-load');
+        const disBtn = document.getElementById('m-dis');
+        
+        if (mode === 'LOADING') {
+            loadBtn.className = 'flex-1 py-4 rounded-2xl border-2 border-slate-900 font-black text-xs mode-active';
+            disBtn.className = 'flex-1 py-4 rounded-2xl border-2 border-slate-200 bg-white font-black text-xs text-slate-400';
+        } else {
+            disBtn.className = 'flex-1 py-4 rounded-2xl border-2 border-slate-900 font-black text-xs mode-active';
+            loadBtn.className = 'flex-1 py-4 rounded-2xl border-2 border-slate-200 bg-white font-black text-xs text-slate-400';
+        }
+        
         renderSteps();
     }
 
     function renderSteps() {
-        const container = document.getElementById('step-btns');
-        container.innerHTML = '';
-        let steps = [];
-        if (currentCrane === 'QC') steps = currentMode === 'LOADING' ? config.QC.LOADING : config.QC.DISCHARGE;
-        else if (currentCrane === 'RTG') steps = currentMode === 'LOADING' ? config.RTG.LOADING : config.RTG.DISCHARGE;
-        else if (currentCrane === 'TT') steps = config.TT[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'].steps;
-        else steps = config[currentCrane] ? config[currentCrane][currentMode] : config.DEFAULT[currentMode];
-        
+        const grid = document.getElementById('step-grid');
+        grid.innerHTML = '';
+        let steps = isManualMode ? manualSteps : (config[currentCrane]?.[currentMode] || config[currentCrane] || config.DEFAULT);
+        currentSteps = steps;
+
         steps.forEach((text, i) => {
             const btn = document.createElement('button');
-            btn.className = 'btn-step';
-            btn.disabled = i !== 0;
             btn.id = `s${i+1}`;
+            btn.className = 'btn-step step-available'; // Start as Dark Grey
             btn.innerText = text;
-            btn.style.background = (parentScreen === 'gct-ops-screen') ? 'var(--ct-blue)' : 'var(--orange)';
+            btn.disabled = (i !== 0);
             btn.onclick = () => triggerStep(i + 1);
-            container.appendChild(btn);
+            grid.appendChild(btn);
         });
     }
 
-    function triggerStep(stepNum) {
+    function triggerStep(num) {
         const now = Date.now();
-        let steps = [];
-        let optional = [];
-        if (currentCrane === 'QC') steps = currentMode === 'LOADING' ? config.QC.LOADING : config.QC.DISCHARGE;
-        else if (currentCrane === 'RTG') steps = currentMode === 'LOADING' ? config.RTG.LOADING : config.RTG.DISCHARGE;
-        else if (currentCrane === 'TT') { const ttCfg = config.TT[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE']; steps = ttCfg.steps; optional = ttCfg.optional; }
-        else steps = config[currentCrane] ? config[currentCrane][currentMode] : config.DEFAULT[currentMode];
-
         if (navigator.vibrate) navigator.vibrate(40);
-        
-        if (stepNum === 1) {
-            startTime = now; absoluteStartTime = now; totalWaitingDuration = 0;
-            currentCycleData = { 
+
+        const stopBtn = document.getElementById('stop-cycle-btn');
+        if (num === 1 && !stopBtn.classList.contains('hidden')) {
+            finalizeCycleSilently(now);
+        }
+
+        if (num === 1) {
+            startTime = now; absoluteStartTime = now; lastTime = now; totalWaitingDuration = 0;
+            currentCycleData = isManualMode ? {
                 Date: new Date().toLocaleDateString(), Time: new Date().toLocaleTimeString(),
-                Equipment: currentCrane.replace('_', ' '), Unit_No: document.getElementById('unitNo').value || "N/A", 
-                Staff_ID: document.getElementById('staffId').value || "N/A", 
-                Category: (document.getElementById('category')) ? document.getElementById('category').value : (document.getElementById('ttFilter') ? document.getElementById('ttFilter').value : "N/A"),
-                Operation: currentMode 
+                Equipment: document.getElementById('manualEquipId').value || "Manual",
+                Staff_ID: document.getElementById('manualStaffId').value || "N/A",
+                Process: document.getElementById('manualProcessTitle').value || "Custom"
+            } : {
+                Date: new Date().toLocaleDateString(), Time: new Date().toLocaleTimeString(),
+                Equipment: currentCrane,
+                Staff_ID: document.getElementById('staffId')?.value || "N/A",
+                Unit_No: document.getElementById('unitNo')?.value || "N/A",
+                Operation: currentMode
             };
+
+            activeInterval = setInterval(() => {
+                document.getElementById('main-timer').innerText = ((Date.now() - startTime) / 1000).toFixed(2);
+            }, 50);
             document.getElementById('pause-btn').disabled = false;
             document.getElementById('wait-btn').disabled = false;
-            activeInterval = setInterval(() => { document.getElementById('main-timer').innerText = ((Date.now() - startTime)/1000).toFixed(2); }, 50);
+            document.getElementById('session-status').innerText = "RECORDING - IN PROGRESS";
+            document.getElementById('stop-cycle-btn').classList.add('hidden');
         } else {
-            // Record previous step duration
-            currentCycleData['Step_'+(stepNum-1)] = ((now - lastTime) / 1000).toFixed(2);
+            currentCycleData[`Step_${num - 1}`] = ((now - lastTime) / 1000).toFixed(2);
         }
 
-        // Handle button styles
-        for(let i=1; i<=steps.length; i++) {
-            const btn = document.getElementById(`s${i}`);
-            if (btn) {
-                btn.disabled = true;
-                btn.classList.remove('step-active');
-            }
-        }
-        document.getElementById(`s${stepNum}`).classList.add('step-active');
+        const btns = document.querySelectorAll('.btn-step');
+        btns.forEach(b => { 
+            b.disabled = true; 
+            b.classList.remove('step-active');
+            b.classList.add('step-available');
+        });
+        
+        // Active Step becomes BLACK
+        const activeBtn = document.getElementById(`s${num}`);
+        activeBtn.classList.remove('step-available');
+        activeBtn.classList.add('step-active');
+        activeBtn.disabled = false;
 
-        if (stepNum === steps.length) {
-            // Final step reached - record continuously until STOP
-            isLastStepActive = true;
+        if (num === currentSteps.length) {
+            document.getElementById('stop-cycle-btn').classList.remove('hidden');
             document.getElementById('stop-cycle-btn').disabled = false;
+            document.getElementById('session-status').innerText = "LAST STEP - STOP OR RESTART";
+            document.getElementById('s1').disabled = false; 
+            document.getElementById('s1').classList.add('opacity-100');
         } else {
-            // Handle next step activation
-            let next = stepNum + 1;
-            const nextBtn = document.getElementById(`s${next}`);
-            if (nextBtn) nextBtn.disabled = false;
-            if (optional.includes(next)) {
-                for (let j = next; j <= steps.length; j++) {
-                    const optBtn = document.getElementById(`s${j}`);
-                    if (optBtn) optBtn.disabled = false;
-                    if (!optional.includes(j)) break;
-                }
-            }
+            const next = document.getElementById(`s${num + 1}`);
+            if (next) next.disabled = false;
         }
         lastTime = now;
     }
 
+    function finalizeCycleSilently(now) {
+        clearInterval(activeInterval);
+        currentCycleData[`Step_${currentSteps.length}`] = ((now - lastTime) / 1000).toFixed(2);
+        currentCycleData['Net_Cycle_Time'] = ((now - startTime) / 1000).toFixed(2);
+        currentCycleData['Gross_Cycle_Time'] = ((now - absoluteStartTime) / 1000).toFixed(2);
+        currentCycleData['Waiting_Time'] = (totalWaitingDuration / 1000).toFixed(2);
+
+        logs.push({ ...currentCycleData });
+        cycleCount++;
+        document.getElementById('cycle-count').innerText = cycleCount;
+        showToast("Cycle Saved!", "success");
+    }
+
     function stopCycle() {
         const now = Date.now();
-        let steps = [];
-        if (currentCrane === 'QC') steps = currentMode === 'LOADING' ? config.QC.LOADING : config.QC.DISCHARGE;
-        else if (currentCrane === 'RTG') steps = currentMode === 'LOADING' ? config.RTG.LOADING : config.RTG.DISCHARGE;
-        else if (currentCrane === 'TT') steps = config.TT[currentMode === 'LOADING' ? 'LOADING' : 'DISCHARGE'].steps;
-        else steps = config[currentCrane] ? config[currentCrane][currentMode] : config.DEFAULT[currentMode];
-
-        clearInterval(activeInterval);
-        
-        // Record final step duration
-        currentCycleData['Step_'+steps.length] = ((now - lastTime) / 1000).toFixed(2);
-        
-        const finishTime = now;
-        currentCycleData['Net_Cycle_Time'] = ((finishTime - startTime) / 1000).toFixed(2);
-        currentCycleData['Gross_Cycle_Time'] = ((finishTime - absoluteStartTime) / 1000).toFixed(2);
-        currentCycleData['Waiting_Time'] = (totalWaitingDuration / 1000).toFixed(2);
-        
-        masterLogs.push({...currentCycleData});
-        
-        if (!currentCounts[currentCrane]) currentCounts[currentCrane] = 0;
-        currentCounts[currentCrane]++;
-        document.getElementById('cycle-count').innerText = currentCounts[currentCrane];
-        
-        document.getElementById('pause-btn').disabled = true;
-        document.getElementById('wait-btn').disabled = true;
-        document.getElementById('stop-cycle-btn').disabled = true;
-        
-        showToast("Cycle Saved Successfully!", "success");
-        setTimeout(resetCrane, 1500);
+        finalizeCycleSilently(now);
+        document.getElementById('recordModal').classList.remove('hidden');
+        setTimeout(() => {
+            document.getElementById('recordModal').classList.add('hidden');
+            resetCurrentTimerUI();
+        }, 1200);
     }
 
     function togglePause() {
+        if (!startTime) return;
         const btn = document.getElementById('pause-btn');
-        const now = Date.now();
         if (!isPaused) {
             if (isWaiting) toggleWaiting();
-            isPaused = true; delayStart = now; btn.classList.add('pause-on'); clearInterval(activeInterval);
+            isPaused = true; delayStart = Date.now(); btn.classList.add('bg-amber-500'); clearInterval(activeInterval);
         } else {
-            isPaused = false; let diff = (now - delayStart); startTime += diff; lastTime += diff;
-            btn.classList.remove('pause-on');
-            activeInterval = setInterval(() => { document.getElementById('main-timer').innerText = ((Date.now() - startTime)/1000).toFixed(2); }, 50);
+            isPaused = false; let diff = (Date.now() - delayStart); startTime += diff; lastTime += diff;
+            btn.classList.remove('bg-amber-500');
+            activeInterval = setInterval(() => { document.getElementById('main-timer').innerText = ((Date.now() - startTime) / 1000).toFixed(2); }, 50);
         }
     }
 
     function toggleWaiting() {
+        if (!startTime) return;
         const btn = document.getElementById('wait-btn');
-        const now = Date.now();
         if (!isWaiting) {
             if (isPaused) togglePause();
-            isWaiting = true; delayStart = now; btn.classList.add('wait-on'); clearInterval(activeInterval);
+            isWaiting = true; delayStart = Date.now(); btn.classList.add('bg-cyan-500'); clearInterval(activeInterval);
         } else {
-            isWaiting = false; let diff = (now - delayStart); totalWaitingDuration += diff; startTime += diff; lastTime += diff;
-            btn.classList.remove('wait-on');
-            activeInterval = setInterval(() => { document.getElementById('main-timer').innerText = ((Date.now() - startTime)/1000).toFixed(2); }, 50);
+            isWaiting = false; let diff = (Date.now() - delayStart); totalWaitingDuration += diff; startTime += diff; lastTime += diff;
+            btn.classList.remove('bg-cyan-500');
+            activeInterval = setInterval(() => { document.getElementById('main-timer').innerText = ((Date.now() - startTime) / 1000).toFixed(2); }, 50);
         }
     }
 
-    function resetCurrentTimer() { 
-        openModal("Reset Timer", "Are you sure you want to discard this measurement?", () => {
-            resetCrane();
+    function undoLastCycle() {
+        if (logs.length > 0) {
+            openModal("Undo Cycle", "Remove last recorded cycle?", () => {
+                logs.pop();
+                cycleCount = Math.max(0, cycleCount - 1);
+                document.getElementById('cycle-count').innerText = cycleCount;
+                resetCurrentTimerUI();
+                showToast("Cycle Removed", "success");
+            });
+        }
+    }
+
+    function resetFullSession() {
+        openModal("Reset Full", "Delete ALL cycle records for this session?", () => {
+            logs = [];
+            cycleCount = 0;
+            document.getElementById('cycle-count').innerText = "0";
+            resetCurrentTimerUI();
+            showToast("Session Cleared", "success");
         });
     }
 
-    function resetCrane() {
-        clearInterval(activeInterval); 
-        startTime = null; 
-        absoluteStartTime = null; 
-        isPaused = false; 
-        isWaiting = false; 
-        isLastStepActive = false;
-        totalWaitingDuration = 0;
+    function resetCurrentTimerUI() {
+        clearInterval(activeInterval);
+        startTime = null; absoluteStartTime = null; isPaused = false; isWaiting = false; totalWaitingDuration = 0;
         document.getElementById('main-timer').innerText = "0.00";
-        document.getElementById('pause-btn').disabled = true; 
-        document.getElementById('wait-btn').disabled = true;
-        document.getElementById('stop-cycle-btn').disabled = true;
-        document.getElementById('pause-btn').classList.remove('pause-on'); 
-        document.getElementById('wait-btn').classList.remove('wait-on');
-        document.getElementById('cycle-count').innerText = currentCounts[currentCrane] || 0;
+        document.getElementById('stop-cycle-btn').classList.add('hidden');
+        document.getElementById('pause-btn').classList.remove('bg-amber-500');
+        document.getElementById('wait-btn').classList.remove('bg-cyan-500');
+        document.getElementById('session-status').innerText = "Waiting - Click Step 1";
         renderSteps();
     }
 
-    function calculateAverage(arr) { if (arr.length === 0) return "0.00"; return (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2); }
-    function calculateMedian(arr) {
-        if (arr.length === 0) return "0.00";
-        const sorted = [...arr].sort((a, b) => a - b);
+    function goHome() {
+        if (startTime) openModal("Exit?", "Discard current measurement?", () => { resetCurrentTimerUI(); showScreen('home-screen'); });
+        else showScreen('home-screen');
+    }
+
+    function getAverage(vals) {
+        if (!vals.length) return "0.00";
+        return (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2);
+    }
+
+    function getMedian(vals) {
+        if (!vals.length) return "0.00";
+        const sorted = [...vals].sort((a, b) => a - b);
         const mid = Math.floor(sorted.length / 2);
         return (sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2).toFixed(2);
     }
 
-    function downloadReport(equipment) {
-        const filtered = masterLogs.filter(log => log.Equipment.replace(' ', '_') === equipment.replace(' ', '_'));
-        if (filtered.length === 0) {
-            showToast("No recorded cycles found.", "error");
-            return;
-        }
+    function downloadReport() {
+        if (logs.length === 0) return showToast("No recorded cycles.", "error");
         
-        const metaHeaders = ['Date', 'Time', 'Equipment', 'Unit_No', 'Staff_ID', 'Category', 'Operation'];
-        let maxSteps = 0;
-        filtered.forEach(log => {
-            const steps = Object.keys(log).filter(k => k.startsWith('Step_')).length;
-            if (steps > maxSteps) maxSteps = steps;
-        });
-        const stepHeaders = Array.from({length: maxSteps}, (_, i) => `Step_${i+1}`);
-        const metricHeaders = ['Net_Cycle_Time', 'Gross_Cycle_Time', 'Waiting_Time'];
-        const allHeaders = [...metaHeaders, ...stepHeaders, ...metricHeaders];
+        let allKeysSet = new Set();
+        logs.forEach(log => Object.keys(log).forEach(k => allKeysSet.add(k)));
+        const headers = Array.from(allKeysSet);
 
-        let csvRows = [];
-        csvRows.push(allHeaders.map(h => `"${h.replace(/_/g, ' ')}"`).join(','));
-        filtered.forEach(row => {
-            csvRows.push(allHeaders.map(h => `"${row[h] || ''}"`).join(','));
+        let csvRows = [headers.map(h => `"${h}"`).join(',')];
+        logs.forEach(log => {
+            csvRows.push(headers.map(h => `"${log[h] || '0.00'}"`).join(','));
         });
 
-        csvRows.push(""); csvRows.push("");
+        csvRows.push("");
+        csvRows.push("");
+        const metrics = ['Net_Cycle_Time', 'Gross_Cycle_Time', 'Waiting_Time'];
+        csvRows.push(`"Metric","${metrics[0]}","${metrics[1]}","${metrics[2]}"`);
 
-        const nets = filtered.map(log => parseFloat(log.Net_Cycle_Time)).filter(v => !isNaN(v));
-        const grosses = filtered.map(log => parseFloat(log.Gross_Cycle_Time)).filter(v => !isNaN(v));
-        const waits = filtered.map(log => parseFloat(log.Waiting_Time)).filter(v => !isNaN(v));
+        const netVals = logs.map(l => parseFloat(l.Net_Cycle_Time) || 0);
+        const grossVals = logs.map(l => parseFloat(l.Gross_Cycle_Time) || 0);
+        const waitVals = logs.map(l => parseFloat(l.Waiting_Time) || 0);
 
-        const padding = Array(metaHeaders.length - 1).fill("").join(',');
-        csvRows.push(`${padding},Metric,Net Cycle Time,Gross Cycle Time,Waiting Time`);
-        csvRows.push(`${padding},Average,${calculateAverage(nets)},${calculateAverage(grosses)},${calculateAverage(waits)}`);
-        csvRows.push(`${padding},Median,${calculateMedian(nets)},${calculateMedian(grosses)},${calculateMedian(waits)}`);
+        csvRows.push(`"Average","${getAverage(netVals)}","${getAverage(grossVals)}","${getAverage(waitVals)}"`);
+        csvRows.push(`"Median","${getMedian(netVals)}","${getMedian(grossVals)}","${getMedian(waitVals)}"`);
 
-        try {
-            const blob = new Blob(['\ufeff', csvRows.join('\n')], { type: "text/csv;charset=utf-8" });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.href = url;
-            link.setAttribute("download", `${equipment}_Cycle_Report_${new Date().toISOString().slice(0,10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            setTimeout(() => {
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
-            }, 100);
-            showToast("Report Downloaded!", "success");
-        } catch (e) {
-            showToast("Download failed. Check browser permissions.", "error");
+        const blob = new Blob(['\ufeff', csvRows.join('\n')], { type: "text/csv;charset=utf-8" });
+        const link = document.createElement("a");
+        const filename = `${isManualMode ? 'Manual' : currentCrane}_Report_${new Date().toISOString().slice(0,10)}.csv`;
+        
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute("download", filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showToast("Report Exported (CSV)", "success");
+    }
+
+    function addManualStep() {
+        const input = document.getElementById('manualStepInput');
+        if (input.value.trim()) {
+            manualSteps.push(input.value.trim());
+            renderManualSetupList();
+            input.value = '';
         }
+    }
+
+    function renderManualSetupList() {
+        const list = document.getElementById('manualStepList');
+        list.innerHTML = '';
+        manualSteps.forEach((s, i) => {
+            const div = document.createElement('div');
+            div.className = 'flex justify-between items-center bg-slate-50 p-3 rounded-lg border-2 border-slate-900 mb-2';
+            div.innerHTML = `<span class="font-bold text-slate-900 text-xs">${i+1}. ${s}</span><button onclick="manualSteps.splice(${i}, 1); renderManualSetupList();" class="text-red-500 font-black text-[10px]">REMOVE</button>`;
+            list.appendChild(div);
+        });
+    }
+
+    function openManualTimer() {
+        if (manualSteps.length === 0) return showToast("Add at least one step.", "error");
+        isManualMode = true;
+        document.getElementById('standard-inputs').classList.add('hidden');
+        document.getElementById('timer-home-btn').onclick = goHome;
+        cycleCount = 0;
+        logs = [];
+        document.getElementById('cycle-count').innerText = "0";
+        resetCurrentTimerUI();
+        showScreen('timer-screen');
     }
 </script>
 </body>
