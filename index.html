@@ -826,14 +826,21 @@
     window.undoLastCycle = () => { if (logs.length > 0) openModal("Undo?", "Remove last cycle?", () => { logs.pop(); cycleCount = Math.max(0, cycleCount-1); document.getElementById('cycle-count').innerText = cycleCount; resetCurrentTimerUI(); }); };
     window.resetFullSession = () => { openModal("Reset?", "Delete all records?", () => { logs = []; cycleCount = 0; document.getElementById('cycle-count').innerText = "0"; resetCurrentTimerUI(); }); };
     
-    // DOWNLOAD REPORT WITH SUMMARY
+    // DOWNLOAD REPORT WITH ENHANCED EXCEL SUPPORT
     window.downloadReport = () => { 
-        if (logs.length === 0) return showToast("No logs.", "error"); 
+        if (logs.length === 0) return showToast("No logs to export.", "error"); 
         
-        // 1. Prepare Data Rows
+        // 1. Prepare Headers and Data (Using CRLF for Excel compatibility)
         const keys = Array.from(new Set(logs.flatMap(l => Object.keys(l)))); 
-        let csvRows = [keys.map(k => `"${k}"`).join(',')]; 
-        logs.forEach(l => csvRows.push(keys.map(k => `"${l[k] || '0.00'}"`).join(','))); 
+        let csvContent = "\ufeff"; // UTF-8 BOM for Excel to recognize encoding
+        
+        // Headers
+        csvContent += keys.map(k => `"${k}"`).join(",") + "\r\n";
+        
+        // Rows
+        logs.forEach(l => {
+            csvContent += keys.map(k => `"${l[k] || '0.00'}"`).join(",") + "\r\n";
+        });
 
         // 2. Summary Calculations
         const totalCycles = logs.length;
@@ -846,22 +853,31 @@
         const avgWait = (totalWait / totalCycles).toFixed(2);
 
         // 3. Append Summary Section
-        csvRows.push(""); // Empty line for separation
-        csvRows.push('"SESSION SUMMARY STATS"');
-        csvRows.push(`"Metric","Value"`);
-        csvRows.push(`"Total Cycles Recorded","${totalCycles}"`);
-        csvRows.push(`"Average Net Cycle Time","${avgNet} s"`);
-        csvRows.push(`"Average Gross Cycle Time","${avgGross} s"`);
-        csvRows.push(`"Total Cumulative Waiting Time","${totalWait.toFixed(2)} s"`);
-        csvRows.push(`"Average Waiting Time per Cycle","${avgWait} s"`);
-        csvRows.push(`"Total Session Gross Time","${totalGross.toFixed(2)} s"`);
+        csvContent += "\r\n\"SESSION SUMMARY\"\r\n";
+        csvContent += `"Metric","Value"\r\n`;
+        csvContent += `"Total Cycles Recorded","${totalCycles}"\r\n`;
+        csvContent += `"Average Net Cycle Time","${avgNet} s"\r\n`;
+        csvContent += `"Average Gross Cycle Time","${avgGross} s"\r\n`;
+        csvContent += `"Total Cumulative Waiting Time","${totalWait.toFixed(2)} s"\r\n`;
+        csvContent += `"Average Waiting Time per Cycle","${avgWait} s"\r\n`;
+        csvContent += `"Total Session Gross Time","${totalGross.toFixed(2)} s"\r\n`;
 
-        // 4. Trigger Download
-        const blob = new Blob(['\ufeff', csvRows.join('\n')], { type: "text/csv" }); 
-        const link = document.createElement("a"); 
-        link.href = URL.createObjectURL(blob); 
-        link.download = `Cycle_Report_${new Date().toISOString().slice(0,10)}.csv`; 
-        link.click(); 
+        // 4. Trigger Download (Ensuring link is in DOM)
+        try {
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" }); 
+            const link = document.createElement("a"); 
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Cycle_Report_${new Date().toISOString().slice(0,10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("Report Downloaded", "success");
+        } catch (e) {
+            console.error(e);
+            showToast("Download Failed", "error");
+        }
     };
 
     window.closeModal = () => { document.getElementById('custom-modal-overlay').style.display = 'none'; };
