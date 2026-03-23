@@ -8,224 +8,315 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root { 
-            --orange: #ff9800; 
-            --white: #ffffff; 
-            --bg: #f8f9fa; 
-            --dark: #212529; 
-            --danger: #ef4444; 
-            --success: #10b981;
-            --ct-blue: #0891b2;
-            --mr-teal: #0d9488;
+            --calc-bg: #121212; 
+            --calc-btn: #333333; 
+            --calc-btn-active: #ff9800; 
+            --calc-lcd: #9ea78d; 
+            --calc-lcd-text: #1a1c1a; 
+            --calc-red: #b91c1c; 
+            --calc-blue: #2563eb; 
+            --calc-teal: #0f766e; 
         }
         
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 0; display: flex; justify-content: center; position: relative; min-height: 100vh; }
+        body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: var(--calc-bg); margin: 0; padding: 0; display: flex; justify-content: center; position: relative; min-height: 100vh; color: #ffffff; }
         
-        .screen { width: 100%; max-width: 500px; min-height: 100vh; background: white; display: none; padding: 20px; box-sizing: border-box; position: relative; }
+        .screen { width: 100%; max-width: 500px; min-height: 100vh; background: #1e1e1e; display: none; padding: 24px; box-sizing: border-box; position: relative; border-left: 1px solid #2a2a2a; border-right: 1px solid #2a2a2a; }
         .active { display: block; }
 
-        .menu-card { 
-            padding: 24px; border-radius: 20px; border: none; color: white; cursor: pointer; 
-            display: flex; align-items: center; justify-content: space-between; 
-            font-size: 1.3rem; font-weight: 800; transition: transform 0.1s;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        .btn-calc {
+            background-color: var(--calc-btn);
+            border-radius: 14px;
+            box-shadow: 
+                inset 0 1px 0 rgba(255,255,255,0.1),
+                0 4px 0 #000,
+                0 6px 10px rgba(0,0,0,0.5);
+            color: #ffffff;
+            font-weight: 800;
+            text-transform: uppercase;
+            transition: all 0.05s;
+            position: relative;
+            top: 0;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
         }
-        .menu-card:active { transform: scale(0.97); }
+        .btn-calc:active:not(:disabled) {
+            top: 3px;
+            box-shadow: 
+                inset 0 1px 2px rgba(0,0,0,0.5),
+                0 1px 0 #000,
+                0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .menu-card { 
+            padding: 24px; font-size: 1.25rem; letter-spacing: 0.05em; margin-bottom: 20px;
+            width: 100%;
+        }
         
         .btn-step { 
-            height: 85px; border: none; border-radius: 15px; 
-            font-size: 0.75rem; font-weight: 700; color: white; 
-            cursor: pointer; display: flex; align-items: center; 
-            justify-content: center; text-align: center; padding: 8px; 
-            line-height: 1.2; transition: all 0.2s; 
+            height: 95px; font-size: 0.9rem; padding: 14px; line-height: 1.3; 
         }
-        .step-available { background-color: #4b5563 !important; } 
-        .step-active { background-color: #000000 !important; } 
+        .step-available { background-color: #333 !important; } 
+        .step-active { 
+            background-color: var(--calc-btn-active) !important; 
+            color: #000 !important; 
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.5), 0 4px 0 #b36b00, 0 8px 12px rgba(0,0,0,0.5);
+        } 
         
-        .btn-step:disabled { opacity: 0.35; cursor: not-allowed; filter: grayscale(30%); }
+        .btn-calc:disabled { opacity: 0.25; cursor: not-allowed; box-shadow: none; top: 0; filter: grayscale(100%); }
 
-        .equip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .equip-item { 
-            padding: 20px 10px; border-radius: 15px; border: none; background: var(--orange); 
-            color: white; font-weight: 800; font-size: 1rem; cursor: pointer; text-align: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        .equip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .equip-item { padding: 24px 12px; font-size: 1.1rem; }
+
+        /* Dual-Section LCD Display */
+        .timer-container { 
+            background-color: var(--calc-lcd); 
+            border-radius: 12px; 
+            padding: 16px 20px; 
+            position: relative; 
+            width: 100%; 
+            margin-bottom: 20px; 
+            border: 5px solid #000;
+            box-shadow: 
+                inset 0 10px 20px rgba(0,0,0,0.3),
+                0 2px 0 rgba(255,255,255,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
-        .equip-item:active { opacity: 0.9; transform: translateY(2px); }
+        
+        .lcd-sub-section {
+            border-bottom: 1px solid rgba(0,0,0,0.15);
+            padding-bottom: 4px;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-        .dark-input { border: 2px solid #0f172a; padding: 14px; border-radius: 12px; width: 100%; font-weight: 700; outline: none; background: #fff; color: #000; }
-        .dark-input:focus { border-color: #38bdf8; }
-        .setup-label { font-size: 0.65rem; font-weight: 900; text-transform: uppercase; color: #1e293b; margin-bottom: 4px; display: block; }
+        .lcd-label {
+            font-size: 0.65rem;
+            font-weight: 900;
+            color: rgba(0,0,0,0.5);
+            text-transform: uppercase;
+        }
 
-        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--dark); color: white; padding: 12px 25px; border-radius: 30px; font-weight: 600; font-size: 0.9rem; display: none; z-index: 2000; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        #custom-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        #custom-modal { background: white; padding: 25px; border-radius: 15px; max-width: 300px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        #last-cycle-display {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-weight: 900;
+            color: rgba(26, 28, 26, 0.6);
+            font-size: 1.8rem;
+            letter-spacing: -1px;
+            text-align: right;
+        }
+
+        #main-timer { 
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-weight: 900; 
+            color: var(--calc-lcd-text); 
+            text-align: right; 
+            line-height: 1; 
+            letter-spacing: -1px;
+            font-size: 4rem; 
+        }
+
+        .dark-input { border: 2px solid #333; padding: 16px; border-radius: 12px; width: 100%; font-weight: 700; outline: none; background: #121212; color: #fff; }
+        .dark-input:focus { border-color: var(--calc-btn-active); }
+        .setup-label { font-size: 0.75rem; font-weight: 900; text-transform: uppercase; color: #666; margin-bottom: 8px; display: block; }
+
+        #toast { 
+            position: fixed; 
+            bottom: 40px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background: #ffffff; 
+            color: #000000; 
+            padding: 12px 24px; 
+            border-radius: 12px; 
+            font-weight: 900; 
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            z-index: 9999; 
+            display: none;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8); 
+            border: 4px solid #000;
+            pointer-events: none;
+        }
+        
+        #custom-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        #custom-modal { background: #222; padding: 32px; border-radius: 24px; max-width: 360px; text-align: center; border: 2px solid #333; color: white; }
     
-        .mode-active { background-color: #000000 !important; color: white !important; border-color: #000000 !important; }
+        .mode-active { background-color: white !important; color: black !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3) !important; }
 
         .admin-only { display: none !important; }
         .logged-in .admin-only { display: block !important; }
+        
+        .btn-red { background-color: var(--calc-red) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 0 #600, 0 8px 15px rgba(0,0,0,0.4); }
+        .btn-blue { background-color: var(--calc-blue) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 0 #1e3a8a, 0 8px 15px rgba(0,0,0,0.4); }
     </style>
 </head>
 <body id="app-body">
 
     <div id="custom-modal-overlay">
         <div id="custom-modal">
-            <h3 id="modal-title" class="text-lg font-black uppercase">Confirmation</h3>
-            <p id="modal-msg" class="text-slate-500 mt-2 font-bold">Are you sure?</p>
-            <div class="flex gap-3 mt-6">
-                <button class="flex-1 py-3 bg-slate-100 rounded-xl font-black text-xs" onclick="closeModal()">CANCEL</button>
-                <button class="flex-1 py-3 bg-red-500 text-white rounded-xl font-black text-xs" id="modal-confirm-btn">YES</button>
+            <h3 id="modal-title" class="text-2xl font-black uppercase mb-3">Confirm?</h3>
+            <p id="modal-msg" class="text-slate-400 font-bold mb-10">Select action to proceed with measurement update.</p>
+            <div class="flex gap-4">
+                <button class="btn-calc flex-1 py-5 text-xs" onclick="closeModal()">CANCEL</button>
+                <button class="btn-calc btn-red flex-1 py-5 text-xs" id="modal-confirm-btn">EXECUTE</button>
             </div>
         </div>
     </div>
-    <div id="toast">Message</div>
+    
+    <div id="toast"></div>
 
     <!-- LOGIN SCREEN -->
     <div id="login-screen" class="screen">
-        <button class="bg-slate-100 px-4 py-2 rounded-lg font-black text-xs mb-10" onclick="showScreen('home-screen')">
-            <i class="fas fa-arrow-left"></i> BACK
+        <button class="btn-calc px-6 py-4 text-xs mb-16" onclick="showScreen('home-screen')">
+            <i class="fas fa-chevron-left mr-2"></i> RETURN
         </button>
-        <div class="text-center mb-8">
-            <div class="w-20 h-20 bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-4 text-white">
-                <i class="fas fa-lock text-3xl"></i>
-            </div>
-            <h2 class="text-2xl font-black text-slate-900 uppercase">Admin Login</h2>
-            <p class="text-slate-400 font-bold text-xs">ENTER PIN TO ACCESS ADMIN FEATURES</p>
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-black uppercase tracking-tight">SECURE PIN</h2>
         </div>
-        <div class="space-y-4">
-            <input type="password" id="adminPin" placeholder="Enter PIN" class="dark-input text-center text-2xl tracking-[10px]">
-            <button onclick="attemptLogin()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl active:scale-95 transition">
-                LOGIN
+        <div class="space-y-8">
+            <input type="password" id="adminPin" placeholder="••••" class="dark-input text-center text-4xl tracking-[20px]">
+            <button onclick="attemptLogin()" class="btn-calc w-full py-7 text-sm tracking-[0.3em]">
+                AUTHORIZE
             </button>
         </div>
     </div>
 
     <!-- HOME SCREEN -->
     <div id="home-screen" class="screen active">
-        <div class="flex justify-between items-center mt-2 mb-6">
+        <div class="flex justify-between items-start mt-6 mb-12">
              <div class="text-left">
-                <h1 class="text-4xl font-black text-[#212529]">Cycle Timer</h1>
-                <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Main selection dashboard</p>
+                <h1 class="text-5xl font-black tracking-tighter leading-none italic uppercase">Cycle <span class="text-orange-500">Timer</span></h1>
+                <p class="text-slate-500 font-black uppercase tracking-[0.2em] text-[10px] mt-4">CYCLE TIME RECORDER</p>
             </div>
-            <div class="flex gap-2">
-                <button id="login-btn" onclick="showScreen('login-screen')" class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-500">
-                    <i class="fas fa-user-lock"></i>
+            <div class="flex gap-4">
+                <button id="login-btn" onclick="showScreen('login-screen')" class="btn-calc w-16 h-16">
+                    <i class="fas fa-lock text-xl"></i>
                 </button>
-                <button id="logout-btn" onclick="logout()" class="admin-only w-12 h-12 bg-red-50 rounded-full flex items-center justify-center text-red-500 hidden">
-                    <i class="fas fa-sign-out-alt"></i>
+                <button id="logout-btn" onclick="logout()" class="admin-only btn-calc btn-red w-16 h-16 hidden">
+                    <i class="fas fa-power-off text-xl"></i>
                 </button>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 gap-4">
-            <button class="menu-card bg-[#ff9800]" onclick="showScreen('ct-ops-screen')">
+        <div class="flex flex-col gap-6">
+            <button class="btn-calc menu-card" style="background-color: var(--calc-btn-active); color: #000; box-shadow: inset 0 1px 2px rgba(255,255,255,0.4), 0 4px 0 #b36b00, 0 8px 15px rgba(0,0,0,0.5);" onclick="showScreen('ct-ops-screen')">
                 <span>CT OPS</span>
-                <i class="fa-solid fa-ship"></i>
+                <i class="fa-solid fa-ship text-3xl"></i>
             </button>
-            <button class="menu-card bg-[#0891b2]" onclick="showScreen('gct-ops-screen')">
+            <button class="btn-calc menu-card" style="background-color: var(--calc-blue); box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 0 #1e3a8a, 0 8px 15px rgba(0,0,0,0.5);" onclick="showScreen('gct-ops-screen')">
                 <span>GCT OPS</span>
-                <i class="fa-solid fa-boxes-stacked"></i>
+                <i class="fa-solid fa-boxes-stacked text-3xl"></i>
             </button>
-            <button class="menu-card bg-[#0d9488]" onclick="showScreen('mr-screen')">
-                <span>M&R</span>
-                <i class="fa-solid fa-screwdriver-wrench"></i>
+            <button class="btn-calc menu-card" style="background-color: var(--calc-teal); box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 0 #064e3b, 0 8px 15px rgba(0,0,0,0.5);" onclick="showScreen('mr-screen')">
+                <span>M&R LOGS</span>
+                <i class="fa-solid fa-screwdriver-wrench text-3xl"></i>
             </button>
-            <button class="menu-card bg-slate-600" onclick="openQuickManual()">
+            <button class="btn-calc menu-card" onclick="openQuickManual()">
                 <span>MANUAL SETUP</span>
-                <i class="fa-solid fa-keyboard"></i>
+                <i class="fa-solid fa-keyboard text-3xl"></i>
             </button>
         </div>
 
-        <div class="text-right mt-10 text-[10px] font-black text-black uppercase tracking-widest">
-            Developed By: Mr. Golden Micheal - Port of Salalah.
+        <div class="mt-20 pt-8 border-t border-white/5">
+            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest text-center leading-relaxed">
+                Developed By:<br>
+                <span class="text-white text-xs">Mr. Golden Micheal</span><br>
+                <span class="opacity-50 italic lowercase">Port of Salalah</span>
+            </p>
         </div>
     </div>
 
     <!-- MANUAL SETUP SCREEN -->
     <div id="manual-setup-screen" class="screen">
-        <div class="flex justify-between items-center mb-6">
-            <button class="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-lg font-black text-xs" onclick="showScreen(window.parentScreen)">
-                <i class="fas fa-arrow-left"></i> BACK
+        <div class="flex justify-between items-center mb-10">
+            <button class="btn-calc px-5 py-4 text-xs" onclick="showScreen(window.parentScreen)">
+                <i class="fas fa-chevron-left"></i> BACK
             </button>
             <div id="auth-status-container">
-                <button id="google-login-btn" onclick="loginWithGoogle()" class="flex items-center gap-2 bg-white border-2 border-slate-900 px-4 py-2 rounded-lg font-black text-[10px] uppercase shadow-sm">
-                    <i class="fab fa-google text-red-500"></i> Cloud Login
+                <button id="google-login-btn" onclick="loginWithGoogle()" class="btn-calc px-5 py-3 text-[11px]">
+                    <i class="fab fa-google text-red-500 mr-2"></i> CLOUD SYNC
                 </button>
-                <div id="user-profile" class="hidden flex items-center gap-2">
-                    <span id="user-email" class="text-[9px] font-black text-slate-500"></span>
-                    <button onclick="logoutGoogle()" class="text-red-500 font-black text-[9px] underline uppercase">Logout</button>
+                <div id="user-profile" class="hidden flex items-center gap-4">
+                    <span id="user-email" class="text-[10px] font-black opacity-60"></span>
+                    <button onclick="logoutGoogle()" class="text-red-500 font-black text-[10px] uppercase underline">Logout</button>
                 </div>
             </div>
         </div>
 
-        <div class="space-y-6">
-            <h2 id="setup-title" class="text-xl font-black uppercase text-slate-900">Equipment Setup</h2>
+        <div class="space-y-8">
+            <h2 id="setup-title" class="text-3xl font-black uppercase tracking-tight">Configuration</h2>
             
             <div id="history-section" class="hidden">
-                <label class="setup-label">Cloud History</label>
-                <div id="history-list" class="flex flex-col gap-2 max-h-[120px] overflow-y-auto mb-4 bg-slate-50 p-3 rounded-xl border border-dashed border-slate-300">
-                    <p class="text-[10px] text-slate-400 italic">Fetching history...</p>
+                <label class="setup-label">Cloud Deployment History</label>
+                <div id="history-list" class="flex flex-col gap-3 max-h-[160px] overflow-y-auto mb-6 bg-black/40 p-5 rounded-2xl border border-white/10">
+                    <p class="text-[11px] text-slate-500 italic uppercase font-black">Connecting to vault...</p>
                 </div>
             </div>
 
-            <div id="equip-name-group">
-                <label class="setup-label">Equipment Name</label>
-                <input type="text" id="manualEquipId" placeholder="e.g. Crane 05" class="dark-input">
+            <div>
+                <label class="setup-label">Asset Identifier</label>
+                <input type="text" id="manualEquipId" placeholder="e.g. CRANE-05" class="dark-input">
             </div>
 
             <div id="staff-id-group">
-                <label class="setup-label">Staff ID</label>
-                <input type="text" id="manualStaffId" placeholder="Enter Staff ID" class="dark-input">
+                <label class="setup-label">Operator Credential</label>
+                <input type="text" id="manualStaffId" placeholder="STAFF-ID" class="dark-input">
             </div>
 
             <div id="process-type-group" class="admin-only hidden">
-                <label class="setup-label">Process Type</label>
-                <select id="processTypeSelect" class="dark-input mb-2" onchange="toggleManualProcessInput()">
-                    <option value="LOADING">Loading</option>
-                    <option value="DISCHARGE">Unloading</option>
-                    <option value="BOTH">Both (Load/Unload)</option>
-                    <option value="MANUAL">Other - Type manually</option>
+                <label class="setup-label">Deployment Logic</label>
+                <select id="processTypeSelect" class="dark-input mb-4" onchange="toggleManualProcessInput()">
+                    <option value="LOADING">LOADING CYCLE</option>
+                    <option value="DISCHARGE">DISCHARGE CYCLE</option>
+                    <option value="BOTH">DUAL (HYBRID) CYCLE</option>
+                    <option value="MANUAL">MANUAL OVERRIDE</option>
                 </select>
-                <input type="text" id="manualProcessTypeInput" placeholder="Enter process type..." class="dark-input hidden">
+                <input type="text" id="manualProcessTypeInput" placeholder="Enter Category Name" class="dark-input hidden">
             </div>
 
-            <div id="filter-setup-group" class="admin-only hidden bg-slate-50 p-4 rounded-2xl border-2 border-slate-900">
-                <label class="setup-label">Filters (Optional)</label>
-                <input type="text" id="filterTitle" placeholder="Filter Title" class="dark-input mb-2">
-                <div class="flex gap-2">
-                    <input type="text" id="filterItemInput" placeholder="Add option" class="dark-input">
-                    <button onclick="addFilterItem()" class="bg-slate-800 text-white px-4 rounded-xl font-black uppercase text-[10px]">Add</button>
+            <div id="filter-setup-group" class="admin-only hidden bg-white/5 p-6 rounded-3xl border border-white/5">
+                <label class="setup-label">Conditional Logic Filters</label>
+                <input type="text" id="filterTitle" placeholder="Filter Headline" class="dark-input mb-4">
+                <div class="flex gap-3">
+                    <input type="text" id="filterItemInput" placeholder="Condition Option" class="dark-input">
+                    <button onclick="addFilterItem()" class="btn-calc px-6 text-[11px]">ADD</button>
                 </div>
-                <div id="filterList" class="flex flex-wrap gap-2 mt-2"></div>
+                <div id="filterList" class="flex flex-wrap gap-3 mt-5"></div>
             </div>
 
             <div id="process-title-group">
-                <label class="setup-label">Process Title</label>
-                <input type="text" id="manualProcessTitle" placeholder="e.g. Custom Log" class="dark-input">
+                <label class="setup-label">Logging Event Reference</label>
+                <input type="text" id="manualProcessTitle" placeholder="Performance Audit Title" class="dark-input">
             </div>
 
-            <div class="bg-slate-50 p-4 rounded-2xl border-2 border-slate-900">
-                <label class="setup-label">Steps <span class="text-red-500">*</span></label>
-                <div class="flex gap-2">
-                    <input type="text" id="manualStepInput" placeholder="Step name..." class="dark-input">
-                    <button onclick="addManualStep()" class="bg-blue-600 text-white px-4 rounded-xl font-black uppercase text-[10px]">Add</button>
+            <div class="bg-white/5 p-6 rounded-3xl border border-white/5">
+                <label class="setup-label">Operational Sequence Steps</label>
+                <div class="flex gap-3">
+                    <input type="text" id="manualStepInput" placeholder="Action Description" class="dark-input">
+                    <button onclick="addManualStep()" class="btn-calc btn-blue px-6 text-[11px]">ADD</button>
                 </div>
-                <div id="manualStepList" class="space-y-2 mt-4 max-h-[200px] overflow-y-auto pr-1"></div>
+                <div id="manualStepList" class="space-y-4 mt-8 max-h-[280px] overflow-y-auto pr-3"></div>
             </div>
             
-            <div class="space-y-3">
-                <div class="flex gap-2">
-                    <button id="run-once-btn" onclick="openManualTimer()" class="flex-1 bg-[#1e293b] text-white py-6 rounded-[24px] font-black uppercase tracking-widest text-sm shadow-xl active:scale-95 transition">
-                        RUN TIMER
-                    </button>
-                    <button id="cloud-save-btn" onclick="saveToCloud()" class="hidden bg-blue-600 text-white px-6 rounded-[24px] font-black uppercase text-[10px] shadow-xl active:scale-95 transition">
-                        <i class="fas fa-cloud-upload-alt mb-1"></i><br>SAVE
-                    </button>
-                </div>
-                <button id="save-list-btn" onclick="saveAndAddEquipment()" class="admin-only w-full bg-[#0d9488] text-white py-4 rounded-[24px] font-black uppercase tracking-widest text-[10px] shadow-md active:scale-95 transition hidden">
-                    PERMANENT SAVE (SYNCED)
+            <div class="space-y-5 pt-6">
+                <button id="run-once-btn" onclick="openManualTimer()" class="btn-calc w-full py-7 text-base tracking-[0.3em]">
+                    INITIALIZE TIMER
                 </button>
-                <button id="delete-equip-btn" onclick="deleteConfiguration()" class="admin-only w-full bg-red-600 text-white py-4 rounded-[24px] font-black uppercase tracking-widest text-[10px] shadow-md active:scale-95 transition hidden">
-                    DELETE CONFIGURATION
+                <button id="save-list-btn" onclick="saveAndAddEquipment()" class="admin-only btn-calc btn-blue w-full py-6 text-xs hidden tracking-[0.2em]">
+                    PERMANENT DEPLOYMENT
+                </button>
+                <button id="delete-equip-btn" onclick="deleteConfiguration()" class="admin-only btn-calc btn-red w-full py-5 text-xs hidden tracking-[0.1em]">
+                    ERASE ASSET PROFILE
                 </button>
             </div>
         </div>
@@ -233,95 +324,100 @@
 
     <!-- TIMER SCREEN -->
     <div id="timer-screen" class="screen">
-        <div class="flex justify-between items-center mb-4">
-            <div class="flex gap-3 items-center">
-                <button id="timer-home-btn" onclick="goHome()" class="flex items-center gap-1 text-slate-500 font-bold hover:text-slate-800 transition text-xs">
-                    <i class="fas fa-home w-4 h-4"></i> HOME
+        <div class="flex justify-between items-center mb-8">
+            <div class="flex gap-4 items-center">
+                <button id="timer-home-btn" onclick="goHome()" class="btn-calc px-5 py-3 text-[11px]">
+                    <i class="fas fa-times-circle mr-2"></i> EXIT
                 </button>
-                <button onclick="editCurrentEquipment()" class="admin-only bg-slate-800 text-white px-3 py-1 rounded-lg font-black text-[9px] uppercase hidden">
-                    <i class="fas fa-edit mr-1"></i> Edit Settings
+                <button onclick="editCurrentEquipment()" class="admin-only btn-calc w-12 h-12 hidden">
+                    <i class="fas fa-cog"></i>
                 </button>
             </div>
-            <div id="dateDisplay" class="text-[10px] font-black text-slate-400 uppercase tracking-widest"></div>
+            <div id="dateDisplay" class="text-[11px] font-black opacity-30 uppercase tracking-[0.3em]"></div>
         </div>
 
-        <div id="standard-inputs" class="mb-4">
-            <div class="mode-toggle flex gap-3 mb-3" id="modeToggleContainer">
-                <button id="m-load" class="flex-1 py-4 rounded-2xl border-2 border-slate-900 bg-white font-black text-xs" onclick="updateMode('LOADING')">LOADING</button>
-                <button id="m-dis" class="flex-1 py-4 rounded-2xl border-2 border-slate-200 bg-white font-black text-xs" onclick="updateMode('DISCHARGE')">DISCHARGE</button>
+        <div id="standard-inputs" class="mb-6">
+            <div class="mode-toggle flex gap-5 mb-5" id="modeToggleContainer">
+                <button id="m-load" class="btn-calc flex-1 py-6 text-sm mode-active" onclick="updateMode('LOADING')">LOADING</button>
+                <button id="m-dis" class="btn-calc flex-1 py-6 text-sm opacity-30" onclick="updateMode('DISCHARGE')">DISCHARGE</button>
             </div>
-            <div id="dynamic-inputs" class="space-y-2"></div>
+            <div id="dynamic-inputs" class="space-y-4"></div>
         </div>
 
-        <div class="timer-container shadow-2xl bg-[#212529] rounded-[24px] p-8 relative w-full mb-4">
-            <div class="absolute top-3 right-3 bg-[#ff9f00] text-white px-3 py-1 rounded-lg font-black text-[0.7rem] uppercase">
-                Cycles: <span id="cycle-count">0</span>
+        <!-- Divided LCD Box -->
+        <div class="timer-container">
+            <div class="lcd-sub-section">
+                <span class="lcd-label">LAST CYCLE</span>
+                <span id="last-cycle-display">0.00</span>
             </div>
-            <div id="main-timer" class="font-black text-[#00d2ff] text-center leading-none text-[5.5rem]">0.00</div>
+            <div class="flex justify-between items-end">
+                <span class="lcd-label mb-2">CURRENT</span>
+                <div id="main-timer">0.00</div>
+            </div>
+            <div class="absolute top-1 left-2 text-slate-800 font-black text-[0.5rem] uppercase opacity-40">
+                CYCLES: <span id="cycle-count">0</span>
+            </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3 mb-3">
-            <button id="pause-btn" onclick="togglePause()" class="bg-[#adb5bd] text-white py-4 rounded-2xl font-black uppercase tracking-wider active:scale-95 transition">Pause</button>
-            <button id="wait-btn" onclick="toggleWaiting()" class="bg-[#adb5bd] text-white py-4 rounded-2xl font-black uppercase tracking-wider active:scale-95 transition">Waiting</button>
+        <div class="grid grid-cols-2 gap-5 mb-5">
+            <button id="pause-btn" onclick="togglePause()" class="btn-calc py-7 text-xs" style="background-color: #f59e0b; box-shadow: inset 0 1px 2px rgba(255,255,255,0.4), 0 5px 0 #b45309, 0 10px 20px rgba(0,0,0,0.5);">
+                PAUSE
+            </button>
+            <button id="wait-btn" onclick="toggleWaiting()" class="btn-calc py-7 text-xs" style="background-color: #0ea5e9; box-shadow: inset 0 1px 2px rgba(255,255,255,0.4), 0 5px 0 #0369a1, 0 10px 20px rgba(0,0,0,0.5);">
+                WAITING
+            </button>
         </div>
 
-        <div class="grid grid-cols-2 gap-3 mb-4">
-            <button onclick="undoLastCycle()" class="bg-[#495057] text-white py-4 text-[10px] uppercase font-black rounded-xl active:scale-95 transition">Reset Last Cycle</button>
-            <button onclick="resetFullSession()" class="bg-[#64748b] text-white py-4 text-[10px] uppercase font-black rounded-xl active:scale-95 transition">Reset Full</button>
+        <div class="grid grid-cols-2 gap-5 mb-10">
+            <button onclick="undoLastCycle()" class="btn-calc py-5 text-[10px] opacity-60">UNDO CYCLE</button>
+            <button onclick="resetFullSession()" class="btn-calc py-5 text-[10px] opacity-60">RESET ALL</button>
         </div>
 
-        <div id="step-grid" class="grid grid-cols-2 gap-3 pt-2"></div>
+        <div id="step-grid" class="grid grid-cols-2 gap-5 pt-2"></div>
 
-        <button id="stop-cycle-btn" onclick="stopCycle()" class="w-full py-6 bg-[#e11d48] text-white text-2xl font-black uppercase tracking-widest mt-4 shadow-xl active:scale-95 transition rounded-[20px] hidden">
-            STOP & RECORD
+        <button id="stop-cycle-btn" onclick="stopCycle()" class="btn-calc btn-red w-full py-10 text-3xl tracking-[0.25em] mt-10 hidden border-2 border-white/10">
+            STOP & LOG
         </button>
 
-        <button onclick="downloadReport()" class="w-full py-5 bg-[#212529] text-white text-lg font-black uppercase tracking-widest mt-6 shadow-xl active:scale-95 transition rounded-2xl">
-            Download Report (CSV)
+        <button onclick="downloadReport()" class="btn-calc w-full py-7 text-sm tracking-widest mt-12 mb-10 shadow-2xl">
+            <i class="fas fa-file-export mr-3 opacity-50"></i> EXPORT CSV REPORT
         </button>
 
-        <div id="session-status" class="text-center text-[10px] font-black text-slate-400 uppercase tracking-widest py-4">
-            Waiting - Click Step 1
+        <div id="session-status" class="text-center text-[10px] font-black text-slate-600 uppercase tracking-[0.5em] py-12">
+            STANDBY - SELECT STEP 01
         </div>
     </div>
 
     <!-- SUCCESS MODAL -->
-    <div id="recordModal" class="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-50 hidden">
-        <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl text-center mx-4 w-full max-sm">
-            <div class="w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-check text-3xl"></i>
+    <div id="recordModal" class="fixed inset-0 flex items-center justify-center bg-black/95 backdrop-blur-md z-50 hidden">
+        <div class="bg-white p-14 rounded-[3rem] shadow-2xl text-center mx-4 w-full max-w-[320px]">
+            <div class="w-24 h-24 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-green-200">
+                <i class="fas fa-check text-5xl"></i>
             </div>
-            <h2 class="text-2xl font-black text-slate-800 uppercase">Cycle Recorded!</h2>
-            <p class="text-slate-500 font-bold uppercase text-xs mt-2">Ready for next cycle</p>
+            <h2 class="text-4xl font-black text-black uppercase tracking-tighter leading-none">LOGGED</h2>
         </div>
     </div>
 
     <!-- CT/GCT/MR SCREENS -->
     <div id="ct-ops-screen" class="screen">
-        <button class="bg-slate-100 px-4 py-2 rounded-lg font-black text-xs mb-6" onclick="showScreen('home-screen')"><i class="fas fa-arrow-left"></i> BACK</button>
-        <h2 class="text-center text-xl font-black text-[#ff9800] uppercase mb-6">CT OPERATIONS</h2>
+        <button class="btn-calc px-5 py-4 text-xs mb-12" onclick="showScreen('home-screen')">BACK</button>
+        <h2 class="text-4xl font-black uppercase tracking-tight mb-10">CT ASSETS</h2>
         <div class="equip-grid" id="ct-grid"></div>
-        <button class="admin-only w-full bg-slate-700 text-white font-black py-4 rounded-xl mt-4 hidden" onclick="openAdminNew()">
-            <i class="fa-solid fa-plus-circle mr-2"></i> ADD NEW
-        </button>
+        <button class="admin-only btn-calc w-full py-6 mt-10 hidden shadow-2xl" onclick="openAdminNew()">CREATE NEW ASSET</button>
     </div>
 
     <div id="gct-ops-screen" class="screen">
-        <button class="bg-slate-100 px-4 py-2 rounded-lg font-black text-xs mb-6" onclick="showScreen('home-screen')"><i class="fas fa-arrow-left"></i> BACK</button>
-        <h2 class="text-center text-xl font-black text-[#0891b2] uppercase mb-6">GCT OPERATIONS</h2>
+        <button class="btn-calc px-5 py-4 text-xs mb-12" onclick="showScreen('home-screen')">BACK</button>
+        <h2 class="text-4xl font-black uppercase tracking-tight mb-10">GCT ASSETS</h2>
         <div class="equip-grid" id="gct-grid"></div>
-        <button class="admin-only w-full bg-slate-700 text-white font-black py-4 rounded-xl mt-4 hidden" onclick="openAdminNew()">
-            <i class="fa-solid fa-plus-circle mr-2"></i> ADD NEW
-        </button>
+        <button class="admin-only btn-calc w-full py-6 mt-10 hidden shadow-2xl" onclick="openAdminNew()">CREATE NEW ASSET</button>
     </div>
 
     <div id="mr-screen" class="screen">
-        <button class="bg-slate-100 px-4 py-2 rounded-lg font-black text-xs mb-6" onclick="showScreen('home-screen')"><i class="fas fa-arrow-left"></i> BACK</button>
-        <h2 class="text-center text-xl font-black text-[#0d9488] uppercase mb-6">M&R</h2>
+        <button class="btn-calc px-5 py-4 text-xs mb-12" onclick="showScreen('home-screen')">BACK</button>
+        <h2 class="text-4xl font-black uppercase tracking-tight mb-10">M&R LOGS</h2>
         <div class="equip-grid" id="mr-grid"></div>
-        <button class="admin-only w-full bg-slate-700 text-white font-black py-4 rounded-xl mt-4 hidden" onclick="openAdminNew()">
-            <i class="fa-solid fa-plus-circle mr-2"></i> ADD NEW
-        </button>
+        <button class="admin-only btn-calc w-full py-6 mt-10 hidden shadow-2xl" onclick="openAdminNew()">CREATE NEW ASSET</button>
     </div>
 
 <script type="module">
@@ -329,27 +425,25 @@
     import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, collection, doc, setDoc, getDocs, addDoc, deleteDoc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // GLOBAL UI HELPER
     function showToast(msg, type = '') {
         const t = document.getElementById('toast');
         if (t) {
             t.innerText = msg;
-            t.className = type ? `toast-${type}` : '';
             t.style.display = 'block';
-            setTimeout(() => { t.style.display = 'none'; }, 2500);
+            setTimeout(() => { 
+                t.style.display = 'none'; 
+                t.innerText = ''; 
+            }, 2500);
         }
     }
     window.showToast = showToast;
 
-    // DEFENSIVE CONFIG LOADING
     let firebaseConfig = null;
     try {
         if (typeof __firebase_config !== 'undefined' && __firebase_config) {
             firebaseConfig = JSON.parse(__firebase_config);
         }
-    } catch (e) {
-        console.warn("Firebase config parse error.");
-    }
+    } catch (e) { console.warn("Firebase config error."); }
     
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
@@ -360,7 +454,6 @@
         db = getFirestore(app);
     }
 
-    // STATE
     let logs = [];
     let currentCrane = '';
     let currentMode = 'LOADING';
@@ -376,7 +469,6 @@
     let delayStart = null;
     let currentCycleData = {};
     
-    // Global State for inline handlers
     window.manualSteps = [];
     window.filterItems = [];
     window.isAdvancedSetup = false;
@@ -387,19 +479,46 @@
     let currentEditingEquip = null;
     let originalEquipName = ''; 
 
-    // PERSISTENT CUSTOM EQUIPMENT
     const STORAGE_KEY = 'cycle_timer_local_configs';
     let customEquipments = { 'ct-ops-screen': [], 'gct-ops-screen': [], 'mr-screen': [] };
 
-    // Initialize Local Data
+    async function fetchHistory() {
+        if (!db || !currentUser || currentUser.isAnonymous) return;
+        const listEl = document.getElementById('history-list');
+        if (listEl) listEl.innerHTML = '<p class="text-[11px] text-slate-500 font-black uppercase tracking-widest italic">Syncing with vault...</p>';
+        try {
+            const collectionRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'manualSetups');
+            const snapshot = await getDocs(collectionRef);
+            if (listEl) {
+                listEl.innerHTML = '';
+                const docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                docs.sort((a, b) => b.timestamp - a.timestamp);
+                if (docs.length === 0) { listEl.innerHTML = '<p class="text-[11px] text-slate-500 font-bold italic">No vault data found.</p>'; return; }
+                docs.forEach(data => {
+                    const item = document.createElement('div');
+                    item.className = "flex justify-between items-center bg-black/40 p-4 rounded-2xl border border-white/5 shadow-sm cursor-pointer hover:border-orange-500 transition-all group";
+                    item.innerHTML = `<div><div class="font-black text-xs uppercase text-white">${data.name}</div><div class="text-[9px] font-black text-slate-500 uppercase tracking-widest">${data.processTitle}</div></div><i class="fas fa-chevron-right text-slate-700 group-hover:text-orange-500 transition"></i>`;
+                    item.onclick = () => {
+                        document.getElementById('manualEquipId').value = data.name || '';
+                        document.getElementById('manualStaffId').value = data.staffId || '';
+                        document.getElementById('manualProcessTitle').value = data.processTitle || '';
+                        window.manualSteps = [...data.steps];
+                        renderManualSetupList();
+                        showToast("PROFILE LOADED");
+                    };
+                    listEl.appendChild(item);
+                });
+            }
+        } catch (e) { console.error("History fetch error"); }
+    }
+    window.fetchHistory = fetchHistory;
+
     function loadLocalEquipment() {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
             const data = JSON.parse(saved);
-            // Merge local into state
             Object.keys(data).forEach(cat => {
                 if (customEquipments[cat]) {
-                    // Only add if not already present from cloud sync
                     data[cat].forEach(localEquip => {
                         const exists = customEquipments[cat].find(e => e.name === localEquip.name);
                         if (!exists) customEquipments[cat].push(localEquip);
@@ -423,21 +542,20 @@
 
     const config = {
         QC: {
-            LOADING: ["1. FROM PARK POSITION TO ADJUST ON TRUCK", "2. FROM START ADJUSTING ON TRUCK TO TO LOCK THE CONTAINER ON TRUCK", "3. FROM LOCK ON CONTAINER ON TRUCK TO SILL BEAM", "4. FROM SILL BEAM TO START ADJUSTING ON TARGET ROW", "5. FROM START ADJUSTING ON TARGET ROW TO UNLOCK"],
-            DISCHARGE: ["1. FROM PARK TO SILL BEAM TO START TARGET ROW", "2. FROM START ADJUSTING ON CONTAINER TO LOCK", "3. FROM LOCK TO SILL BEAM", "4. FROM SILL BEAM TO START ADJUSTING ON TRUCK", "5. FROM START ADJUSTING ON TRUCK TO UNLOCK ON TRUCK"]
+            LOADING: ["1. PARK TO ADJUST ON TRUCK", "2. ADJUST TO LOCK ON TRUCK", "3. LOCK TO SILL BEAM", "4. SILL BEAM TO TARGET ROW", "5. ADJUST ON ROW TO UNLOCK"],
+            DISCHARGE: ["1. PARK TO SILL BEAM", "2. SILL BEAM TO LOCK ON ROW", "3. LOCK TO SILL BEAM", "4. SILL BEAM TO TRUCK", "5. ADJUST ON TRUCK TO UNLOCK"]
         },
         RTG: {
-            LOADING: ["1. FROM PARK POSITION TO LOCK CONTAINER IN THE BAY", "2. FROM LOCK IN THE BAY TO A-ROW", "3. FROM A- ROW TO UNLOCK ON TRUCK"],
-            DISCHARGE: ["1. FROM PARK POSITION TO LOCK ON TRUCK", "2. FROM LOCK ON TRUCK TO UNLOCK ON TARGET ROW"]
+            LOADING: ["1. PARK TO LOCK IN BAY", "2. LOCK TO A-ROW", "3. A-ROW TO UNLOCK ON TRUCK"],
+            DISCHARGE: ["1. PARK TO LOCK ON TRUCK", "2. LOCK ON TRUCK TO UNLOCK ON ROW"]
         },
         TT: {
-            LOADING: ["1. Container lifted by QC", "2. Move to yard RTG location", "3. Received container from RTG", "4. Move to PULL position", "5. Move to pinning area", "6. Fixing twistlock", "7. Move to standby position"],
-            DISCHARGE: ["1. Received container from QC", "2. Move to pinning station", "3. Twistlocks removed", "4. Move to RTG", "5. Containers discharged", "6. Move to PULL position", "7. Move to standby position"]
+            LOADING: ["1. Lifted by QC", "2. Move to RTG", "3. Rec from RTG", "4. Move to PULL", "5. Move to Pinning", "6. Fixing twistlock", "7. Standby"],
+            DISCHARGE: ["1. Rec from QC", "2. Move to Pinning", "3. Twistlocks out", "4. Move to RTG", "5. Discharged", "6. Move to PULL", "7. Standby"]
         },
-        DEFAULT: ["1. Start operation", "2. In progress"]
+        DEFAULT: ["1. Start cycle", "2. End cycle"]
     };
 
-    // AUTH
     const initAuth = async () => {
         if (!auth) return;
         try {
@@ -446,7 +564,7 @@
             } else {
                 await signInAnonymously(auth);
             }
-        } catch (e) { console.error("Auth error", e); }
+        } catch (e) {}
     };
 
     if (auth) {
@@ -454,96 +572,66 @@
             currentUser = user;
             const profile = document.getElementById('user-profile');
             const loginBtn = document.getElementById('google-login-btn');
-            const cloudBtn = document.getElementById('cloud-save-btn');
-            const historySec = document.getElementById('history-section');
             
             if (user) {
                 setupPublicEquipmentListener();
                 if (!user.isAnonymous) {
                     if (profile) profile.classList.remove('hidden');
                     if (loginBtn) loginBtn.classList.add('hidden');
-                    if (cloudBtn) cloudBtn.classList.remove('hidden');
-                    if (historySec) historySec.classList.remove('hidden');
-                    const emailEl = document.getElementById('user-email');
-                    if (emailEl) emailEl.innerText = user.email;
+                    document.getElementById('user-email').innerText = user.email;
                     fetchHistory();
                 } else {
                     if (profile) profile.classList.add('hidden');
                     if (loginBtn) loginBtn.classList.remove('hidden');
-                    if (cloudBtn) cloudBtn.classList.add('hidden');
-                    if (historySec) historySec.classList.add('hidden');
                 }
             }
         });
         initAuth();
     }
 
-    // FIRESTORE SYNC
     function setupPublicEquipmentListener() {
         if (!currentUser || !db) return;
         const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'customEquipment');
-        
         onSnapshot(collectionRef, (snapshot) => {
-            // Keep existing state structure
-            const syncedFromCloud = { 'ct-ops-screen': [], 'gct-ops-screen': [], 'mr-screen': [] };
+            const synced = { 'ct-ops-screen': [], 'gct-ops-screen': [], 'mr-screen': [] };
             snapshot.forEach(doc => {
                 const data = doc.data();
-                if (data.category && syncedFromCloud[data.category]) {
-                    syncedFromCloud[data.category].push({ id: doc.id, ...data });
-                }
+                if (data.category && synced[data.category]) synced[data.category].push({ id: doc.id, ...data });
             });
-            // Update and merge with local
-            customEquipments = syncedFromCloud;
+            customEquipments = synced;
             loadLocalEquipment(); 
-            
-            if (window.parentScreen && window.parentScreen !== 'home-screen') {
-                renderEquipmentGrid(window.parentScreen);
-            }
-        }, (error) => console.error("Cloud Sync Error"));
+            if (window.parentScreen !== 'home-screen') renderEquipmentGrid(window.parentScreen);
+        });
     }
 
-    // NAVIGATION
     window.showScreen = (id) => {
         if (!id) id = 'home-screen';
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         const target = document.getElementById(id);
         if (target) {
             target.classList.add('active');
-            if (id.includes('ops') || id === 'mr-screen') {
-                window.parentScreen = id;
-                renderEquipmentGrid(id);
-            } else if (id === 'home-screen') {
-                window.parentScreen = 'home-screen';
-            }
+            if (id.includes('ops') || id === 'mr-screen') { window.parentScreen = id; renderEquipmentGrid(id); }
         }
-        const dateEl = document.getElementById('dateDisplay');
-        if (dateEl) dateEl.innerText = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        document.getElementById('dateDisplay').innerText = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
     };
 
     window.goHome = () => {
         if (startTime) {
-            openModal("Exit?", "Discard current measurement?", () => { 
+            openModal("ABORT MEASUREMENT?", "All current timing data will be purged. Confirm exit?", () => { 
                 resetCurrentTimerUI(); 
                 window.showScreen(window.parentScreen); 
             });
-        } else {
-            window.showScreen(window.parentScreen);
-        }
+        } else { window.showScreen(window.parentScreen); }
     };
 
-    // EQUIPMENT GRID
     function renderEquipmentGrid(screenId) {
         let gridId = (screenId === 'ct-ops-screen' ? 'ct-grid' : (screenId === 'gct-ops-screen' ? 'gct-grid' : 'mr-grid'));
-        let bgColor = (screenId === 'ct-ops-screen' ? 'var(--orange)' : (screenId === 'gct-ops-screen' ? 'var(--ct-blue)' : 'var(--mr-teal)'));
-        const grid = document.getElementById(gridId);
-        if (!grid) return;
+        const grid = document.getElementById(gridId); if (!grid) return;
         grid.innerHTML = '';
-        
         const allNames = Array.from(new Set([...baseEquipments[screenId], ...customEquipments[screenId].map(c => c.name)]));
         allNames.forEach(name => {
             const btn = document.createElement('button');
-            btn.className = 'equip-item' + (name === 'M&R' ? ' col-span-2' : '');
-            btn.style.background = bgColor;
+            btn.className = 'btn-calc equip-item' + (name === 'M&R' ? ' col-span-2' : '');
             btn.innerText = name;
             const customData = customEquipments[screenId].find(c => c.name === name);
             btn.onclick = () => initTimer(name, customData);
@@ -551,34 +639,25 @@
         });
     }
 
-    // TIMER LOGIC
     window.initTimer = (equipment, customData = null) => {
         isManualMode = false; currentCrane = equipment; currentEditingEquip = customData; 
-        const inputDiv = document.getElementById('dynamic-inputs');
-        if (!inputDiv) return;
-        inputDiv.innerHTML = '';
-        const darkInputClass = "p-3 border-2 border-slate-900 rounded-xl text-xs font-black outline-none bg-white text-slate-900";
+        const inputDiv = document.getElementById('dynamic-inputs'); inputDiv.innerHTML = '';
+        const darkInputClass = "dark-input text-xs";
         if (customData) {
-            isManualMode = true; 
-            window.manualSteps = [...customData.steps];
+            isManualMode = true; window.manualSteps = [...customData.steps];
             const modeToggle = document.getElementById('modeToggleContainer');
-            if (modeToggle) {
-                if (customData.processType === 'BOTH') modeToggle.classList.remove('hidden');
-                else { modeToggle.classList.add('hidden'); currentMode = customData.processType || 'MANUAL'; }
-            }
+            if (customData.processType === 'BOTH') modeToggle.classList.remove('hidden');
+            else { modeToggle.classList.add('hidden'); currentMode = customData.processType || 'MANUAL'; }
             if (customData.filterTitle && customData.filterOptions && customData.filterOptions.length > 0) {
                 let opts = customData.filterOptions.map(o => `<option value="${o}">${o}</option>`).join('');
-                inputDiv.innerHTML = `<div class="grid grid-cols-1 gap-2"><label class="setup-label text-slate-500">${customData.filterTitle}</label><select id="customFilter" class="${darkInputClass}">${opts}</select><input type="text" id="unitNo" placeholder="Equipment ID/No" class="${darkInputClass}"></div>`;
-            } else {
-                inputDiv.innerHTML = `<input type="text" id="unitNo" placeholder="Equipment ID/No" class="${darkInputClass}">`;
-            }
+                inputDiv.innerHTML = `<label class="setup-label">${customData.filterTitle}</label><select id="customFilter" class="${darkInputClass}">${opts}</select><input type="text" id="unitNo" placeholder="Asset ID" class="${darkInputClass}">`;
+            } else { inputDiv.innerHTML = `<input type="text" id="unitNo" placeholder="Asset ID" class="${darkInputClass}">`; }
         } else {
-            const modeToggle = document.getElementById('modeToggleContainer');
-            if (modeToggle) modeToggle.classList.remove('hidden');
+            document.getElementById('modeToggleContainer').classList.remove('hidden');
             if (equipment === 'QC') {
-                inputDiv.innerHTML = `<div class="grid grid-cols-2 gap-2"><input type="text" id="staffId" placeholder="STAFF ID" class="${darkInputClass}"><input type="text" id="unitNo" placeholder="QC#" class="${darkInputClass} text-center"></div><select id="category" onchange="renderSteps()" class="${darkInputClass} w-full"><option value="Above deck">Above deck</option><option value="Below deck">Below deck</option><option value="Hatch cover">Hatch cover</option><option value="OOG">OOG</option></select>`;
+                inputDiv.innerHTML = `<div class="grid grid-cols-2 gap-3"><input type="text" id="staffId" placeholder="OP-ID" class="${darkInputClass}"><input type="text" id="unitNo" placeholder="CRANE#" class="${darkInputClass} text-center"></div><select id="category" onchange="renderSteps()" class="${darkInputClass} w-full"><option value="Above deck">Above deck</option><option value="Below deck">Below deck</option><option value="Hatch cover">Hatch cover</option><option value="OOG">OOG</option></select>`;
             } else {
-                inputDiv.innerHTML = `<div class="grid grid-cols-2 gap-2"><input type="text" id="staffId" placeholder="STAFF ID" class="${darkInputClass}"><input type="text" id="unitNo" placeholder="UNIT NO" class="${darkInputClass}"></div>`;
+                inputDiv.innerHTML = `<div class="grid grid-cols-2 gap-3"><input type="text" id="staffId" placeholder="OP-ID" class="${darkInputClass}"><input type="text" id="unitNo" placeholder="UNIT#" class="${darkInputClass}"></div>`;
             }
             updateMode('LOADING');
         }
@@ -589,286 +668,152 @@
         if (startTime) return;
         currentMode = mode;
         const l = document.getElementById('m-load'); const d = document.getElementById('m-dis');
-        if (l && d) {
-            if (mode === 'LOADING') { l.className = 'flex-1 py-4 rounded-2xl border-2 border-slate-900 font-black text-xs mode-active'; d.className = 'flex-1 py-4 rounded-2xl border-2 border-slate-200 bg-white font-black text-xs text-slate-400'; }
-            else { d.className = 'flex-1 py-4 rounded-2xl border-2 border-slate-900 font-black text-xs mode-active'; l.className = 'flex-1 py-4 rounded-2xl border-2 border-slate-200 bg-white font-black text-xs text-slate-400'; }
-        }
+        if (mode === 'LOADING') { l.classList.add('mode-active'); l.classList.remove('opacity-30'); d.classList.remove('mode-active'); d.classList.add('opacity-30'); }
+        else { d.classList.add('mode-active'); d.classList.remove('opacity-30'); l.classList.remove('mode-active'); l.classList.add('opacity-30'); }
         renderSteps();
     };
 
     function renderSteps() {
-        const grid = document.getElementById('step-grid'); if (!grid) return;
-        grid.innerHTML = '';
+        const grid = document.getElementById('step-grid'); grid.innerHTML = '';
         currentSteps = isManualMode ? window.manualSteps : (config[currentCrane]?.[currentMode] || config[currentCrane] || config.DEFAULT);
         currentSteps.forEach((text, i) => {
-            const btn = document.createElement('button'); btn.id = `s${i+1}`; btn.className = 'btn-step step-available'; btn.innerText = text; btn.disabled = (i !== 0); btn.onclick = () => triggerStep(i + 1); grid.appendChild(btn);
+            const btn = document.createElement('button'); btn.id = `s${i+1}`; btn.className = 'btn-calc btn-step step-available'; btn.innerText = text; btn.disabled = (i !== 0); btn.onclick = () => triggerStep(i + 1); grid.appendChild(btn);
         });
     }
 
     function triggerStep(num) {
         const now = Date.now();
         const stopBtnEl = document.getElementById('stop-cycle-btn');
-        if (num === 1 && stopBtnEl && !stopBtnEl.classList.contains('hidden')) finalizeCycleSilently(now);
+        if (num === 1 && !stopBtnEl.classList.contains('hidden')) finalizeCycleSilently(now);
         if (num === 1) {
-            startTime = now; absoluteStartTime = now; lastTime = now; totalWaitingDuration = 0;
-            const filterVal = document.getElementById('customFilter')?.value || "N/A";
-            currentCycleData = isManualMode ? { Date: new Date().toLocaleDateString(), Time: new Date().toLocaleTimeString(), Equipment: currentCrane, Filter: filterVal, Unit_No: document.getElementById('unitNo')?.value || "N/A", Operation: currentMode } : { Date: new Date().toLocaleDateString(), Time: new Date().toLocaleTimeString(), Equipment: currentCrane, Staff_ID: document.getElementById('staffId')?.value || "N/A", Unit_No: document.getElementById('unitNo')?.value || "N/A", Operation: currentMode };
-            activeInterval = setInterval(() => { const mainTimer = document.getElementById('main-timer'); if (mainTimer) mainTimer.innerText = ((Date.now() - startTime) / 1000).toFixed(2); }, 50);
-            if (stopBtnEl) stopBtnEl.classList.add('hidden');
+            startTime = now;
+            absoluteStartTime = now; 
+            lastTime = now; 
+            totalWaitingDuration = 0;
+            currentCycleData = isManualMode ? { Date: new Date().toLocaleDateString(), Equipment: currentCrane, Operation: currentMode } : { Date: new Date().toLocaleDateString(), Equipment: currentCrane, Staff: document.getElementById('staffId')?.value || "N/A", Operation: currentMode };
+            
+            clearInterval(activeInterval);
+            activeInterval = setInterval(() => { 
+                const elapsed = (Date.now() - startTime) / 1000;
+                document.getElementById('main-timer').innerText = elapsed.toFixed(2); 
+            }, 50);
+            stopBtnEl.classList.add('hidden');
         } else { currentCycleData[`Step_${num - 1}`] = ((now - lastTime) / 1000).toFixed(2); }
         document.querySelectorAll('.btn-step').forEach(b => { b.disabled = true; b.classList.remove('step-active'); b.classList.add('step-available'); });
-        const act = document.getElementById(`s${num}`); if (act) { act.classList.replace('step-available', 'step-active'); act.disabled = false; }
-        if (num === currentSteps.length) { if (stopBtnEl) stopBtnEl.classList.remove('hidden'); const s1 = document.getElementById('s1'); if (s1) s1.disabled = false; }
-        else { const next = document.getElementById(`s${num + 1}`); if (next) next.disabled = false; }
+        const act = document.getElementById(`s${num}`); act.classList.replace('step-available', 'step-active'); act.disabled = false;
+        if (num === currentSteps.length) { stopBtnEl.classList.remove('hidden'); document.getElementById('s1').disabled = false; }
+        else { document.getElementById(`s${num + 1}`).disabled = false; }
         lastTime = now;
     }
-    window.triggerStep = triggerStep;
 
     function finalizeCycleSilently(now) {
         clearInterval(activeInterval);
+        const netTime = ((now - startTime) / 1000).toFixed(2);
         currentCycleData[`Step_${currentSteps.length}`] = ((now - lastTime) / 1000).toFixed(2);
-        currentCycleData['Net_Cycle_Time'] = ((now - startTime) / 1000).toFixed(2);
-        currentCycleData['Gross_Cycle_Time'] = ((now - absoluteStartTime) / 1000).toFixed(2);
-        currentCycleData['Waiting_Time'] = (totalWaitingDuration / 1000).toFixed(2);
+        currentCycleData['Net_Cycle'] = netTime;
+        currentCycleData['Waiting'] = (totalWaitingDuration / 1000).toFixed(2);
+        
+        // Update "Last Cycle" section in LCD
+        document.getElementById('last-cycle-display').innerText = netTime;
+        
         logs.push({ ...currentCycleData }); cycleCount++;
-        const cycleCountEl = document.getElementById('cycle-count'); if (cycleCountEl) cycleCountEl.innerText = cycleCount;
+        document.getElementById('cycle-count').innerText = cycleCount;
     }
 
     window.stopCycle = () => {
         finalizeCycleSilently(Date.now());
-        const recordModalEl = document.getElementById('recordModal');
-        if (recordModalEl) recordModalEl.classList.remove('hidden');
-        setTimeout(() => { if (recordModalEl) recordModalEl.classList.add('hidden'); resetCurrentTimerUI(); }, 1000);
+        document.getElementById('recordModal').classList.remove('hidden');
+        setTimeout(() => { document.getElementById('recordModal').classList.add('hidden'); resetCurrentTimerUI(); }, 1000);
     };
 
     window.togglePause = () => {
         if (!startTime) return;
         const pBtn = document.getElementById('pause-btn');
-        if (!isPaused) { if (isWaiting) toggleWaiting(); isPaused = true; delayStart = Date.now(); if (pBtn) pBtn.classList.add('bg-amber-500'); clearInterval(activeInterval); }
-        else { isPaused = false; let d = Date.now() - delayStart; startTime += d; lastTime += d; if (pBtn) pBtn.classList.remove('bg-amber-500'); activeInterval = setInterval(() => { const mainTimer = document.getElementById('main-timer'); if (mainTimer) mainTimer.innerText = ((Date.now() - startTime) / 1000).toFixed(2); }, 50); }
+        if (!isPaused) { if (isWaiting) toggleWaiting(); isPaused = true; delayStart = Date.now(); pBtn.style.opacity = '0.5'; clearInterval(activeInterval); }
+        else { isPaused = false; let d = Date.now() - delayStart; startTime += d; lastTime += d; pBtn.style.opacity = '1'; activeInterval = setInterval(() => { document.getElementById('main-timer').innerText = ((Date.now() - startTime) / 1000).toFixed(2); }, 50); }
     };
 
     window.toggleWaiting = () => {
         if (!startTime) return;
         const wBtn = document.getElementById('wait-btn');
-        if (!isWaiting) { if (isPaused) togglePause(); isWaiting = true; delayStart = Date.now(); if (wBtn) wBtn.classList.add('bg-cyan-500'); clearInterval(activeInterval); }
-        else { isWaiting = false; let d = Date.now() - delayStart; totalWaitingDuration += d; startTime += d; lastTime += d; if (wBtn) wBtn.classList.remove('bg-cyan-500'); activeInterval = setInterval(() => { const mainTimer = document.getElementById('main-timer'); if (mainTimer) mainTimer.innerText = ((Date.now() - startTime) / 1000).toFixed(2); }, 50); }
+        if (!isWaiting) { if (isPaused) togglePause(); isWaiting = true; delayStart = Date.now(); wBtn.style.opacity = '0.5'; clearInterval(activeInterval); }
+        else { isWaiting = false; let d = Date.now() - delayStart; totalWaitingDuration += d; startTime += d; lastTime += d; wBtn.style.opacity = '1'; activeInterval = setInterval(() => { document.getElementById('main-timer').innerText = ((Date.now() - startTime) / 1000).toFixed(2); }, 50); }
     };
 
     function resetCurrentTimerUI() {
         clearInterval(activeInterval); startTime = null; isPaused = false; isWaiting = false;
-        const mainTimer = document.getElementById('main-timer'); if (mainTimer) mainTimer.innerText = "0.00";
-        const stopBtnEl = document.getElementById('stop-cycle-btn'); if (stopBtnEl) stopBtnEl.classList.add('hidden');
-        const pBtn = document.getElementById('pause-btn'); const wBtn = document.getElementById('wait-btn');
-        if (pBtn) pBtn.classList.remove('bg-amber-500'); if (wBtn) wBtn.classList.remove('bg-cyan-500');
+        document.getElementById('main-timer').innerText = "0.00";
+        document.getElementById('stop-cycle-btn').classList.add('hidden');
+        document.getElementById('pause-btn').style.opacity = '1';
+        document.getElementById('wait-btn').style.opacity = '1';
         renderSteps();
     }
-    window.resetCurrentTimerUI = resetCurrentTimerUI;
 
-    // CLOUD / SETUP
     window.loginWithGoogle = async () => {
-        if (!auth) return showToast("Login is only available in the cloud environment.", "error");
-        const provider = new GoogleAuthProvider();
-        try {
-            await signInWithPopup(auth, provider);
-            showToast("Cloud Login Successful", "success");
-        } catch (e) { showToast("Login failed", "error"); }
+        if (!auth) return showToast("Administrative login requires active cloud session.", "error");
+        try { await signInWithPopup(auth, new GoogleAuthProvider()); showToast("CLOUD CONNECTED", "success"); } catch (e) {}
     };
 
-    window.logoutGoogle = () => {
-        if (!auth) return;
-        signOut(auth);
-        signInAnonymously(auth);
-        showToast("Logged Out");
-    };
+    window.logoutGoogle = () => { if (auth) { signOut(auth); signInAnonymously(auth); } };
 
-    window.saveToCloud = async () => {
-        if (!db || !currentUser || currentUser.isAnonymous) return showToast("Cloud login required to sync data.", "error");
+    window.saveAndAddEquipment = async () => {
+        if (!isLoggedIn) return showToast("Administrative privilege required.", "error");
         const name = document.getElementById('manualEquipId').value.trim();
-        const staff = document.getElementById('manualStaffId').value.trim();
-        const procTitle = document.getElementById('manualProcessTitle').value.trim();
-        if (!name || window.manualSteps.length === 0) return showToast("Name and Steps required", "error");
-        const setupData = { name, staffId: staff, processTitle: procTitle, steps: [...window.manualSteps], timestamp: Date.now() };
-        try {
-            const collectionRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'manualSetups');
-            await addDoc(collectionRef, setupData);
-            showToast("Saved to Cloud!", "success");
-            fetchHistory();
-        } catch (e) { showToast("Save failed", "error"); console.error(e); }
+        if (!name || window.manualSteps.length === 0) return showToast("VALIDATION ERROR: Missing Data.", "error");
+        const data = { name, steps: [...window.manualSteps], category: window.parentScreen, updatedAt: Date.now() };
+        if (db) { try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'customEquipment', name.replace(/\s/g, '_')), data); } catch (e) {} }
+        customEquipments[window.parentScreen] = customEquipments[window.parentScreen].filter(e => e.name !== name);
+        customEquipments[window.parentScreen].push(data);
+        saveLocalEquipment(); showToast("ASSET DEPLOYED"); renderEquipmentGrid(window.parentScreen); window.showScreen(window.parentScreen);
     };
 
-    window.fetchHistory = async () => {
-        if (!db || !currentUser || currentUser.isAnonymous) return;
-        const listEl = document.getElementById('history-list');
-        if (listEl) listEl.innerHTML = '<p class="text-[10px] text-slate-400 italic">Syncing...</p>';
-        try {
-            const collectionRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'manualSetups');
-            const snapshot = await getDocs(collectionRef);
-            if (listEl) {
-                listEl.innerHTML = '';
-                const docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-                docs.sort((a, b) => b.timestamp - a.timestamp);
-                if (docs.length === 0) { listEl.innerHTML = '<p class="text-[10px] text-slate-400 italic">No saved setups yet.</p>'; return; }
-                docs.forEach(data => {
-                    const item = document.createElement('div');
-                    item.className = "flex justify-between items-center bg-white p-2 rounded-lg border border-slate-200 shadow-sm cursor-pointer hover:bg-slate-50";
-                    item.innerHTML = `<div><div class="font-black text-[10px] uppercase">${data.name}</div><div class="text-[8px] text-slate-500">${data.processTitle}</div></div><i class="fas fa-chevron-right text-[8px]"></i>`;
-                    item.onclick = () => {
-                        document.getElementById('manualEquipId').value = data.name || '';
-                        document.getElementById('manualStaffId').value = data.staffId || '';
-                        document.getElementById('manualProcessTitle').value = data.processTitle || '';
-                        window.manualSteps = [...data.steps];
-                        renderManualSetupList();
-                        showToast("Setup Loaded!");
-                    };
-                    listEl.appendChild(item);
-                });
-            }
-        } catch (e) { console.error(e); }
+    window.deleteConfiguration = async () => {
+        if (!originalEquipName) return;
+        openModal("ERASE PROFILE?", "Decommission asset from local/cloud storage?", async () => {
+            if (db) { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'customEquipment', originalEquipName.replace(/\s/g, '_'))); } catch (e) {} }
+            customEquipments[window.parentScreen] = customEquipments[window.parentScreen].filter(e => e.name !== originalEquipName);
+            saveLocalEquipment(); showToast("ERASED"); renderEquipmentGrid(window.parentScreen); window.showScreen(window.parentScreen);
+        });
     };
 
     window.openQuickManual = () => {
-        window.isAdvancedSetup = false; window.manualSteps = []; window.filterItems = []; originalEquipName = '';
-        window.parentScreen = 'home-screen';
+        window.isAdvancedSetup = false; window.manualSteps = [];
         document.getElementById('staff-id-group').classList.remove('hidden');
-        document.getElementById('process-title-group').classList.remove('hidden');
-        document.getElementById('process-type-group').classList.add('hidden');
-        document.getElementById('filter-setup-group').classList.add('hidden');
         document.getElementById('run-once-btn').classList.remove('hidden');
         document.getElementById('save-list-btn').classList.add('hidden');
-        document.getElementById('delete-equip-btn').classList.add('hidden');
-        document.getElementById('setup-title').innerText = "Manual Log Setup";
+        document.getElementById('setup-title').innerText = "AUDIT SETUP";
         resetSetupFields(); window.showScreen('manual-setup-screen');
     };
 
     window.openAdminNew = () => {
-        window.isAdvancedSetup = true; window.manualSteps = []; window.filterItems = []; originalEquipName = '';
+        window.isAdvancedSetup = true; window.manualSteps = [];
         document.getElementById('staff-id-group').classList.add('hidden');
-        document.getElementById('process-title-group').classList.add('hidden');
-        document.getElementById('process-type-group').classList.remove('hidden');
-        document.getElementById('filter-setup-group').classList.remove('hidden');
         document.getElementById('run-once-btn').classList.add('hidden');
         document.getElementById('save-list-btn').classList.remove('hidden');
-        document.getElementById('delete-equip-btn').classList.add('hidden');
-        document.getElementById('setup-title').innerText = "Add Equipment Configuration";
         resetSetupFields(); window.showScreen('manual-setup-screen');
     };
 
     window.editCurrentEquipment = () => {
         if (!isLoggedIn) return;
         window.isAdvancedSetup = true;
-        let d = currentEditingEquip || { name: currentCrane, processType: currentMode, steps: config[currentCrane]?.[currentMode] || config.DEFAULT, filterTitle: '', filterOptions: [] };
+        let d = currentEditingEquip || { name: currentCrane, steps: config[currentCrane]?.[currentMode] || config.DEFAULT };
         originalEquipName = d.name;
         document.getElementById('manualEquipId').value = d.name;
-        document.getElementById('filterTitle').value = d.filterTitle || '';
-        window.filterItems = [...(d.filterOptions || [])];
         window.manualSteps = [...(d.steps || [])];
-        
-        const pTypeSel = document.getElementById('processTypeSelect');
-        const pManualInput = document.getElementById('manualProcessTypeInput');
-        if (['LOADING', 'DISCHARGE', 'BOTH'].includes(d.processType)) {
-            pTypeSel.value = d.processType;
-            pManualInput.classList.add('hidden');
-        } else {
-            pTypeSel.value = 'MANUAL';
-            pManualInput.value = d.processType || '';
-            pManualInput.classList.remove('hidden');
-        }
-
-        document.getElementById('staff-id-group').classList.add('hidden');
-        document.getElementById('process-title-group').classList.add('hidden');
-        document.getElementById('process-type-group').classList.remove('hidden');
-        document.getElementById('filter-setup-group').classList.remove('hidden');
-        document.getElementById('run-once-btn').classList.add('hidden');
-        document.getElementById('save-list-btn').classList.remove('hidden');
-        document.getElementById('delete-equip-btn').classList.remove('hidden');
-        renderManualSetupList(); renderFilterList(); window.showScreen('manual-setup-screen');
-    };
-
-    window.saveAndAddEquipment = async () => {
-        if (!isLoggedIn) return showToast("Admin access required", "error");
-
-        const name = document.getElementById('manualEquipId').value.trim();
-        const procTypeSelect = document.getElementById('processTypeSelect');
-        const procManualInput = document.getElementById('manualProcessTypeInput');
-        const processType = (procTypeSelect.value === 'MANUAL' ? procManualInput.value.trim() : procTypeSelect.value);
-        
-        if (!name || window.manualSteps.length === 0) return showToast("Name and steps required.", "error");
-
-        const equipData = {
-            name,
-            processType,
-            filterTitle: document.getElementById('filterTitle').value.trim(),
-            filterOptions: [...window.filterItems],
-            steps: [...window.manualSteps],
-            category: window.parentScreen,
-            updatedAt: Date.now()
-        };
-
-        // Sync to cloud if available
-        if (db) {
-            try {
-                if (originalEquipName && originalEquipName !== name) {
-                    const oldDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'customEquipment', originalEquipName.replace(/\s/g, '_'));
-                    await deleteDoc(oldDocRef);
-                }
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'customEquipment', name.replace(/\s/g, '_'));
-                await setDoc(docRef, equipData);
-                showToast(`${name} Synced to Cloud!`, "success");
-            } catch (e) {
-                console.error("Cloud Error");
-            }
-        }
-
-        // Always Update Local State and Persistence
-        if (originalEquipName) {
-            customEquipments[window.parentScreen] = customEquipments[window.parentScreen].filter(e => e.name !== originalEquipName);
-        }
-        customEquipments[window.parentScreen] = customEquipments[window.parentScreen].filter(e => e.name !== name);
-        customEquipments[window.parentScreen].push(equipData);
-        saveLocalEquipment();
-        
-        showToast(`${name} Saved Successfully!`, "success");
-        renderEquipmentGrid(window.parentScreen);
-        window.showScreen(window.parentScreen);
-    };
-
-    window.deleteConfiguration = async () => {
-        if (!originalEquipName) return;
-        
-        openModal("Delete?", `Permanently remove ${originalEquipName}?`, async () => {
-            // Delete from Cloud
-            if (db) {
-                try {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'customEquipment', originalEquipName.replace(/\s/g, '_'));
-                    await deleteDoc(docRef);
-                } catch (e) { console.error("Cloud Delete Failed"); }
-            }
-
-            // Always Delete Locally
-            customEquipments[window.parentScreen] = customEquipments[window.parentScreen].filter(e => e.name !== originalEquipName);
-            saveLocalEquipment();
-            
-            showToast("Configuration Deleted");
-            renderEquipmentGrid(window.parentScreen);
-            window.showScreen(window.parentScreen);
-        });
+        renderManualSetupList(); window.showScreen('manual-setup-screen');
     };
 
     window.openManualTimer = () => {
-        const name = document.getElementById('manualEquipId').value.trim() || "Manual";
-        const d = { name, processType: document.getElementById('manualProcessTitle').value || "Quick Log", steps: [...window.manualSteps], staffId: document.getElementById('manualStaffId').value };
-        if (window.manualSteps.length === 0) return showToast("Add steps first.", "error");
+        const name = document.getElementById('manualEquipId').value.trim() || "Manual Audit";
+        const d = { name, steps: [...window.manualSteps] };
+        if (window.manualSteps.length === 0) return showToast("SEQUENCE ERROR: Add steps.", "error");
         window.initTimer(name, d);
     };
 
     function resetSetupFields() {
         document.getElementById('manualEquipId').value = ''; 
-        document.getElementById('manualStaffId').value = ''; 
-        document.getElementById('manualProcessTitle').value = ''; 
-        document.getElementById('manualProcessTypeInput').value = ''; 
-        document.getElementById('filterTitle').value = '';
-        renderManualSetupList(); renderFilterList();
+        document.getElementById('manualStepInput').value = ''; 
+        renderManualSetupList();
     }
 
     window.addManualStep = () => { 
@@ -876,63 +821,17 @@
         if (i && i.value.trim()) { window.manualSteps.push(i.value.trim()); renderManualSetupList(); i.value = ''; } 
     };
 
-    window.editStepInline = (index) => {
-        const newText = prompt("Edit Step:", window.manualSteps[index]);
-        if (newText !== null && newText.trim() !== "") {
-            window.manualSteps[index] = newText.trim();
-            renderManualSetupList();
-        }
-    };
-
-    window.removeStep = (index) => {
-        window.manualSteps.splice(index, 1);
-        renderManualSetupList();
-    };
+    window.removeStep = (index) => { window.manualSteps.splice(index, 1); renderManualSetupList(); };
 
     function renderManualSetupList() { 
-        const l = document.getElementById('manualStepList'); if (!l) return;
-        l.innerHTML = ''; 
+        const l = document.getElementById('manualStepList'); l.innerHTML = ''; 
         window.manualSteps.forEach((s, i) => { 
             const d = document.createElement('div'); 
-            d.className = 'flex justify-between items-center bg-white p-3 rounded-lg border-2 border-slate-900 mb-2 gap-2'; 
-            d.innerHTML = `
-                <span class="font-bold text-xs flex-1">${i+1}. ${s}</span>
-                <div class="flex gap-2">
-                    <button onclick="editStepInline(${i})" class="text-blue-600 font-black text-[10px] uppercase">Edit</button>
-                    <button onclick="removeStep(${i})" class="text-red-500 font-black text-[10px] uppercase">Del</button>
-                </div>
-            `; 
+            d.className = 'flex justify-between items-center bg-black/40 p-5 rounded-2xl border border-white/5'; 
+            d.innerHTML = `<span class="font-black text-xs uppercase tracking-tight text-white">${i+1}. ${s}</span><button onclick="removeStep(${i})" class="text-red-500 font-black text-[11px] uppercase tracking-widest">DEL</button>`; 
             l.appendChild(d); 
         }); 
     }
-    window.renderManualSetupList = renderManualSetupList;
-
-    window.removeFilter = (index) => {
-        window.filterItems.splice(index, 1);
-        renderFilterList();
-    };
-
-    function renderFilterList() { 
-        const l = document.getElementById('filterList'); if (!l) return; l.innerHTML = ''; 
-        window.filterItems.forEach((item, i) => { 
-            const s = document.createElement('span'); 
-            s.className = 'bg-slate-200 px-3 py-1 rounded-full font-black text-[10px] flex items-center gap-2 border-2 border-slate-900'; 
-            s.innerHTML = `${item} <i class="fas fa-times cursor-pointer" onclick="removeFilter(${i})"></i>`; 
-            l.appendChild(s); 
-        }); 
-    }
-    window.renderFilterList = renderFilterList;
-
-    window.addFilterItem = () => { 
-        let i = document.getElementById('filterItemInput'); 
-        if (i && i.value.trim()) { window.filterItems.push(i.value.trim()); renderFilterList(); i.value = ''; } 
-    };
-
-    window.toggleManualProcessInput = () => { 
-        const pManualInput = document.getElementById('manualProcessTypeInput'); 
-        const pTypeSelect = document.getElementById('processTypeSelect'); 
-        if (pManualInput && pTypeSelect) { pManualInput.classList.toggle('hidden', pTypeSelect.value !== 'MANUAL'); } 
-    };
 
     window.attemptLogin = () => {
         if (document.getElementById('adminPin').value === '1234') {
@@ -941,69 +840,31 @@
             document.getElementById('login-btn').classList.add('hidden');
             document.getElementById('logout-btn').classList.remove('hidden');
             document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
-            showToast("Admin Access Granted", "success");
+            showToast("ADMIN AUTHORIZED", "success");
             window.showScreen('home-screen');
-        } else { showToast("Invalid PIN", "error"); }
+        } else { showToast("ACCESS DENIED: PIN INVALID.", "error"); }
         document.getElementById('adminPin').value = '';
     };
 
-    window.logout = () => {
-        isLoggedIn = false;
-        document.getElementById('app-body').classList.remove('logged-in');
-        document.getElementById('login-btn').classList.remove('hidden');
-        document.getElementById('logout-btn').classList.add('hidden');
-        document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
-        showToast("Logged Out");
-        window.showScreen('home-screen');
-    };
+    window.logout = () => { isLoggedIn = false; location.reload(); };
 
-    window.undoLastCycle = () => { if (logs.length > 0) openModal("Undo?", "Remove last cycle?", () => { logs.pop(); cycleCount = Math.max(0, cycleCount-1); document.getElementById('cycle-count').innerText = cycleCount; resetCurrentTimerUI(); }); };
-    window.resetFullSession = () => { openModal("Reset?", "Delete all records?", () => { logs = []; cycleCount = 0; document.getElementById('cycle-count').innerText = "0"; resetCurrentTimerUI(); }); };
-    
     window.downloadReport = () => { 
-        if (logs.length === 0) return showToast("No logs to export.", "error"); 
+        if (logs.length === 0) return showToast("ERROR: NO DATA LOGS.", "error"); 
         const keys = Array.from(new Set(logs.flatMap(l => Object.keys(l)))); 
-        let csvContent = "\ufeff";
-        csvContent += keys.map(k => `"${k}"`).join(",") + "\r\n";
-        logs.forEach(l => { csvContent += keys.map(k => `"${l[k] || '0.00'}"`).join(",") + "\r\n"; });
-        const totalCycles = logs.length;
-        const totalNet = logs.reduce((acc, l) => acc + parseFloat(l.Net_Cycle_Time || 0), 0);
-        const totalGross = logs.reduce((acc, l) => acc + parseFloat(l.Gross_Cycle_Time || 0), 0);
-        const totalWait = logs.reduce((acc, l) => acc + parseFloat(l.Waiting_Time || 0), 0);
-        const avgNet = (totalNet / totalCycles).toFixed(2);
-        const avgGross = (totalGross / totalCycles).toFixed(2);
-        const avgWait = (totalWait / totalCycles).toFixed(2);
-        csvContent += "\r\n\"SESSION SUMMARY\"\r\n";
-        csvContent += `"Metric","Value"\r\n`;
-        csvContent += `"Total Cycles Recorded","${totalCycles}"\r\n`;
-        csvContent += `"Average Net Cycle Time","${avgNet} s"\r\n`;
-        csvContent += `"Average Gross Cycle Time","${avgGross} s"\r\n`;
-        csvContent += `"Total Cumulative Waiting Time","${totalWait.toFixed(2)} s"\r\n`;
-        csvContent += `"Average Waiting Time per Cycle","${avgWait} s"\r\n`;
-        csvContent += `"Total Session Gross Time","${totalGross.toFixed(2)} s"\r\n`;
-        try {
-            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" }); 
-            const link = document.createElement("a"); 
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", `Cycle_Report_${new Date().toISOString().slice(0,10)}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            showToast("Report Downloaded", "success");
-        } catch (e) {
-            showToast("Download Failed", "error");
-        }
+        let csv = "\ufeff" + keys.map(k => `"${k}"`).join(",") + "\r\n";
+        logs.forEach(l => { csv += keys.map(k => `"${l[k] || '0.00'}"`).join(",") + "\r\n"; });
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" }); 
+        const link = document.createElement("a"); 
+        link.href = URL.createObjectURL(blob);
+        link.download = `Performance_Report_${new Date().getTime()}.csv`;
+        link.click();
+        showToast("REPORT EXPORTED");
     };
 
     window.closeModal = () => { document.getElementById('custom-modal-overlay').style.display = 'none'; };
     window.openModal = (title, msg, onConfirm) => { document.getElementById('modal-title').innerText = title; document.getElementById('modal-msg').innerText = msg; document.getElementById('custom-modal-overlay').style.display = 'flex'; document.getElementById('modal-confirm-btn').onclick = () => { onConfirm(); closeModal(); }; };
 
-    window.onload = function() { 
-        loadLocalEquipment();
-        window.showScreen('home-screen'); 
-    };
+    window.onload = function() { loadLocalEquipment(); window.showScreen('home-screen'); };
 </script>
 </body>
 </html>
