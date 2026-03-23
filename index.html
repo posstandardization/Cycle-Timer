@@ -148,7 +148,7 @@
             </button>
             <div id="auth-status-container">
                 <button id="google-login-btn" onclick="loginWithGoogle()" class="flex items-center gap-2 bg-white border-2 border-slate-900 px-4 py-2 rounded-lg font-black text-[10px] uppercase shadow-sm">
-                    <i class="fab fa-google text-red-500"></i> Login to Save
+                    <i class="fab fa-google text-red-500"></i> Cloud Login
                 </button>
                 <div id="user-profile" class="hidden flex items-center gap-2">
                     <span id="user-email" class="text-[9px] font-black text-slate-500"></span>
@@ -342,20 +342,24 @@
     window.showToast = showToast;
 
     // DEFENSIVE CONFIG LOADING
-    let firebaseConfig = {};
+    let firebaseConfig = null;
     try {
-        firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+            firebaseConfig = JSON.parse(__firebase_config);
+        }
     } catch (e) {
-        console.warn("Firebase config not defined. Cloud features disabled.");
+        console.warn("Firebase config parse error.");
     }
     
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
     let app, auth, db;
-    if (firebaseConfig) {
+    if (firebaseConfig && firebaseConfig.apiKey) {
         app = initializeApp(firebaseConfig);
         auth = getAuth(app);
         db = getFirestore(app);
+    } else {
+        console.log("Running in Local Mode. Cloud features disabled.");
     }
 
     // STATE
@@ -378,9 +382,6 @@
     window.manualSteps = [];
     window.filterItems = [];
     window.isAdvancedSetup = false;
-    
-    let manualSteps = window.manualSteps;
-    let filterItems = window.filterItems;
     
     let isManualMode = false;
     let isLoggedIn = false;
@@ -641,11 +642,11 @@
 
     // CLOUD / SETUP
     window.loginWithGoogle = async () => {
-        if (!auth) return showToast("Firebase not configured", "error");
+        if (!auth) return showToast("Cloud setup is only available in the app preview.", "error");
         const provider = new GoogleAuthProvider();
         try {
             await signInWithPopup(auth, provider);
-            showToast("Logged in with Google", "success");
+            showToast("Logged in successfully", "success");
         } catch (e) { showToast("Login failed", "error"); }
     };
 
@@ -657,7 +658,7 @@
     };
 
     window.saveToCloud = async () => {
-        if (!db || !currentUser || currentUser.isAnonymous) return showToast("Login required", "error");
+        if (!db || !currentUser || currentUser.isAnonymous) return showToast("Cloud login required to save.", "error");
         const name = document.getElementById('manualEquipId').value.trim();
         const staff = document.getElementById('manualStaffId').value.trim();
         const procTitle = document.getElementById('manualProcessTitle').value.trim();
@@ -761,7 +762,7 @@
 
     window.saveAndAddEquipment = async () => {
         if (!isLoggedIn) return showToast("Admin access required", "error");
-        if (!db) return showToast("Firebase not configured", "error");
+        if (!db) return showToast("Cloud features are unavailable outside the preview.", "error");
 
         const name = document.getElementById('manualEquipId').value.trim();
         const procTypeSelect = document.getElementById('processTypeSelect');
@@ -789,16 +790,18 @@
             const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'customEquipment', name.replace(/\s/g, '_'));
             await setDoc(docRef, equipData);
             
-            showToast(`${name} Saved Permanently!`, "success");
+            showToast(`${name} Saved Successfully!`, "success");
             window.showScreen(window.parentScreen);
         } catch (e) {
             console.error(e);
-            showToast("Permanent Save Failed", "error");
+            showToast("Cloud operation failed.", "error");
         }
     };
 
     window.deleteConfiguration = () => {
         if (!originalEquipName) return;
+        if (!db) return showToast("Cloud features unavailable.", "error");
+        
         openModal("Delete?", `Permanently remove ${originalEquipName}?`, async () => {
             try {
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'customEquipment', originalEquipName.replace(/\s/g, '_'));
