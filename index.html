@@ -224,6 +224,9 @@
                 <button id="save-list-btn" onclick="saveAndAddEquipment()" class="admin-only w-full bg-[#0d9488] text-white py-4 rounded-[24px] font-black uppercase tracking-widest text-[10px] shadow-md active:scale-95 transition hidden">
                     PERMANENT CLOUD SAVE (ADMIN)
                 </button>
+                <button id="delete-equip-btn" onclick="deleteConfiguration()" class="admin-only w-full bg-red-600 text-white py-4 rounded-[24px] font-black uppercase tracking-widest text-[10px] shadow-md active:scale-95 transition hidden">
+                    DELETE CONFIGURATION (ADMIN)
+                </button>
             </div>
         </div>
     </div>
@@ -282,6 +285,17 @@
         </div>
     </div>
 
+    <!-- SUCCESS MODAL -->
+    <div id="recordModal" class="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-50 hidden">
+        <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl text-center mx-4 w-full max-sm">
+            <div class="w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-check text-3xl"></i>
+            </div>
+            <h2 class="text-2xl font-black text-slate-800 uppercase">Cycle Recorded!</h2>
+            <p class="text-slate-500 font-bold uppercase text-xs mt-2">Ready for next cycle</p>
+        </div>
+    </div>
+
     <!-- CT/GCT/MR SCREENS -->
     <div id="ct-ops-screen" class="screen">
         <button class="bg-slate-100 px-4 py-2 rounded-lg font-black text-xs mb-6" onclick="showScreen('home-screen')"><i class="fas fa-arrow-left"></i> BACK</button>
@@ -313,7 +327,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, getDocs, addDoc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, collection, doc, setDoc, getDocs, addDoc, deleteDoc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // GLOBAL UI HELPER
     function showToast(msg, type = '') {
@@ -359,13 +373,20 @@
     let totalWaitingDuration = 0; 
     let delayStart = null;
     let currentCycleData = {};
-    let manualSteps = [];
-    let filterItems = [];
+    
+    // Global State for inline handlers
+    window.manualSteps = [];
+    window.filterItems = [];
+    window.isAdvancedSetup = false;
+    
+    let manualSteps = window.manualSteps;
+    let filterItems = window.filterItems;
+    
     let isManualMode = false;
     let isLoggedIn = false;
     let currentUser = null;
     let currentEditingEquip = null;
-    let isAdvancedSetup = false;
+    let originalEquipName = ''; 
 
     // PERSISTENT CUSTOM EQUIPMENT
     let customEquipments = { 'ct-ops-screen': [], 'gct-ops-screen': [], 'mr-screen': [] };
@@ -512,7 +533,8 @@
         inputDiv.innerHTML = '';
         const darkInputClass = "p-3 border-2 border-slate-900 rounded-xl text-xs font-black outline-none bg-white text-slate-900";
         if (customData) {
-            isManualMode = true; manualSteps = customData.steps;
+            isManualMode = true; 
+            window.manualSteps = [...customData.steps];
             const modeToggle = document.getElementById('modeToggleContainer');
             if (modeToggle) {
                 if (customData.processType === 'BOTH') modeToggle.classList.remove('hidden');
@@ -551,7 +573,7 @@
     function renderSteps() {
         const grid = document.getElementById('step-grid'); if (!grid) return;
         grid.innerHTML = '';
-        currentSteps = isManualMode ? manualSteps : (config[currentCrane]?.[currentMode] || config[currentCrane] || config.DEFAULT);
+        currentSteps = isManualMode ? window.manualSteps : (config[currentCrane]?.[currentMode] || config[currentCrane] || config.DEFAULT);
         currentSteps.forEach((text, i) => {
             const btn = document.createElement('button'); btn.id = `s${i+1}`; btn.className = 'btn-step step-available'; btn.innerText = text; btn.disabled = (i !== 0); btn.onclick = () => triggerStep(i + 1); grid.appendChild(btn);
         });
@@ -617,7 +639,7 @@
     }
     window.resetCurrentTimerUI = resetCurrentTimerUI;
 
-    // CLOUD
+    // CLOUD / SETUP
     window.loginWithGoogle = async () => {
         if (!auth) return showToast("Firebase not configured", "error");
         const provider = new GoogleAuthProvider();
@@ -639,8 +661,8 @@
         const name = document.getElementById('manualEquipId').value.trim();
         const staff = document.getElementById('manualStaffId').value.trim();
         const procTitle = document.getElementById('manualProcessTitle').value.trim();
-        if (!name || manualSteps.length === 0) return showToast("Name and Steps required", "error");
-        const setupData = { name, staffId: staff, processTitle: procTitle, steps: [...manualSteps], timestamp: Date.now() };
+        if (!name || window.manualSteps.length === 0) return showToast("Name and Steps required", "error");
+        const setupData = { name, staffId: staff, processTitle: procTitle, steps: [...window.manualSteps], timestamp: Date.now() };
         try {
             const collectionRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'manualSetups');
             await addDoc(collectionRef, setupData);
@@ -669,7 +691,7 @@
                         document.getElementById('manualEquipId').value = data.name || '';
                         document.getElementById('manualStaffId').value = data.staffId || '';
                         document.getElementById('manualProcessTitle').value = data.processTitle || '';
-                        manualSteps = [...data.steps];
+                        window.manualSteps = [...data.steps];
                         renderManualSetupList();
                         showToast("Setup Loaded!");
                     };
@@ -680,7 +702,7 @@
     };
 
     window.openQuickManual = () => {
-        isAdvancedSetup = false; manualSteps = []; filterItems = [];
+        window.isAdvancedSetup = false; window.manualSteps = []; window.filterItems = []; originalEquipName = '';
         window.parentScreen = 'home-screen';
         document.getElementById('staff-id-group').classList.remove('hidden');
         document.getElementById('process-title-group').classList.remove('hidden');
@@ -688,35 +710,53 @@
         document.getElementById('filter-setup-group').classList.add('hidden');
         document.getElementById('run-once-btn').classList.remove('hidden');
         document.getElementById('save-list-btn').classList.add('hidden');
+        document.getElementById('delete-equip-btn').classList.add('hidden');
         document.getElementById('setup-title').innerText = "Manual Log Setup";
         resetSetupFields(); window.showScreen('manual-setup-screen');
     };
 
     window.openAdminNew = () => {
-        isAdvancedSetup = true; manualSteps = []; filterItems = [];
+        window.isAdvancedSetup = true; window.manualSteps = []; window.filterItems = []; originalEquipName = '';
         document.getElementById('staff-id-group').classList.add('hidden');
         document.getElementById('process-title-group').classList.add('hidden');
         document.getElementById('process-type-group').classList.remove('hidden');
         document.getElementById('filter-setup-group').classList.remove('hidden');
         document.getElementById('run-once-btn').classList.add('hidden');
         document.getElementById('save-list-btn').classList.remove('hidden');
+        document.getElementById('delete-equip-btn').classList.add('hidden');
         document.getElementById('setup-title').innerText = "Add Equipment Configuration";
         resetSetupFields(); window.showScreen('manual-setup-screen');
     };
 
     window.editCurrentEquipment = () => {
         if (!isLoggedIn) return;
-        isAdvancedSetup = true;
-        let d = currentEditingEquip || { name: currentCrane, processType: currentMode, steps: config[currentCrane]?.[currentMode] || config.DEFAULT };
+        window.isAdvancedSetup = true;
+        let d = currentEditingEquip || { name: currentCrane, processType: currentMode, steps: config[currentCrane]?.[currentMode] || config.DEFAULT, filterTitle: '', filterOptions: [] };
+        originalEquipName = d.name;
         document.getElementById('manualEquipId').value = d.name;
-        manualSteps = [...(d.steps || [])];
+        document.getElementById('filterTitle').value = d.filterTitle || '';
+        window.filterItems = [...(d.filterOptions || [])];
+        window.manualSteps = [...(d.steps || [])];
+        
+        const pTypeSel = document.getElementById('processTypeSelect');
+        const pManualInput = document.getElementById('manualProcessTypeInput');
+        if (['LOADING', 'DISCHARGE', 'BOTH'].includes(d.processType)) {
+            pTypeSel.value = d.processType;
+            pManualInput.classList.add('hidden');
+        } else {
+            pTypeSel.value = 'MANUAL';
+            pManualInput.value = d.processType || '';
+            pManualInput.classList.remove('hidden');
+        }
+
         document.getElementById('staff-id-group').classList.add('hidden');
         document.getElementById('process-title-group').classList.add('hidden');
         document.getElementById('process-type-group').classList.remove('hidden');
         document.getElementById('filter-setup-group').classList.remove('hidden');
         document.getElementById('run-once-btn').classList.add('hidden');
         document.getElementById('save-list-btn').classList.remove('hidden');
-        renderManualSetupList(); window.showScreen('manual-setup-screen');
+        document.getElementById('delete-equip-btn').classList.remove('hidden');
+        renderManualSetupList(); renderFilterList(); window.showScreen('manual-setup-screen');
     };
 
     window.saveAndAddEquipment = async () => {
@@ -728,21 +768,27 @@
         const procManualInput = document.getElementById('manualProcessTypeInput');
         const processType = (procTypeSelect.value === 'MANUAL' ? procManualInput.value.trim() : procTypeSelect.value);
         
-        if (!name || manualSteps.length === 0) return showToast("Name and steps required.", "error");
+        if (!name || window.manualSteps.length === 0) return showToast("Name and steps required.", "error");
 
         const equipData = {
             name,
             processType,
             filterTitle: document.getElementById('filterTitle').value.trim(),
-            filterOptions: [...filterItems],
-            steps: [...manualSteps],
+            filterOptions: [...window.filterItems],
+            steps: [...window.manualSteps],
             category: window.parentScreen,
             updatedAt: Date.now()
         };
 
         try {
+            if (originalEquipName && originalEquipName !== name) {
+                const oldDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'customEquipment', originalEquipName.replace(/\s/g, '_'));
+                await deleteDoc(oldDocRef);
+            }
+
             const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'customEquipment', name.replace(/\s/g, '_'));
             await setDoc(docRef, equipData);
+            
             showToast(`${name} Saved Permanently!`, "success");
             window.showScreen(window.parentScreen);
         } catch (e) {
@@ -751,10 +797,24 @@
         }
     };
 
+    window.deleteConfiguration = () => {
+        if (!originalEquipName) return;
+        openModal("Delete?", `Permanently remove ${originalEquipName}?`, async () => {
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'customEquipment', originalEquipName.replace(/\s/g, '_'));
+                await deleteDoc(docRef);
+                showToast("Configuration Deleted");
+                window.showScreen(window.parentScreen);
+            } catch (e) {
+                showToast("Delete Failed", "error");
+            }
+        });
+    };
+
     window.openManualTimer = () => {
         const name = document.getElementById('manualEquipId').value.trim() || "Manual";
-        const d = { name, processType: document.getElementById('manualProcessTitle').value || "Quick Log", steps: [...manualSteps], staffId: document.getElementById('manualStaffId').value };
-        if (manualSteps.length === 0) return showToast("Add steps first.", "error");
+        const d = { name, processType: document.getElementById('manualProcessTitle').value || "Quick Log", steps: [...window.manualSteps], staffId: document.getElementById('manualStaffId').value };
+        if (window.manualSteps.length === 0) return showToast("Add steps first.", "error");
         window.initTimer(name, d);
     };
 
@@ -769,29 +829,59 @@
 
     window.addManualStep = () => { 
         let i = document.getElementById('manualStepInput'); 
-        if (i && i.value.trim()) { manualSteps.push(i.value.trim()); renderManualSetupList(); i.value = ''; } 
+        if (i && i.value.trim()) { window.manualSteps.push(i.value.trim()); renderManualSetupList(); i.value = ''; } 
+    };
+
+    window.editStepInline = (index) => {
+        const newText = prompt("Edit Step:", window.manualSteps[index]);
+        if (newText !== null && newText.trim() !== "") {
+            window.manualSteps[index] = newText.trim();
+            renderManualSetupList();
+        }
+    };
+
+    window.removeStep = (index) => {
+        window.manualSteps.splice(index, 1);
+        renderManualSetupList();
     };
 
     function renderManualSetupList() { 
         const l = document.getElementById('manualStepList'); if (!l) return;
         l.innerHTML = ''; 
-        manualSteps.forEach((s, i) => { 
-            const d = document.createElement('div'); d.className = 'flex justify-between items-center bg-white p-3 rounded-lg border-2 border-slate-900 mb-2'; d.innerHTML = `<span class="font-bold text-xs">${i+1}. ${s}</span><button onclick="manualSteps.splice(${i}, 1); renderManualSetupList();" class="text-red-500 font-black text-[10px]">REMOVE</button>`; l.appendChild(d); 
+        window.manualSteps.forEach((s, i) => { 
+            const d = document.createElement('div'); 
+            d.className = 'flex justify-between items-center bg-white p-3 rounded-lg border-2 border-slate-900 mb-2 gap-2'; 
+            d.innerHTML = `
+                <span class="font-bold text-xs flex-1">${i+1}. ${s}</span>
+                <div class="flex gap-2">
+                    <button onclick="editStepInline(${i})" class="text-blue-600 font-black text-[10px] uppercase">Edit</button>
+                    <button onclick="removeStep(${i})" class="text-red-500 font-black text-[10px] uppercase">Del</button>
+                </div>
+            `; 
+            l.appendChild(d); 
         }); 
     }
     window.renderManualSetupList = renderManualSetupList;
 
+    window.removeFilter = (index) => {
+        window.filterItems.splice(index, 1);
+        renderFilterList();
+    };
+
     function renderFilterList() { 
         const l = document.getElementById('filterList'); if (!l) return; l.innerHTML = ''; 
-        filterItems.forEach((item, i) => { 
-            const s = document.createElement('span'); s.className = 'bg-slate-200 px-3 py-1 rounded-full font-black text-[10px] flex items-center gap-2 border-2 border-slate-900'; s.innerHTML = `${item} <i class="fas fa-times cursor-pointer" onclick="filterItems.splice(${i}, 1); renderFilterList();"></i>`; l.appendChild(s); 
+        window.filterItems.forEach((item, i) => { 
+            const s = document.createElement('span'); 
+            s.className = 'bg-slate-200 px-3 py-1 rounded-full font-black text-[10px] flex items-center gap-2 border-2 border-slate-900'; 
+            s.innerHTML = `${item} <i class="fas fa-times cursor-pointer" onclick="removeFilter(${i})"></i>`; 
+            l.appendChild(s); 
         }); 
     }
     window.renderFilterList = renderFilterList;
 
     window.addFilterItem = () => { 
         let i = document.getElementById('filterItemInput'); 
-        if (i && i.value.trim()) { filterItems.push(i.value.trim()); renderFilterList(); i.value = ''; } 
+        if (i && i.value.trim()) { window.filterItems.push(i.value.trim()); renderFilterList(); i.value = ''; } 
     };
 
     window.toggleManualProcessInput = () => { 
@@ -826,33 +916,19 @@
     window.undoLastCycle = () => { if (logs.length > 0) openModal("Undo?", "Remove last cycle?", () => { logs.pop(); cycleCount = Math.max(0, cycleCount-1); document.getElementById('cycle-count').innerText = cycleCount; resetCurrentTimerUI(); }); };
     window.resetFullSession = () => { openModal("Reset?", "Delete all records?", () => { logs = []; cycleCount = 0; document.getElementById('cycle-count').innerText = "0"; resetCurrentTimerUI(); }); };
     
-    // DOWNLOAD REPORT WITH ENHANCED EXCEL SUPPORT
     window.downloadReport = () => { 
         if (logs.length === 0) return showToast("No logs to export.", "error"); 
-        
-        // 1. Prepare Headers and Data (Using CRLF for Excel compatibility)
         const keys = Array.from(new Set(logs.flatMap(l => Object.keys(l)))); 
-        let csvContent = "\ufeff"; // UTF-8 BOM for Excel to recognize encoding
-        
-        // Headers
+        let csvContent = "\ufeff";
         csvContent += keys.map(k => `"${k}"`).join(",") + "\r\n";
-        
-        // Rows
-        logs.forEach(l => {
-            csvContent += keys.map(k => `"${l[k] || '0.00'}"`).join(",") + "\r\n";
-        });
-
-        // 2. Summary Calculations
+        logs.forEach(l => { csvContent += keys.map(k => `"${l[k] || '0.00'}"`).join(",") + "\r\n"; });
         const totalCycles = logs.length;
         const totalNet = logs.reduce((acc, l) => acc + parseFloat(l.Net_Cycle_Time || 0), 0);
         const totalGross = logs.reduce((acc, l) => acc + parseFloat(l.Gross_Cycle_Time || 0), 0);
         const totalWait = logs.reduce((acc, l) => acc + parseFloat(l.Waiting_Time || 0), 0);
-
         const avgNet = (totalNet / totalCycles).toFixed(2);
         const avgGross = (totalGross / totalCycles).toFixed(2);
         const avgWait = (totalWait / totalCycles).toFixed(2);
-
-        // 3. Append Summary Section
         csvContent += "\r\n\"SESSION SUMMARY\"\r\n";
         csvContent += `"Metric","Value"\r\n`;
         csvContent += `"Total Cycles Recorded","${totalCycles}"\r\n`;
@@ -861,8 +937,6 @@
         csvContent += `"Total Cumulative Waiting Time","${totalWait.toFixed(2)} s"\r\n`;
         csvContent += `"Average Waiting Time per Cycle","${avgWait} s"\r\n`;
         csvContent += `"Total Session Gross Time","${totalGross.toFixed(2)} s"\r\n`;
-
-        // 4. Trigger Download (Ensuring link is in DOM)
         try {
             const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" }); 
             const link = document.createElement("a"); 
@@ -875,7 +949,6 @@
             document.body.removeChild(link);
             showToast("Report Downloaded", "success");
         } catch (e) {
-            console.error(e);
             showToast("Download Failed", "error");
         }
     };
