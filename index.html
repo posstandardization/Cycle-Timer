@@ -222,10 +222,10 @@
                     </button>
                 </div>
                 <button id="save-list-btn" onclick="saveAndAddEquipment()" class="admin-only w-full bg-[#0d9488] text-white py-4 rounded-[24px] font-black uppercase tracking-widest text-[10px] shadow-md active:scale-95 transition hidden">
-                    PERMANENT CLOUD SAVE (ADMIN)
+                    PERMANENT SAVE (CLOUD/LOCAL)
                 </button>
                 <button id="delete-equip-btn" onclick="deleteConfiguration()" class="admin-only w-full bg-red-600 text-white py-4 rounded-[24px] font-black uppercase tracking-widest text-[10px] shadow-md active:scale-95 transition hidden">
-                    DELETE CONFIGURATION (ADMIN)
+                    DELETE CONFIGURATION
                 </button>
             </div>
         </div>
@@ -642,7 +642,7 @@
 
     // CLOUD / SETUP
     window.loginWithGoogle = async () => {
-        if (!auth) return showToast("Cloud setup is only available in the app preview.", "error");
+        if (!auth) return showToast("Cloud setup is only available in the Canvas preview.", "error");
         const provider = new GoogleAuthProvider();
         try {
             await signInWithPopup(auth, provider);
@@ -762,7 +762,6 @@
 
     window.saveAndAddEquipment = async () => {
         if (!isLoggedIn) return showToast("Admin access required", "error");
-        if (!db) return showToast("Cloud features are unavailable outside the preview.", "error");
 
         const name = document.getElementById('manualEquipId').value.trim();
         const procTypeSelect = document.getElementById('processTypeSelect');
@@ -781,35 +780,56 @@
             updatedAt: Date.now()
         };
 
-        try {
-            if (originalEquipName && originalEquipName !== name) {
-                const oldDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'customEquipment', originalEquipName.replace(/\s/g, '_'));
-                await deleteDoc(oldDocRef);
+        // IF DB (Firestore) is available
+        if (db) {
+            try {
+                if (originalEquipName && originalEquipName !== name) {
+                    const oldDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'customEquipment', originalEquipName.replace(/\s/g, '_'));
+                    await deleteDoc(oldDocRef);
+                }
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'customEquipment', name.replace(/\s/g, '_'));
+                await setDoc(docRef, equipData);
+                showToast(`${name} Saved to Cloud!`, "success");
+                window.showScreen(window.parentScreen);
+            } catch (e) {
+                console.error(e);
+                showToast("Cloud operation failed.", "error");
             }
-
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'customEquipment', name.replace(/\s/g, '_'));
-            await setDoc(docRef, equipData);
+        } else {
+            // FALLBACK: Local Session Saving
+            // Remove old version if renamed
+            if (originalEquipName) {
+                customEquipments[window.parentScreen] = customEquipments[window.parentScreen].filter(e => e.name !== originalEquipName);
+            }
+            // Add or Update
+            customEquipments[window.parentScreen] = customEquipments[window.parentScreen].filter(e => e.name !== name);
+            customEquipments[window.parentScreen].push(equipData);
             
-            showToast(`${name} Saved Successfully!`, "success");
+            showToast(`${name} Saved locally for this session!`, "success");
+            renderEquipmentGrid(window.parentScreen);
             window.showScreen(window.parentScreen);
-        } catch (e) {
-            console.error(e);
-            showToast("Cloud operation failed.", "error");
         }
     };
 
-    window.deleteConfiguration = () => {
+    window.deleteConfiguration = async () => {
         if (!originalEquipName) return;
-        if (!db) return showToast("Cloud features unavailable.", "error");
         
         openModal("Delete?", `Permanently remove ${originalEquipName}?`, async () => {
-            try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'customEquipment', originalEquipName.replace(/\s/g, '_'));
-                await deleteDoc(docRef);
-                showToast("Configuration Deleted");
+            if (db) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'customEquipment', originalEquipName.replace(/\s/g, '_'));
+                    await deleteDoc(docRef);
+                    showToast("Configuration Deleted");
+                    window.showScreen(window.parentScreen);
+                } catch (e) {
+                    showToast("Delete Failed", "error");
+                }
+            } else {
+                // FALLBACK: Local Session Deletion
+                customEquipments[window.parentScreen] = customEquipments[window.parentScreen].filter(e => e.name !== originalEquipName);
+                showToast("Deleted from local session");
+                renderEquipmentGrid(window.parentScreen);
                 window.showScreen(window.parentScreen);
-            } catch (e) {
-                showToast("Delete Failed", "error");
             }
         });
     };
