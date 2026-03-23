@@ -222,7 +222,7 @@
                     </button>
                 </div>
                 <button id="save-list-btn" onclick="saveAndAddEquipment()" class="admin-only w-full bg-[#0d9488] text-white py-4 rounded-[24px] font-black uppercase tracking-widest text-[10px] shadow-md active:scale-95 transition hidden">
-                    PERMANENT SAVE (CLOUD/LOCAL)
+                    PERMANENT SAVE (SYNCED)
                 </button>
                 <button id="delete-equip-btn" onclick="deleteConfiguration()" class="admin-only w-full bg-red-600 text-white py-4 rounded-[24px] font-black uppercase tracking-widest text-[10px] shadow-md active:scale-95 transition hidden">
                     DELETE CONFIGURATION
@@ -358,8 +358,6 @@
         app = initializeApp(firebaseConfig);
         auth = getAuth(app);
         db = getFirestore(app);
-    } else {
-        console.log("Running in Local Mode. Cloud features disabled.");
     }
 
     // STATE
@@ -390,7 +388,30 @@
     let originalEquipName = ''; 
 
     // PERSISTENT CUSTOM EQUIPMENT
+    const STORAGE_KEY = 'cycle_timer_local_configs';
     let customEquipments = { 'ct-ops-screen': [], 'gct-ops-screen': [], 'mr-screen': [] };
+
+    // Initialize Local Data
+    function loadLocalEquipment() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            const data = JSON.parse(saved);
+            // Merge local into state
+            Object.keys(data).forEach(cat => {
+                if (customEquipments[cat]) {
+                    // Only add if not already present from cloud sync
+                    data[cat].forEach(localEquip => {
+                        const exists = customEquipments[cat].find(e => e.name === localEquip.name);
+                        if (!exists) customEquipments[cat].push(localEquip);
+                    });
+                }
+            });
+        }
+    }
+
+    function saveLocalEquipment() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(customEquipments));
+    }
 
     window.parentScreen = 'home-screen';
 
@@ -438,7 +459,6 @@
             
             if (user) {
                 setupPublicEquipmentListener();
-
                 if (!user.isAnonymous) {
                     if (profile) profile.classList.remove('hidden');
                     if (loginBtn) loginBtn.classList.add('hidden');
@@ -464,17 +484,22 @@
         const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'customEquipment');
         
         onSnapshot(collectionRef, (snapshot) => {
-            customEquipments = { 'ct-ops-screen': [], 'gct-ops-screen': [], 'mr-screen': [] };
+            // Keep existing state structure
+            const syncedFromCloud = { 'ct-ops-screen': [], 'gct-ops-screen': [], 'mr-screen': [] };
             snapshot.forEach(doc => {
                 const data = doc.data();
-                if (data.category && customEquipments[data.category]) {
-                    customEquipments[data.category].push({ id: doc.id, ...data });
+                if (data.category && syncedFromCloud[data.category]) {
+                    syncedFromCloud[data.category].push({ id: doc.id, ...data });
                 }
             });
+            // Update and merge with local
+            customEquipments = syncedFromCloud;
+            loadLocalEquipment(); 
+            
             if (window.parentScreen && window.parentScreen !== 'home-screen') {
                 renderEquipmentGrid(window.parentScreen);
             }
-        }, (error) => console.error("Equipment sync error:", error));
+        }, (error) => console.error("Cloud Sync Error"));
     }
 
     // NAVIGATION
@@ -642,11 +667,11 @@
 
     // CLOUD / SETUP
     window.loginWithGoogle = async () => {
-        if (!auth) return showToast("Cloud setup is only available in the Canvas preview.", "error");
+        if (!auth) return showToast("Login is only available in the cloud environment.", "error");
         const provider = new GoogleAuthProvider();
         try {
             await signInWithPopup(auth, provider);
-            showToast("Logged in successfully", "success");
+            showToast("Cloud Login Successful", "success");
         } catch (e) { showToast("Login failed", "error"); }
     };
 
@@ -658,7 +683,7 @@
     };
 
     window.saveToCloud = async () => {
-        if (!db || !currentUser || currentUser.isAnonymous) return showToast("Cloud login required to save.", "error");
+        if (!db || !currentUser || currentUser.isAnonymous) return showToast("Cloud login required to sync data.", "error");
         const name = document.getElementById('manualEquipId').value.trim();
         const staff = document.getElementById('manualStaffId').value.trim();
         const procTitle = document.getElementById('manualProcessTitle').value.trim();
@@ -780,7 +805,7 @@
             updatedAt: Date.now()
         };
 
-        // IF DB (Firestore) is available
+        // Sync to cloud if available
         if (db) {
             try {
                 if (originalEquipName && originalEquipName !== name) {
@@ -789,48 +814,44 @@
                 }
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'customEquipment', name.replace(/\s/g, '_'));
                 await setDoc(docRef, equipData);
-                showToast(`${name} Saved to Cloud!`, "success");
-                window.showScreen(window.parentScreen);
+                showToast(`${name} Synced to Cloud!`, "success");
             } catch (e) {
-                console.error(e);
-                showToast("Cloud operation failed.", "error");
+                console.error("Cloud Error");
             }
-        } else {
-            // FALLBACK: Local Session Saving
-            // Remove old version if renamed
-            if (originalEquipName) {
-                customEquipments[window.parentScreen] = customEquipments[window.parentScreen].filter(e => e.name !== originalEquipName);
-            }
-            // Add or Update
-            customEquipments[window.parentScreen] = customEquipments[window.parentScreen].filter(e => e.name !== name);
-            customEquipments[window.parentScreen].push(equipData);
-            
-            showToast(`${name} Saved locally for this session!`, "success");
-            renderEquipmentGrid(window.parentScreen);
-            window.showScreen(window.parentScreen);
         }
+
+        // Always Update Local State and Persistence
+        if (originalEquipName) {
+            customEquipments[window.parentScreen] = customEquipments[window.parentScreen].filter(e => e.name !== originalEquipName);
+        }
+        customEquipments[window.parentScreen] = customEquipments[window.parentScreen].filter(e => e.name !== name);
+        customEquipments[window.parentScreen].push(equipData);
+        saveLocalEquipment();
+        
+        showToast(`${name} Saved Successfully!`, "success");
+        renderEquipmentGrid(window.parentScreen);
+        window.showScreen(window.parentScreen);
     };
 
     window.deleteConfiguration = async () => {
         if (!originalEquipName) return;
         
         openModal("Delete?", `Permanently remove ${originalEquipName}?`, async () => {
+            // Delete from Cloud
             if (db) {
                 try {
                     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'customEquipment', originalEquipName.replace(/\s/g, '_'));
                     await deleteDoc(docRef);
-                    showToast("Configuration Deleted");
-                    window.showScreen(window.parentScreen);
-                } catch (e) {
-                    showToast("Delete Failed", "error");
-                }
-            } else {
-                // FALLBACK: Local Session Deletion
-                customEquipments[window.parentScreen] = customEquipments[window.parentScreen].filter(e => e.name !== originalEquipName);
-                showToast("Deleted from local session");
-                renderEquipmentGrid(window.parentScreen);
-                window.showScreen(window.parentScreen);
+                } catch (e) { console.error("Cloud Delete Failed"); }
             }
+
+            // Always Delete Locally
+            customEquipments[window.parentScreen] = customEquipments[window.parentScreen].filter(e => e.name !== originalEquipName);
+            saveLocalEquipment();
+            
+            showToast("Configuration Deleted");
+            renderEquipmentGrid(window.parentScreen);
+            window.showScreen(window.parentScreen);
         });
     };
 
@@ -979,7 +1000,10 @@
     window.closeModal = () => { document.getElementById('custom-modal-overlay').style.display = 'none'; };
     window.openModal = (title, msg, onConfirm) => { document.getElementById('modal-title').innerText = title; document.getElementById('modal-msg').innerText = msg; document.getElementById('custom-modal-overlay').style.display = 'flex'; document.getElementById('modal-confirm-btn').onclick = () => { onConfirm(); closeModal(); }; };
 
-    window.onload = function() { window.showScreen('home-screen'); };
+    window.onload = function() { 
+        loadLocalEquipment();
+        window.showScreen('home-screen'); 
+    };
 </script>
 </body>
 </html>
