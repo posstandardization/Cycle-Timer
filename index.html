@@ -647,6 +647,13 @@
         } else { window.showScreen(window.parentScreen); } 
     };
 
+    window.openQuickManual = () => {
+        document.getElementById('manualEquipId').value = '';
+        document.getElementById('manualStaffId').value = '';
+        document.getElementById('manualStepList').innerHTML = '';
+        window.showScreen('manual-setup-screen');
+    };
+
     window.addManualStep = () => { 
         let i = document.getElementById('manualStepInput'); 
         if (i && i.value.trim()) { 
