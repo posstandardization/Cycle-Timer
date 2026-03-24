@@ -449,8 +449,17 @@
             }
         },
         RTG: {
-            LOADING: ["1. PARK TO LOCK IN BAY", "2. LOCK TO A-ROW", "3. A-ROW TO UNLOCK ON TRUCK"],
-            DISCHARGE: ["1. PARK TO LOCK ON TRUCK", "2. LOCK ON TRUCK TO UNLOCK ON ROW"]
+            LOADING: [
+                "1. FROM PARK POSITION TO LOCK CONTAINER IN THE BAY",
+                "2. FROM LOCK IN THE BAY TO A-ROW",
+                "3. FROM A- ROW TO UNLOCK ON TRUCK",
+                "4. FROM UNLOCK ON TRUCK TO PARK POSITION"
+            ],
+            DISCHARGE: [
+                "1. FROM PARK POSITION TO LOCK ON TRUCK",
+                "2. FROM LOCK ON TRUCK TO UNLOCK ON TARGET ROW",
+                "3. FROM UNLOCK TO PARK POSITION"
+            ]
         },
         TT: {
             LOADING: ["1. Lifted by QC", "2. Move to RTG", "3. Rec from RTG", "4. Move to PULL", "5. Move to Pinning", "6. Fixing twistlock", "7. Standby"],
