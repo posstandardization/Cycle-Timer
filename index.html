@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cycle Timer Master</title>
+    <!-- Note: These CDNs require an initial internet connection to load the app -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -154,6 +155,17 @@
         
         .btn-red { background-color: var(--calc-red) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 0 #600, 0 8px 15px rgba(0,0,0,0.4); }
         .btn-blue { background-color: var(--calc-blue) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 0 #1e3a8a, 0 8px 15px rgba(0,0,0,0.4); }
+
+        .status-badge {
+            font-size: 0.5rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .status-online { background: #059669; color: white; }
+        .status-offline { background: #dc2626; color: white; }
     </style>
 </head>
 <body id="app-body">
@@ -189,10 +201,13 @@
 
     <!-- HOME SCREEN -->
     <div id="home-screen" class="screen active">
-        <div class="flex justify-between items-start mt-6 mb-12">
+        <div class="flex justify-between items-start mt-4 mb-12">
              <div class="text-left">
-                <h1 class="text-5xl font-black tracking-tighter leading-none italic uppercase">Cycle <span class="text-orange-500">Timer</span></h1>
-                <p class="text-slate-500 font-black uppercase tracking-[0.2em] text-[10px] mt-4">CYCLE TIME RECORDER</p>
+                <div class="flex items-center gap-3 mb-1">
+                    <h1 class="text-5xl font-black tracking-tighter leading-none italic uppercase">Cycle <span class="text-orange-500">Timer</span></h1>
+                    <span id="conn-status" class="status-badge status-online">Online</span>
+                </div>
+                <p class="text-slate-500 font-black uppercase tracking-[0.2em] text-[10px] mt-2">CYCLE TIME RECORDER</p>
             </div>
             <div class="flex gap-4">
                 <button id="login-btn" onclick="showScreen('login-screen')" class="btn-calc w-16 h-16">
@@ -311,9 +326,14 @@
             STOP & LOG
         </button>
 
-        <button onclick="downloadReport()" class="btn-calc w-full py-6 text-sm tracking-widest mt-12 mb-10">
-            <i class="fas fa-file-export mr-3"></i> EXPORT CSV REPORT
-        </button>
+        <div class="flex flex-col gap-4 mt-12 mb-10">
+            <button onclick="downloadReport()" class="btn-calc w-full py-6 text-sm tracking-widest">
+                <i class="fas fa-file-export mr-3"></i> EXPORT CSV REPORT
+            </button>
+            <button onclick="clearLocalStorage()" class="text-[10px] font-black text-red-500 uppercase tracking-widest opacity-40 hover:opacity-100 transition">
+                Clear Offline Storage
+            </button>
+        </div>
     </div>
 
     <!-- SUCCESS MODAL -->
@@ -346,7 +366,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, getDocs, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, collection, doc, setDoc, getDocs, onSnapshot, query, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     function showToast(msg) {
         const t = document.getElementById('toast');
@@ -354,13 +374,32 @@
     }
     window.showToast = showToast;
 
+    // LOCAL STORAGE KEYS
+    const LOGS_STORAGE_KEY = 'cycle_timer_offline_logs';
+
     let firebaseConfig = null;
     try { if (typeof __firebase_config !== 'undefined' && __firebase_config) firebaseConfig = JSON.parse(__firebase_config); } catch (e) {}
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
     let app, auth, db;
-    if (firebaseConfig && firebaseConfig.apiKey) { app = initializeApp(firebaseConfig); auth = getAuth(app); db = getFirestore(app); }
+    if (firebaseConfig && firebaseConfig.apiKey) { 
+        app = initializeApp(firebaseConfig); 
+        auth = getAuth(app); 
+        db = getFirestore(app); 
+        
+        // Attempt to enable Firebase Offline Persistence if online
+        try {
+            enableIndexedDbPersistence(db).catch((err) => {
+                if (err.code == 'failed-precondition') {
+                    console.warn("Offline persistence failed (multiple tabs open)");
+                } else if (err.code == 'unimplemented') {
+                    console.warn("Offline persistence not supported by browser");
+                }
+            });
+        } catch(e) {}
+    }
 
+    // STATE
     let logs = [];
     let currentCrane = '';
     let currentMode = 'LOADING';
@@ -468,6 +507,48 @@
         DEFAULT: ["1. Start cycle", "2. End cycle"]
     };
 
+    // OFFLINE LOGIC
+    function saveLogsToLocal() {
+        localStorage.setItem(LOGS_STORAGE_KEY, JSON.stringify(logs));
+    }
+
+    function loadLogsFromLocal() {
+        const saved = localStorage.getItem(LOGS_STORAGE_KEY);
+        if (saved) {
+            logs = JSON.parse(saved);
+            cycleCount = logs.length;
+            document.getElementById('cycle-count').innerText = cycleCount;
+            if (cycleCount > 0) {
+                document.getElementById('last-cycle-display').innerText = logs[logs.length-1].Net_Cycle || "0.00";
+            }
+        }
+    }
+
+    window.clearLocalStorage = () => {
+        openModal("CLEAR STORAGE?", "This will erase all logs currently stored on this device. Make sure you have exported your CSV first.", () => {
+            localStorage.removeItem(LOGS_STORAGE_KEY);
+            logs = [];
+            cycleCount = 0;
+            document.getElementById('cycle-count').innerText = "0";
+            document.getElementById('last-cycle-display').innerText = "0.00";
+            showToast("STORAGE CLEARED");
+        });
+    };
+
+    // CONNECTION MONITOR
+    window.addEventListener('online', updateConnStatus);
+    window.addEventListener('offline', updateConnStatus);
+    function updateConnStatus() {
+        const badge = document.getElementById('conn-status');
+        if (navigator.onLine) {
+            badge.innerText = "Online";
+            badge.className = "status-badge status-online";
+        } else {
+            badge.innerText = "Offline Mode";
+            badge.className = "status-badge status-offline";
+        }
+    }
+
     if (auth) signInAnonymously(auth);
 
     window.showScreen = (id) => {
@@ -574,8 +655,11 @@
         currentCycleData['Gross_Cycle'] = gross;
         
         document.getElementById('last-cycle-display').innerText = net;
-        logs.push({ ...currentCycleData }); cycleCount++;
+        logs.push({ ...currentCycleData }); 
+        cycleCount++;
         document.getElementById('cycle-count').innerText = cycleCount;
+        
+        saveLogsToLocal(); // Persistence
     }
 
     window.stopCycle = () => { 
@@ -679,7 +763,11 @@
         showToast("Feature under configuration");
     };
 
-    window.onload = function() { window.showScreen('home-screen'); };
+    window.onload = function() { 
+        loadLogsFromLocal();
+        updateConnStatus();
+        window.showScreen('home-screen'); 
+    };
 </script>
 </body>
 </html>
