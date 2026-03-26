@@ -570,16 +570,40 @@
         });
     };
 
-    // CSV GENERATION LOGIC
+    // CSV GENERATION LOGIC (WITH SUMMARY)
     function generateCSVString() {
         if (logs.length === 0) return null;
+        
         const manualHeaderOrder = ["Date", "Time", "Equipment", "Unit", "Staff", "Operation", "Category", "Net_Cycle", "Waiting", "Gross_Cycle"];
         const allPossibleKeys = Array.from(new Set(logs.flatMap(l => Object.keys(l))));
         const keys = manualHeaderOrder.concat(allPossibleKeys.filter(k => !manualHeaderOrder.includes(k)));
+        
+        // Add UTF-8 BOM for Excel compatibility
         let csv = "\ufeff" + keys.map(k => `"${k}"`).join(",") + "\r\n"; 
+        
+        let sumNet = 0, sumGross = 0, sumWait = 0;
+        
         logs.forEach(l => { 
             csv += keys.map(k => `"${l[k] || '0.00'}"`).join(",") + "\r\n"; 
+            sumNet += parseFloat(l.Net_Cycle || 0);
+            sumGross += parseFloat(l.Gross_Cycle || 0);
+            sumWait += parseFloat(l.Waiting || 0);
         }); 
+
+        const avgNet = (sumNet / logs.length).toFixed(2);
+        const avgGross = (sumGross / logs.length).toFixed(2);
+        const avgWait = (sumWait / logs.length).toFixed(2);
+
+        // APPEND SUMMARY AT THE BOTTOM
+        csv += "\r\n\r\n";
+        csv += `"PERFORMANCE SUMMARY REPORT",\r\n`;
+        csv += `"Total Cycles recorded","${logs.length}"\r\n`;
+        csv += `"Average Net Cycle Time","${avgNet} seconds"\r\n`;
+        csv += `"Average Gross Cycle Time","${avgGross} seconds"\r\n`;
+        csv += `"Average Waiting Time","${avgWait} seconds"\r\n`;
+        csv += `"Export Date","${new Date().toLocaleDateString()}"\r\n`;
+        csv += `"Export Time","${new Date().toLocaleTimeString()}"\r\n`;
+        
         return csv;
     }
 
@@ -606,8 +630,8 @@
             try {
                 await navigator.share({
                     files: [file],
-                    title: 'Performance Report',
-                    text: 'Attached is the cycle timer performance excel sheet.'
+                    title: 'Performance Report - Excel',
+                    text: 'Attached is the cycle timer excel sheet with performance summary.'
                 });
                 closeShareModal();
                 return;
@@ -616,9 +640,9 @@
             }
         }
 
-        // Fallback for WhatsApp (Link only - WhatsApp Web/API doesn't support direct file attachment via URL)
+        // Fallback for WhatsApp (Link only)
         const last = logs[logs.length - 1];
-        const textSummary = `*Cycle Report: ${last.Equipment} (${last.Unit})*%0A` +
+        const textSummary = `*Cycle Excel Report: ${last.Equipment} (${last.Unit})*%0A` +
                             `Date: ${last.Date}%0A` +
                             `Total Cycles: ${logs.length}%0A%0A` +
                             `_Note: Excel file sharing requires mobile browser share support. Use "Download CSV" to save the file manually._`;
@@ -803,3 +827,4 @@
 </script>
 </body>
 </html>
+
