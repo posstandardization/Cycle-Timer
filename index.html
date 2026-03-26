@@ -152,7 +152,7 @@
     <div id="share-modal-overlay">
         <div id="share-modal">
             <h3 class="text-2xl font-black uppercase mb-3 italic">Share <span class="text-orange-500">Excel</span></h3>
-            <p class="text-slate-400 font-bold mb-8">Choose platform to send the cycle record file.</p>
+            <p class="text-slate-400 font-bold mb-8">Choose platform to send the cycle record file with average analysis.</p>
             <div class="flex flex-col gap-4">
                 <button class="btn-calc py-5 text-xs" onclick="handleShare('whatsapp')" style="background-color: #25D366; color: white;">
                     <svg class="icon mr-2" viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.819 9.819 0 0 0 12.04 2zM12.04 20.13c-1.48 0-2.93-.4-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31c-.83-1.31-1.26-2.84-1.26-4.41 0-4.51 3.67-8.18 8.18-8.18 2.19 0 4.24.85 5.78 2.4s2.4 3.59 2.4 5.78c-.01 4.51-3.68 8.18-8.12 8.18zm4.48-6.13c-.25-.13-1.47-.72-1.69-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.03-1.25-.75-.67-1.26-1.5-1.41-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.37-.44.12-.15.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.39 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.23-.16-.48-.29z"/></svg>
@@ -309,7 +309,6 @@
             <button id="wait-btn" onclick="toggleWaiting()" class="btn-calc py-6 text-xs" style="background-color: #0ea5e9;">WAITING</button>
         </div>
 
-        <!-- RESET BUTTONS UNDER PAUSE/WAITING -->
         <div class="grid grid-cols-2 gap-4 mb-4">
             <button onclick="resetLastRecord()" class="btn-calc py-4 text-[10px]" style="background-color: #64748b;">RESET LAST</button>
             <button onclick="resetAllRecordsInTimer()" class="btn-calc py-4 text-[10px]" style="background-color: #475569;">RESET ALL</button>
@@ -334,7 +333,6 @@
         </div>
     </div>
 
-    <!-- SUCCESS MODAL -->
     <div id="recordModal" class="fixed inset-0 flex items-center justify-center bg-black/95 backdrop-blur-md z-50 hidden">
         <div class="bg-white p-14 rounded-[3rem] shadow-2xl text-center mx-4 w-full max-w-[320px]">
             <div class="w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-6">
@@ -399,14 +397,9 @@
             app = initializeApp(firebaseConfig); 
             auth = getAuth(app); 
             db = getFirestore(app); 
-            
-            enableIndexedDbPersistence(db).catch((err) => {
-                if (err.code == 'failed-precondition') console.warn("Multiple tabs open");
-            });
+            enableIndexedDbPersistence(db).catch(() => {});
             signInAnonymously(auth);
-        } catch(e) {
-            console.warn("Firebase Init failed.");
-        }
+        } catch(e) {}
     }
 
     // STATE
@@ -449,66 +442,21 @@
             "Above Deck": standardSteps,
             "Below Deck": standardSteps,
             "Hatch cover": {
-                LOADING: [
-                    "1. From Park position Or Sillbeam TO Adjustment on Hatch cover",
-                    "2. From start Adjusting to lock",
-                    "3. From lock on Hatch cover to sillbeam",
-                    "4. From sillbeam to start adjust on target row",
-                    "5. From Start adjust on target row to Unlock",
-                    "6. From Unlock to sillbeam"
-                ],
-                DISCHARGE: [
-                    "1. From Park position / Sillbeam to target hatch cover location",
-                    "2. From Start adjust on hatch cover to Lock",
-                    "3. From Lock to sillbeam",
-                    "4. From Sillbeam to start Aligning on back reach",
-                    "5. From start Aligning on back reach to Unlock",
-                    "6. From Unlock to sillbeam / Park position"
-                ]
+                LOADING: ["1. From Park position Or Sillbeam TO Adjustment on Hatch cover", "2. From start Adjusting to lock", "3. From lock on Hatch cover to sillbeam", "4. From sillbeam to start adjust on target row", "5. From Start adjust on target row to Unlock", "6. From Unlock to sillbeam"],
+                DISCHARGE: ["1. From Park position / Sillbeam to target hatch cover location", "2. From Start adjust on hatch cover to Lock", "3. From Lock to sillbeam", "4. From Sillbeam to start Aligning on back reach", "5. From start Aligning on back reach to Unlock", "6. From Unlock to sillbeam / Park position"]
             },
             "OOG (OHF)": {
-                LOADING: [
-                    "1. From Park position Or Sillbeam TO Adjustment on TT",
-                    "2. From start Adjusting to lock",
-                    "3. From lock on OOG to sillbeam",
-                    "4. From sillbeam to start adjust on target row",
-                    "5. From Start adjust on target row to Unlock",
-                    "6. From Unlock to sillbeam"
-                ],
-                DISCHARGE: [
-                    "1. From Park position / Sillbeam to target OOG",
-                    "2. From Start adjust on OOG to Lock",
-                    "3. From Lock to sillbeam",
-                    "4. From Sillbeam to start Adjusting on TT",
-                    "5. From start Adjustment on TT to Unlock",
-                    "6. From Unlock to sillbeam / Park position"
-                ]
+                LOADING: ["1. From Park position Or Sillbeam TO Adjustment on TT", "2. From start Adjusting to lock", "3. From lock on OOG to sillbeam", "4. From sillbeam to start adjust on target row", "5. From Start adjust on target row to Unlock", "6. From Unlock to sillbeam"],
+                DISCHARGE: ["1. From Park position / Sillbeam to target OOG", "2. From Start adjust on OOG to Lock", "3. From Lock to sillbeam", "4. From Sillbeam to start Adjusting on TT", "5. From start Adjustment on TT to Unlock", "6. From Unlock to sillbeam / Park position"]
             },
             "OOG (Wire sling)": {
-                DISCHARGE: [
-                    "1. From Park position / Sillbeam to target OOG",
-                    "2. From Start adjust on OOG to Awaiting attachements",
-                    "3. From Awaiting attachements by dowelman to clearance to hoist"
-                ],
-                LOADING: [
-                    "1. Hook up OOG",
-                    "2. Lift OOG",
-                    "3. Release OOG"
-                ]
+                DISCHARGE: ["1. From Park position / Sillbeam to target OOG", "2. From Start adjust on OOG to Awaiting attachements", "3. From Awaiting attachements by dowelman to clearance to hoist"],
+                LOADING: ["1. Hook up OOG", "2. Lift OOG", "3. Release OOG"]
             }
         },
         RTG: {
-            LOADING: [
-                "1. FROM PARK POSITION TO LOCK CONTAINER IN THE BAY",
-                "2. FROM LOCK IN THE BAY TO A-ROW",
-                "3. FROM A- ROW TO UNLOCK ON TRUCK",
-                "4. FROM UNLOCK ON TRUCK TO PARK POSITION"
-            ],
-            DISCHARGE: [
-                "1. FROM PARK POSITION TO LOCK ON TRUCK",
-                "2. FROM LOCK ON TRUCK TO UNLOCK ON TARGET ROW",
-                "3. FROM UNLOCK TO PARK POSITION"
-            ]
+            LOADING: ["1. FROM PARK POSITION TO LOCK CONTAINER IN THE BAY", "2. FROM LOCK IN THE BAY TO A-ROW", "3. FROM A- ROW TO UNLOCK ON TRUCK", "4. FROM UNLOCK ON TRUCK TO PARK POSITION"],
+            DISCHARGE: ["1. FROM PARK POSITION TO LOCK ON TRUCK", "2. FROM LOCK ON TRUCK TO UNLOCK ON TARGET ROW", "3. FROM UNLOCK TO PARK POSITION"]
         },
         TT: {
             LOADING: ["1. Lifted by QC", "2. Move to RTG", "3. Rec from RTG", "4. Move to PULL", "5. Move to Pinning", "6. Fixing twistlock", "7. Standby"],
@@ -517,155 +465,154 @@
         DEFAULT: ["1. Start cycle", "2. End cycle"]
     };
 
-    // OFFLINE LOGIC
-    function saveLogsToLocal() {
-        localStorage.setItem(LOGS_STORAGE_KEY, JSON.stringify(logs));
+    // Helper to generate ranges for selects
+    function generateSelectRange(prefix, start, end) {
+        let html = '';
+        for(let i = start; i <= end; i++) {
+            let num = i.toString().padStart(2, '0');
+            if (prefix === 'TT') num = i.toString(); // TT doesn't use padding
+            html += `<option value="${prefix} ${num}">${prefix} ${num}</option>`;
+        }
+        return html;
     }
 
+    // OFFLINE LOGIC
+    function saveLogsToLocal() { localStorage.setItem(LOGS_STORAGE_KEY, JSON.stringify(logs)); }
     function loadLogsFromLocal() {
         const saved = localStorage.getItem(LOGS_STORAGE_KEY);
         if (saved) {
             logs = JSON.parse(saved);
             cycleCount = logs.length;
             document.getElementById('cycle-count').innerText = cycleCount;
-            if (cycleCount > 0) {
-                document.getElementById('last-cycle-display').innerText = logs[logs.length-1].Net_Cycle || "0.00";
-            }
+            if (cycleCount > 0) document.getElementById('last-cycle-display').innerText = logs[logs.length-1].Net_Cycle || "0.00";
         }
     }
 
-    // RESET ACTIONS
+    // CSV GENERATION LOGIC WITH INLINE AVERAGES & EXACT ORDER FROM image_30ff97.png
+    function generateCSVString() {
+        if (logs.length === 0) return null;
+        
+        // Exact headers setup based on image_30ff97.png
+        const baseHeaders = ["Date", "Time", "Equipment", "Unit", "Cycles", "Staff", "Operation", "Category", "Net_Cycle", "Waiting", "Gross_Cycle"];
+        const allKeys = Array.from(new Set(logs.flatMap(l => Object.keys(l))));
+        const stepKeys = allKeys.filter(k => k.startsWith('Step_')).sort((a,b) => parseInt(a.split('_')[1]) - parseInt(b.split('_')[1]));
+        const summaryHeaders = ["Avg Net Cycle", "Avg Gross Cycle", "Avg Waiting Time"];
+        
+        const headers = baseHeaders.concat(stepKeys).concat(summaryHeaders);
+
+        let csv = "\ufeff" + headers.map(k => `"${k}"`).join(",") + "\r\n"; 
+        
+        // Totals tracker for final summary row
+        let columnSums = {};
+        headers.forEach(h => columnSums[h] = 0);
+
+        // Pre-calculate session averages
+        let sumNetTotal = 0, sumGrossTotal = 0, sumWaitTotal = 0;
+        logs.forEach(l => {
+            sumNetTotal += parseFloat(l.Net_Cycle || 0);
+            sumGrossTotal += parseFloat(l.Gross_Cycle || 0);
+            sumWaitTotal += parseFloat(l.Waiting || 0);
+        });
+        const finalAvgNet = (sumNetTotal / logs.length).toFixed(2) + "s";
+        const finalAvgGross = (sumGrossTotal / logs.length).toFixed(2) + "s";
+        const finalAvgWait = (sumWaitTotal / logs.length).toFixed(2) + "s";
+
+        // Add Data Rows
+        logs.forEach((l, idx) => { 
+            csv += headers.map(h => {
+                let val = l[h] || "";
+                
+                // Dynamic cycle counter for the excel sheet
+                if (h === "Cycles") val = idx + 1;
+                else if (h === "Avg Net Cycle") val = finalAvgNet;
+                else if (h === "Avg Gross Cycle") val = finalAvgGross;
+                else if (h === "Avg Waiting Time") val = finalAvgWait;
+
+                // Track sums for time metrics
+                if (h.startsWith('Step_') || h === 'Net_Cycle' || h === 'Waiting' || h === 'Gross_Cycle') {
+                    columnSums[h] += parseFloat(val || 0);
+                }
+                
+                return `"${val}"`;
+            }).join(",") + "\r\n"; 
+        }); 
+
+        // Add Final Average Row at the bottom
+        csv += headers.map((h, index) => {
+            if (h === "Category") return `"AVERAGE"`;
+            
+            // For standard metrics and steps, calculate the vertical average
+            if (h.startsWith('Step_') || h === 'Net_Cycle' || h === 'Waiting' || h === 'Gross_Cycle') {
+                return `"${(columnSums[h] / logs.length).toFixed(2)}"`;
+            }
+
+            if (h === "Avg Net Cycle") return `"${finalAvgNet}"`;
+            if (h === "Avg Gross Cycle") return `"${finalAvgGross}"`;
+            if (h === "Avg Waiting Time") return `"${finalAvgWait}"`;
+            
+            return `""`;
+        }).join(",") + "\r\n";
+
+        return csv;
+    }
+
+    window.downloadReport = () => { 
+        const csv = generateCSVString();
+        if (!csv) return showToast("NO DATA LOGGED"); 
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" }); 
+        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); 
+        link.download = `Salalah_Ops_Analysis_${new Date().getTime()}.csv`; link.click(); 
+        showToast("REPORT DOWNLOADED"); 
+    };
+
+    window.handleShare = async (platform) => {
+        const csvContent = generateCSVString();
+        if (!csvContent) return;
+        const filename = `Port_Performance_${new Date().getTime()}.csv`;
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const file = new File([blob], filename, { type: 'text/csv' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            try { await navigator.share({ files: [file], title: 'Performance Analysis', text: 'Salalah Port Operation Report with session averages.' }); closeShareModal(); return; } catch (err) {}
+        }
+        const last = logs[logs.length - 1];
+        const textSummary = `*Cycle Report: ${last.Equipment}*\nCycles: ${logs.length}\nAnalysis shared via CSV attachment.`;
+        if (platform === 'whatsapp') window.open(`https://wa.me/?text=${encodeURIComponent(textSummary)}`, '_blank');
+        else window.open(`mailto:?subject=Salalah Port Analysis&body=${encodeURIComponent(textSummary)}`, '_blank');
+        closeShareModal();
+    };
+
+    // UI & Logic
     window.resetLastRecord = () => {
         if (logs.length === 0) return showToast("NO RECORDS TO RESET");
         openModal("REMOVE LAST?", "The last recorded cycle will be deleted permanently.", () => {
-            logs.pop();
-            cycleCount = logs.length;
+            logs.pop(); cycleCount = logs.length;
             document.getElementById('cycle-count').innerText = cycleCount;
             document.getElementById('last-cycle-display').innerText = cycleCount > 0 ? (logs[logs.length-1].Net_Cycle || "0.00") : "0.00";
-            saveLogsToLocal();
-            showToast("LAST RECORD REMOVED");
+            saveLogsToLocal(); showToast("LAST RECORD REMOVED");
         });
     };
 
     window.resetAllRecordsInTimer = () => {
         if (logs.length === 0) return showToast("NO DATA TO CLEAR");
         openModal("CLEAR ALL DATA?", "This will delete all cycles logged in this session.", () => {
-            logs = [];
-            cycleCount = 0;
+            logs = []; cycleCount = 0;
             document.getElementById('cycle-count').innerText = "0";
             document.getElementById('last-cycle-display').innerText = "0.00";
-            saveLogsToLocal();
-            showToast("ALL DATA CLEARED");
+            saveLogsToLocal(); showToast("ALL DATA CLEARED");
         });
     };
 
     window.clearLocalStorage = () => {
-        openModal("WIPE STORAGE?", "This will erase all logs stored on this device. Export CSV first.", () => {
-            localStorage.removeItem(LOGS_STORAGE_KEY);
-            logs = [];
-            cycleCount = 0;
+        openModal("WIPE STORAGE?", "This will erase all logs stored on this device.", () => {
+            localStorage.removeItem(LOGS_STORAGE_KEY); logs = []; cycleCount = 0;
             document.getElementById('cycle-count').innerText = "0";
             document.getElementById('last-cycle-display').innerText = "0.00";
             showToast("STORAGE WIPED");
         });
     };
 
-    // CSV GENERATION LOGIC (WITH SUMMARY)
-    function generateCSVString() {
-        if (logs.length === 0) return null;
-        
-        const manualHeaderOrder = ["Date", "Time", "Equipment", "Unit", "Staff", "Operation", "Category", "Net_Cycle", "Waiting", "Gross_Cycle"];
-        const allPossibleKeys = Array.from(new Set(logs.flatMap(l => Object.keys(l))));
-        const keys = manualHeaderOrder.concat(allPossibleKeys.filter(k => !manualHeaderOrder.includes(k)));
-        
-        // Add UTF-8 BOM for Excel compatibility
-        let csv = "\ufeff" + keys.map(k => `"${k}"`).join(",") + "\r\n"; 
-        
-        let sumNet = 0, sumGross = 0, sumWait = 0;
-        
-        logs.forEach(l => { 
-            csv += keys.map(k => `"${l[k] || '0.00'}"`).join(",") + "\r\n"; 
-            sumNet += parseFloat(l.Net_Cycle || 0);
-            sumGross += parseFloat(l.Gross_Cycle || 0);
-            sumWait += parseFloat(l.Waiting || 0);
-        }); 
-
-        const avgNet = (sumNet / logs.length).toFixed(2);
-        const avgGross = (sumGross / logs.length).toFixed(2);
-        const avgWait = (sumWait / logs.length).toFixed(2);
-
-        // APPEND SUMMARY AT THE BOTTOM
-        csv += "\r\n\r\n";
-        csv += `"PERFORMANCE SUMMARY REPORT",\r\n`;
-        csv += `"Total Cycles recorded","${logs.length}"\r\n`;
-        csv += `"Average Net Cycle Time","${avgNet} seconds"\r\n`;
-        csv += `"Average Gross Cycle Time","${avgGross} seconds"\r\n`;
-        csv += `"Average Waiting Time","${avgWait} seconds"\r\n`;
-        csv += `"Export Date","${new Date().toLocaleDateString()}"\r\n`;
-        csv += `"Export Time","${new Date().toLocaleTimeString()}"\r\n`;
-        
-        return csv;
-    }
-
-    // SHARE LOGIC
-    window.openShareModal = () => {
-        if (logs.length === 0) return showToast("NO DATA TO SHARE");
-        document.getElementById('share-modal-overlay').style.display = 'flex';
-    };
-
-    window.closeShareModal = () => {
-        document.getElementById('share-modal-overlay').style.display = 'none';
-    };
-
-    window.handleShare = async (platform) => {
-        const csvContent = generateCSVString();
-        if (!csvContent) return;
-
-        const filename = `Cycle_Report_${new Date().getTime()}.csv`;
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        const file = new File([blob], filename, { type: 'text/csv' });
-
-        // Native File Share (Mobile Support)
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            try {
-                await navigator.share({
-                    files: [file],
-                    title: 'Performance Report - Excel',
-                    text: 'Attached is the cycle timer excel sheet with performance summary.'
-                });
-                closeShareModal();
-                return;
-            } catch (err) {
-                console.warn("Share failed, falling back to link...", err);
-            }
-        }
-
-        // Fallback for WhatsApp (Link only)
-        const last = logs[logs.length - 1];
-        const textSummary = `*Cycle Excel Report: ${last.Equipment} (${last.Unit})*%0A` +
-                            `Date: ${last.Date}%0A` +
-                            `Total Cycles: ${logs.length}%0A%0A` +
-                            `_Note: Excel file sharing requires mobile browser share support. Use "Download CSV" to save the file manually._`;
-
-        if (platform === 'whatsapp') {
-            window.open(`https://wa.me/?text=${textSummary}`, '_blank');
-        } else {
-            const subject = encodeURIComponent(`Cycle Timer Excel Report: ${last.Equipment}`);
-            window.open(`mailto:?subject=${subject}&body=${textSummary.replace(/%0A/g, '\r\n').replace(/\*/g, '')}`, '_blank');
-        }
-        closeShareModal();
-    };
-
-    // CONNECTION MONITOR
-    window.addEventListener('online', updateConnStatus);
-    window.addEventListener('offline', updateConnStatus);
-    function updateConnStatus() {
-        const badge = document.getElementById('conn-status');
-        if (badge) {
-            if (navigator.onLine) { badge.innerText = "Online"; badge.className = "status-badge status-online"; } 
-            else { badge.innerText = "Offline Mode"; badge.className = "status-badge status-offline"; }
-        }
-    }
+    window.openShareModal = () => { if (logs.length === 0) return showToast("NO DATA TO SHARE"); document.getElementById('share-modal-overlay').style.display = 'flex'; };
+    window.closeShareModal = () => { document.getElementById('share-modal-overlay').style.display = 'none'; };
 
     window.showScreen = (id) => {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -688,12 +635,63 @@
         currentCrane = equipment; 
         const inputDiv = document.getElementById('dynamic-inputs'); inputDiv.innerHTML = '';
         document.getElementById('modeToggleContainer').classList.remove('hidden');
+        
+        let unitDropdownHTML = '';
+        let unitLabel = 'UNIT#';
+
         if (equipment === 'QC') {
-            inputDiv.innerHTML = `<div class="grid grid-cols-2 gap-3"><input type="text" id="staffId" placeholder="OP-ID" class="dark-input text-xs"><input type="text" id="unitNo" placeholder="CRANE#" class="dark-input text-xs text-center"></div><label class="setup-label">Measurement Type</label><select id="qcCategory" onchange="window.updateQCCategory(this.value)" class="dark-input text-xs w-full"><option value="Above Deck">Above Deck</option><option value="Below Deck">Below Deck</option><option value="Hatch cover">Hatch cover</option><option value="OOG (OHF)">OOG (OHF)</option><option value="OOG (Wire sling)">OOG (Wire sling)</option></select>`;
+            unitLabel = 'CRANE#';
+            unitDropdownHTML = `<select id="unitNo" class="dark-input text-xs">${generateSelectRange('QC', 8, 40)}</select>`;
+            inputDiv.innerHTML = `
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="setup-label">OP-ID</label><input type="text" id="staffId" placeholder="STAFF" class="dark-input text-xs"></div>
+                    <div><label class="setup-label">${unitLabel}</label>${unitDropdownHTML}</div>
+                </div>
+                <label class="setup-label">Measurement Type</label>
+                <select id="qcCategory" onchange="window.updateQCCategory(this.value)" class="dark-input text-xs w-full">
+                    <option value="Above Deck">Above Deck</option>
+                    <option value="Below Deck">Below Deck</option>
+                    <option value="Hatch cover">Hatch cover</option>
+                    <option value="OOG (OHF)">OOG (OHF)</option>
+                    <option value="OOG (Wire sling)">OOG (Wire sling)</option>
+                </select>`;
             currentCategory = 'Above Deck';
+        } else if (equipment === 'RTG') {
+            unitDropdownHTML = `<select id="unitNo" class="dark-input text-xs">${generateSelectRange('RTG', 34, 135)}</select>`;
+            inputDiv.innerHTML = `
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="setup-label">OP-ID</label><input type="text" id="staffId" placeholder="STAFF" class="dark-input text-xs"></div>
+                    <div><label class="setup-label">RTG#</label>${unitDropdownHTML}</div>
+                </div>`;
+        } else if (equipment === 'TT') {
+            unitDropdownHTML = `<select id="unitNo" class="dark-input text-xs">${generateSelectRange('TT', 305, 500)}</select>`;
+            inputDiv.innerHTML = `
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="setup-label">OP-ID</label><input type="text" id="staffId" placeholder="STAFF" class="dark-input text-xs"></div>
+                    <div><label class="setup-label">TT#</label>${unitDropdownHTML}</div>
+                </div>`;
+        } else if (equipment === 'EH') {
+            unitDropdownHTML = `<select id="unitNo" class="dark-input text-xs">${generateSelectRange('EH', 5, 20)}</select>`;
+            inputDiv.innerHTML = `
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="setup-label">OP-ID</label><input type="text" id="staffId" placeholder="STAFF" class="dark-input text-xs"></div>
+                    <div><label class="setup-label">EH#</label>${unitDropdownHTML}</div>
+                </div>`;
+        } else if (equipment === 'RS') {
+            unitDropdownHTML = `<select id="unitNo" class="dark-input text-xs">${generateSelectRange('RS', 5, 12)}</select>`;
+            inputDiv.innerHTML = `
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="setup-label">OP-ID</label><input type="text" id="staffId" placeholder="STAFF" class="dark-input text-xs"></div>
+                    <div><label class="setup-label">RS#</label>${unitDropdownHTML}</div>
+                </div>`;
         } else {
-            inputDiv.innerHTML = `<input type="text" id="staffId" placeholder="OP-ID" class="dark-input text-xs"><input type="text" id="unitNo" placeholder="UNIT#" class="dark-input text-xs">`;
+            inputDiv.innerHTML = `
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="text" id="staffId" placeholder="OP-ID" class="dark-input text-xs">
+                    <input type="text" id="unitNo" placeholder="UNIT#" class="dark-input text-xs">
+                </div>`;
         }
+        
         resetCurrentTimerUI(); updateMode('LOADING'); window.showScreen('timer-screen');
     };
 
@@ -745,86 +743,19 @@
         saveLogsToLocal(); 
     }
 
-    window.stopCycle = () => { 
-        finalizeCycleSilently(Date.now()); 
-        document.getElementById('recordModal').classList.remove('hidden'); 
-        setTimeout(() => { document.getElementById('recordModal').classList.add('hidden'); resetCurrentTimerUI(); }, 1000); 
-    };
-
-    window.togglePause = () => { 
-        if (!startTime) return; 
-        const pBtn = document.getElementById('pause-btn'); 
-        if (!isPaused) { isPaused = true; delayStart = Date.now(); pBtn.style.opacity = '0.5'; clearInterval(activeInterval); } 
-        else { isPaused = false; let d = Date.now() - delayStart; startTime += d; lastTime += d; pBtn.style.opacity = '1'; activeInterval = setInterval(() => { document.getElementById('main-timer').innerText = ((Date.now() - startTime) / 1000).toFixed(2); }, 50); } 
-    };
-
-    window.toggleWaiting = () => { 
-        if (!startTime) return; 
-        const wBtn = document.getElementById('wait-btn'); 
-        if (!isWaiting) { isWaiting = true; delayStart = Date.now(); wBtn.style.opacity = '0.5'; clearInterval(activeInterval); } 
-        else { isWaiting = false; let d = Date.now() - delayStart; totalWaitingDuration += d; startTime += d; lastTime += d; wBtn.style.opacity = '1'; activeInterval = setInterval(() => { document.getElementById('main-timer').innerText = ((Date.now() - startTime) / 1000).toFixed(2); }, 50); } 
-    };
-
-    function resetCurrentTimerUI() { 
-        clearInterval(activeInterval); startTime = null; isPaused = false; isWaiting = false; 
-        document.getElementById('main-timer').innerText = "0.00"; 
-        document.getElementById('stop-cycle-btn').classList.add('hidden'); 
-        document.getElementById('pause-btn').style.opacity = '1'; document.getElementById('wait-btn').style.opacity = '1'; 
-        renderSteps(); 
-    }
-
-    window.downloadReport = () => { 
-        const csv = generateCSVString();
-        if (!csv) return showToast("NO DATA LOGGED"); 
-        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" }); 
-        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); 
-        link.download = `Cycle_Report_${new Date().getTime()}.csv`; link.click(); 
-        showToast("REPORT DOWNLOADED"); 
-    };
-
+    window.stopCycle = () => { finalizeCycleSilently(Date.now()); document.getElementById('recordModal').classList.remove('hidden'); setTimeout(() => { document.getElementById('recordModal').classList.add('hidden'); resetCurrentTimerUI(); }, 1000); };
+    window.togglePause = () => { if (!startTime) return; const pBtn = document.getElementById('pause-btn'); if (!isPaused) { isPaused = true; delayStart = Date.now(); pBtn.style.opacity = '0.5'; clearInterval(activeInterval); } else { isPaused = false; let d = Date.now() - delayStart; startTime += d; lastTime += d; pBtn.style.opacity = '1'; activeInterval = setInterval(() => { document.getElementById('main-timer').innerText = ((Date.now() - startTime) / 1000).toFixed(2); }, 50); } };
+    window.toggleWaiting = () => { if (!startTime) return; const wBtn = document.getElementById('wait-btn'); if (!isWaiting) { isWaiting = true; delayStart = Date.now(); wBtn.style.opacity = '0.5'; clearInterval(activeInterval); } else { isWaiting = false; let d = Date.now() - delayStart; totalWaitingDuration += d; startTime += d; lastTime += d; wBtn.style.opacity = '1'; activeInterval = setInterval(() => { document.getElementById('main-timer').innerText = ((Date.now() - startTime) / 1000).toFixed(2); }, 50); } };
+    function resetCurrentTimerUI() { clearInterval(activeInterval); startTime = null; isPaused = false; isWaiting = false; document.getElementById('main-timer').innerText = "0.00"; document.getElementById('stop-cycle-btn').classList.add('hidden'); document.getElementById('pause-btn').style.opacity = '1'; document.getElementById('wait-btn').style.opacity = '1'; renderSteps(); }
     window.closeModal = () => { document.getElementById('custom-modal-overlay').style.display = 'none'; };
-    window.openModal = (title, msg, onConfirm) => { 
-        document.getElementById('modal-title').innerText = title; document.getElementById('modal-msg').innerText = msg; 
-        document.getElementById('custom-modal-overlay').style.display = 'flex'; 
-        document.getElementById('modal-confirm-btn').onclick = () => { onConfirm(); closeModal(); }; 
-    };
-
-    window.goHome = () => { 
-        if (startTime) { openModal("ABORT MEASUREMENT?", "Current timing data will be lost.", () => { resetCurrentTimerUI(); window.showScreen(window.parentScreen); }); } 
-        else { window.showScreen(window.parentScreen); } 
-    };
-
-    window.openQuickManual = () => {
-        document.getElementById('manualEquipId').value = ''; document.getElementById('manualStaffId').value = '';
-        document.getElementById('manualStepList').innerHTML = ''; window.showScreen('manual-setup-screen');
-    };
-
-    window.addManualStep = () => { 
-        let i = document.getElementById('manualStepInput'); 
-        if (i && i.value.trim()) { 
-            const list = document.getElementById('manualStepList');
-            const d = document.createElement('div'); d.className = 'flex justify-between items-center bg-black/40 p-3 rounded-lg border border-white/5';
-            d.innerHTML = `<span class="text-xs font-bold">${i.value}</span>`;
-            list.appendChild(d); i.value = '';
-        } 
-    };
-
+    window.openModal = (title, msg, onConfirm) => { document.getElementById('modal-title').innerText = title; document.getElementById('modal-msg').innerText = msg; document.getElementById('custom-modal-overlay').style.display = 'flex'; document.getElementById('modal-confirm-btn').onclick = () => { onConfirm(); closeModal(); }; };
+    window.goHome = () => { if (startTime) { openModal("ABORT MEASUREMENT?", "Current timing data will be lost.", () => { resetCurrentTimerUI(); window.showScreen(window.parentScreen); }); } else { window.showScreen(window.parentScreen); } };
+    window.openQuickManual = () => { document.getElementById('manualEquipId').value = ''; document.getElementById('manualStaffId').value = ''; document.getElementById('manualStepList').innerHTML = ''; window.showScreen('manual-setup-screen'); };
+    window.addManualStep = () => { let i = document.getElementById('manualStepInput'); if (i && i.value.trim()) { const list = document.getElementById('manualStepList'); const d = document.createElement('div'); d.className = 'flex justify-between items-center bg-black/40 p-3 rounded-lg border border-white/5'; d.innerHTML = `<span class="text-xs font-bold">${i.value}</span>`; list.appendChild(d); i.value = ''; } };
     window.openManualTimer = () => { showToast("Configuring..."); };
-
-    window.onload = function() { loadLogsFromLocal(); updateConnStatus(); window.showScreen('home-screen'); };
-
-    window.attemptLogin = () => {
-        if (document.getElementById('adminPin').value === '1234') {
-            document.getElementById('app-body').classList.add('logged-in');
-            document.getElementById('login-btn').classList.add('hidden'); document.getElementById('logout-btn').classList.remove('hidden');
-            showToast("ADMIN ACCESS"); window.showScreen('home-screen');
-        } else { showToast("INVALID PIN"); }
-        document.getElementById('adminPin').value = '';
-    };
-
+    window.onload = function() { loadLogsFromLocal(); const badge = document.getElementById('conn-status'); if (badge) { badge.innerText = navigator.onLine ? "Online" : "Offline Mode"; badge.className = navigator.onLine ? "status-badge status-online" : "status-badge status-offline"; } window.showScreen('home-screen'); };
+    window.attemptLogin = () => { if (document.getElementById('adminPin').value === '1234') { document.getElementById('app-body').classList.add('logged-in'); document.getElementById('login-btn').classList.add('hidden'); document.getElementById('logout-btn').classList.remove('hidden'); showToast("ADMIN ACCESS"); window.showScreen('home-screen'); } else { showToast("INVALID PIN"); } document.getElementById('adminPin').value = ''; };
     window.logout = () => { location.reload(); };
-
 </script>
 </body>
 </html>
-
