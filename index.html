@@ -470,7 +470,7 @@
         let html = '';
         for(let i = start; i <= end; i++) {
             let num = i.toString().padStart(2, '0');
-            if (prefix === 'TT') num = i.toString(); // TT doesn't use padding
+            if (prefix === 'TT') num = i.toString();
             html += `<option value="${prefix} ${num}">${prefix} ${num}</option>`;
         }
         return html;
@@ -488,47 +488,33 @@
         }
     }
 
-    // CSV GENERATION LOGIC WITH INLINE AVERAGES & EXACT ORDER FROM image_30ff97.png
+    // CSV GENERATION LOGIC - Updated to remove repeated Average columns
     function generateCSVString() {
         if (logs.length === 0) return null;
         
-        // Exact headers setup based on image_30ff97.png
+        // Exact headers setup based on user feedback
         const baseHeaders = ["Date", "Time", "Equipment", "Unit", "Cycles", "Staff", "Operation", "Category", "Net_Cycle", "Waiting", "Gross_Cycle"];
         const allKeys = Array.from(new Set(logs.flatMap(l => Object.keys(l))));
         const stepKeys = allKeys.filter(k => k.startsWith('Step_')).sort((a,b) => parseInt(a.split('_')[1]) - parseInt(b.split('_')[1]));
-        const summaryHeaders = ["Avg Net Cycle", "Avg Gross Cycle", "Avg Waiting Time"];
         
-        const headers = baseHeaders.concat(stepKeys).concat(summaryHeaders);
+        // Final headers (Avg Net Cycle etc. removed from main columns)
+        const headers = baseHeaders.concat(stepKeys);
 
         let csv = "\ufeff" + headers.map(k => `"${k}"`).join(",") + "\r\n"; 
         
-        // Totals tracker for final summary row
+        // Totals tracker for final AVERAGE summary row
         let columnSums = {};
         headers.forEach(h => columnSums[h] = 0);
-
-        // Pre-calculate session averages
-        let sumNetTotal = 0, sumGrossTotal = 0, sumWaitTotal = 0;
-        logs.forEach(l => {
-            sumNetTotal += parseFloat(l.Net_Cycle || 0);
-            sumGrossTotal += parseFloat(l.Gross_Cycle || 0);
-            sumWaitTotal += parseFloat(l.Waiting || 0);
-        });
-        const finalAvgNet = (sumNetTotal / logs.length).toFixed(2) + "s";
-        const finalAvgGross = (sumGrossTotal / logs.length).toFixed(2) + "s";
-        const finalAvgWait = (sumWaitTotal / logs.length).toFixed(2) + "s";
 
         // Add Data Rows
         logs.forEach((l, idx) => { 
             csv += headers.map(h => {
                 let val = l[h] || "";
                 
-                // Dynamic cycle counter for the excel sheet
+                // Set the incremental counter
                 if (h === "Cycles") val = idx + 1;
-                else if (h === "Avg Net Cycle") val = finalAvgNet;
-                else if (h === "Avg Gross Cycle") val = finalAvgGross;
-                else if (h === "Avg Waiting Time") val = finalAvgWait;
 
-                // Track sums for time metrics
+                // Track sums for vertical average calculation
                 if (h.startsWith('Step_') || h === 'Net_Cycle' || h === 'Waiting' || h === 'Gross_Cycle') {
                     columnSums[h] += parseFloat(val || 0);
                 }
@@ -537,18 +523,15 @@
             }).join(",") + "\r\n"; 
         }); 
 
-        // Add Final Average Row at the bottom
+        // Add Final "AVERAGE" Row at the bottom
         csv += headers.map((h, index) => {
+            // Labeling the row
             if (h === "Category") return `"AVERAGE"`;
             
-            // For standard metrics and steps, calculate the vertical average
+            // Calculate vertical averages for every numeric column
             if (h.startsWith('Step_') || h === 'Net_Cycle' || h === 'Waiting' || h === 'Gross_Cycle') {
                 return `"${(columnSums[h] / logs.length).toFixed(2)}"`;
             }
-
-            if (h === "Avg Net Cycle") return `"${finalAvgNet}"`;
-            if (h === "Avg Gross Cycle") return `"${finalAvgGross}"`;
-            if (h === "Avg Waiting Time") return `"${finalAvgWait}"`;
             
             return `""`;
         }).join(",") + "\r\n";
@@ -561,23 +544,23 @@
         if (!csv) return showToast("NO DATA LOGGED"); 
         const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" }); 
         const link = document.createElement("a"); link.href = URL.createObjectURL(blob); 
-        link.download = `Salalah_Ops_Analysis_${new Date().getTime()}.csv`; link.click(); 
+        link.download = `Cycle_Analysis_Salalah_${new Date().getTime()}.csv`; link.click(); 
         showToast("REPORT DOWNLOADED"); 
     };
 
     window.handleShare = async (platform) => {
         const csvContent = generateCSVString();
         if (!csvContent) return;
-        const filename = `Port_Performance_${new Date().getTime()}.csv`;
+        const filename = `Cycle_Record_${new Date().getTime()}.csv`;
         const blob = new Blob([csvContent], { type: 'text/csv' });
         const file = new File([blob], filename, { type: 'text/csv' });
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            try { await navigator.share({ files: [file], title: 'Performance Analysis', text: 'Salalah Port Operation Report with session averages.' }); closeShareModal(); return; } catch (err) {}
+            try { await navigator.share({ files: [file], title: 'Cycle Analysis', text: 'Operation performance report attached.' }); closeShareModal(); return; } catch (err) {}
         }
         const last = logs[logs.length - 1];
-        const textSummary = `*Cycle Report: ${last.Equipment}*\nCycles: ${logs.length}\nAnalysis shared via CSV attachment.`;
+        const textSummary = `*Cycle Report*\nAsset: ${last.Equipment}\nCycles: ${logs.length}\nReport shared as CSV.`;
         if (platform === 'whatsapp') window.open(`https://wa.me/?text=${encodeURIComponent(textSummary)}`, '_blank');
-        else window.open(`mailto:?subject=Salalah Port Analysis&body=${encodeURIComponent(textSummary)}`, '_blank');
+        else window.open(`mailto:?subject=Port Operation Analysis&body=${encodeURIComponent(textSummary)}`, '_blank');
         closeShareModal();
     };
 
