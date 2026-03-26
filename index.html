@@ -18,7 +18,6 @@
             --calc-teal: #0f766e; 
         }
         
-        /* Essential Offline Layout Fallbacks (if Tailwind fails) */
         body { 
             font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; 
             background: var(--calc-bg); 
@@ -95,8 +94,24 @@
         
         .lcd-sub-section { border-bottom: 1px solid rgba(0,0,0,0.15); padding-bottom: 4px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
         .lcd-label { font-size: 0.6rem; font-weight: 900; color: rgba(0,0,0,0.5); text-transform: uppercase; }
-        #last-cycle-display { font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-weight: 900; color: rgba(26, 28, 26, 0.6); font-size: 1.5rem; text-align: right; }
-        #main-timer { font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-weight: 900; color: var(--calc-lcd-text); text-align: right; line-height: 1; font-size: 3.8rem; }
+        
+        /* Last Cycle Display and Total Cycle Display styling */
+        .lcd-secondary-text {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-weight: 900;
+            color: rgba(26, 28, 26, 0.6);
+            font-size: 1.2rem;
+        }
+        
+        #main-timer { 
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace; 
+            font-weight: 900; 
+            color: var(--calc-lcd-text); 
+            text-align: right; 
+            line-height: 1; 
+            font-size: 3.2rem;
+            white-space: nowrap;
+        }
 
         .dark-input { border: 2px solid #333; padding: 14px; border-radius: 10px; width: 100%; font-weight: 700; outline: none; background: #121212; color: #fff; box-sizing: border-box; }
         .dark-input:focus { border-color: var(--calc-btn-active); }
@@ -117,22 +132,7 @@
         .status-online { background: #059669; color: white; }
         .status-offline { background: #dc2626; color: white; }
 
-        /* Mobile Layout Helpers */
-        .flex { display: flex; }
-        .flex-col { flex-direction: column; }
-        .flex-1 { flex: 1; }
-        .gap-4 { gap: 16px; }
-        .items-center { align-items: center; }
-        .justify-between { justify-content: space-between; }
-        .mb-4 { margin-bottom: 16px; }
-        .mt-4 { margin-top: 16px; }
-        .w-full { width: 100%; }
-        .grid { display: grid; }
-        .grid-cols-2 { grid-template-columns: 1fr 1fr; }
-        .text-xs { font-size: 0.75rem; }
-        .font-black { font-weight: 900; }
-
-        .icon { width: 24px; height: 24px; fill: currentColor; }
+        .icon { width: 24px; height: 24px; fill: currentColor; flex-shrink: 0; }
     </style>
 </head>
 <body id="app-body">
@@ -153,12 +153,12 @@
     <!-- LOGIN SCREEN -->
     <div id="login-screen" class="screen">
         <button class="btn-calc px-6 py-4 text-xs mb-16" onclick="showScreen('home-screen')">
-            <svg class="icon mr-2" viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg> RETURN
+            <svg class="icon mr-2" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> RETURN
         </button>
         <div class="text-center mb-12">
             <h2 class="text-4xl font-black uppercase tracking-tight">SECURE PIN</h2>
         </div>
-        <div class="space-y-8">
+        <div class="space-y-8 p-4">
             <input type="password" id="adminPin" placeholder="••••" class="dark-input text-center text-4xl tracking-[20px]">
             <button onclick="attemptLogin()" class="btn-calc w-full py-7 text-sm tracking-[0.3em]">
                 AUTHORIZE
@@ -171,16 +171,16 @@
         <div class="flex justify-between items-start mt-4 mb-12">
              <div class="text-left">
                 <div class="flex items-center gap-3 mb-1">
-                    <h1 class="text-3xl sm:text-5xl font-black tracking-tighter leading-none italic uppercase">Cycle <span class="text-orange-500">Timer</span></h1>
+                    <h1 class="text-3xl sm:text-4xl font-black tracking-tighter leading-none italic uppercase">Cycle <span class="text-orange-500">Timer</span></h1>
                     <span id="conn-status" class="status-badge status-online">Online</span>
                 </div>
                 <p class="text-slate-500 font-black uppercase tracking-[0.2em] text-[10px] mt-2">CYCLE TIME RECORDER</p>
             </div>
             <div class="flex gap-4">
-                <button id="login-btn" onclick="showScreen('login-screen')" class="btn-calc w-14 h-14 sm:w-16 sm:h-16">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                <button id="login-btn" onclick="showScreen('login-screen')" class="btn-calc w-14 h-14">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM8.9 6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2H8.9V6zM18 20H6V10h12v10z"/></svg>
                 </button>
-                <button id="logout-btn" onclick="logout()" class="admin-only btn-calc btn-red w-14 h-14 sm:w-16 sm:h-16 hidden">
+                <button id="logout-btn" onclick="logout()" class="admin-only btn-calc btn-red w-14 h-14 hidden">
                     <svg class="icon" viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg>
                 </button>
             </div>
@@ -218,7 +218,7 @@
     <div id="manual-setup-screen" class="screen">
         <div class="flex justify-between items-center mb-10">
             <button class="btn-calc px-5 py-4 text-xs" onclick="showScreen(window.parentScreen)">
-                <svg class="icon w-4 h-4 mr-1" viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg> BACK
+                <svg class="icon w-4 h-4 mr-1" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> BACK
             </button>
             <div id="auth-status-container">
                 <button id="google-login-btn" onclick="loginWithGoogle()" class="btn-calc px-5 py-3 text-[11px]">
@@ -255,13 +255,13 @@
     <div id="timer-screen" class="screen">
         <div class="flex justify-between items-center mb-6">
             <button id="timer-home-btn" onclick="goHome()" class="btn-calc px-5 py-3 text-[11px]">
-                EXIT
+                <svg class="icon w-4 h-4 mr-1" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg> EXIT
             </button>
             <div id="dateDisplay" class="text-[11px] font-black opacity-30 uppercase tracking-[0.3em]"></div>
         </div>
 
         <div id="standard-inputs" class="mb-4">
-            <div class="mode-toggle flex gap-4 mb-4" id="modeToggleContainer">
+            <div class="flex gap-4 mb-4" id="modeToggleContainer">
                 <button id="m-load" class="btn-calc flex-1 py-5 text-sm mode-active" onclick="updateMode('LOADING')">LOADING</button>
                 <button id="m-dis" class="btn-calc flex-1 py-5 text-sm opacity-30" onclick="updateMode('DISCHARGE')">DISCHARGE</button>
             </div>
@@ -270,21 +270,30 @@
 
         <div class="timer-container">
             <div class="lcd-sub-section">
-                <span class="lcd-label">LAST CYCLE</span>
-                <span id="last-cycle-display">0.00</span>
+                <div class="flex items-center gap-2">
+                    <span class="lcd-label">LAST</span>
+                    <span id="last-cycle-display" class="lcd-secondary-text">0.00</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="lcd-label">No. of Cycles</span>
+                    <span id="cycle-count" class="lcd-secondary-text">0</span>
+                </div>
             </div>
             <div class="flex justify-between items-end">
                 <span class="lcd-label mb-1">CURRENT</span>
                 <div id="main-timer">0.00</div>
             </div>
-            <div class="absolute top-1 left-2 text-slate-800 font-black text-[0.45rem] uppercase opacity-40">
-                TOTAL CYCLES: <span id="cycle-count">0</span>
-            </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 mb-4">
+        <div class="grid grid-cols-2 gap-4 mb-2">
             <button id="pause-btn" onclick="togglePause()" class="btn-calc py-6 text-xs" style="background-color: #f59e0b;">PAUSE</button>
             <button id="wait-btn" onclick="toggleWaiting()" class="btn-calc py-6 text-xs" style="background-color: #0ea5e9;">WAITING</button>
+        </div>
+
+        <!-- RESET BUTTONS UNDER PAUSE/WAITING -->
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <button onclick="resetLastRecord()" class="btn-calc py-4 text-[10px]" style="background-color: #64748b;">RESET LAST</button>
+            <button onclick="resetAllRecordsInTimer()" class="btn-calc py-4 text-[10px]" style="background-color: #475569;">RESET ALL</button>
         </div>
 
         <div id="step-grid" class="grid grid-cols-2 gap-4 pt-2"></div>
@@ -298,7 +307,7 @@
                 EXPORT CSV REPORT
             </button>
             <button onclick="clearLocalStorage()" class="text-[10px] font-black text-red-500 uppercase tracking-widest opacity-40 hover:opacity-100 transition">
-                Clear Offline Storage
+                Wipe Global Data
             </button>
         </div>
     </div>
@@ -503,14 +512,47 @@
         }
     }
 
+    // RESET ACTIONS
+    window.resetLastRecord = () => {
+        if (logs.length === 0) return showToast("NO RECORDS TO RESET");
+        
+        openModal("REMOVE LAST?", "The last recorded cycle will be deleted permanently.", () => {
+            logs.pop();
+            cycleCount = logs.length;
+            document.getElementById('cycle-count').innerText = cycleCount;
+            
+            if (cycleCount > 0) {
+                document.getElementById('last-cycle-display').innerText = logs[logs.length-1].Net_Cycle || "0.00";
+            } else {
+                document.getElementById('last-cycle-display').innerText = "0.00";
+            }
+            
+            saveLogsToLocal();
+            showToast("LAST RECORD REMOVED");
+        });
+    };
+
+    window.resetAllRecordsInTimer = () => {
+        if (logs.length === 0) return showToast("NO DATA TO CLEAR");
+        
+        openModal("CLEAR ALL DATA?", "This will delete all cycles logged in this session.", () => {
+            logs = [];
+            cycleCount = 0;
+            document.getElementById('cycle-count').innerText = "0";
+            document.getElementById('last-cycle-display').innerText = "0.00";
+            saveLogsToLocal();
+            showToast("ALL DATA CLEARED");
+        });
+    };
+
     window.clearLocalStorage = () => {
-        openModal("CLEAR STORAGE?", "This will erase all logs stored on this device. Export CSV first.", () => {
+        openModal("WIPE STORAGE?", "This will erase all logs stored on this device. Export CSV first.", () => {
             localStorage.removeItem(LOGS_STORAGE_KEY);
             logs = [];
             cycleCount = 0;
             document.getElementById('cycle-count').innerText = "0";
             document.getElementById('last-cycle-display').innerText = "0.00";
-            showToast("STORAGE CLEARED");
+            showToast("STORAGE WIPED");
         });
     };
 
@@ -633,7 +675,7 @@
         
         document.getElementById('last-cycle-display').innerText = net;
         logs.push({ ...currentCycleData }); 
-        cycleCount++;
+        cycleCount = logs.length;
         document.getElementById('cycle-count').innerText = cycleCount;
         
         saveLogsToLocal(); 
