@@ -95,7 +95,6 @@
         .lcd-sub-section { border-bottom: 1px solid rgba(0,0,0,0.15); padding-bottom: 4px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
         .lcd-label { font-size: 0.6rem; font-weight: 900; color: rgba(0,0,0,0.5); text-transform: uppercase; }
         
-        /* Last Cycle Display and Total Cycle Display styling */
         .lcd-secondary-text {
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
             font-weight: 900;
@@ -561,12 +560,14 @@
     window.addEventListener('offline', updateConnStatus);
     function updateConnStatus() {
         const badge = document.getElementById('conn-status');
-        if (navigator.onLine) {
-            badge.innerText = "Online";
-            badge.className = "status-badge status-online";
-        } else {
-            badge.innerText = "Offline Mode";
-            badge.className = "status-badge status-offline";
+        if (badge) {
+            if (navigator.onLine) {
+                badge.innerText = "Online";
+                badge.className = "status-badge status-online";
+            } else {
+                badge.innerText = "Offline Mode";
+                badge.className = "status-badge status-offline";
+            }
         }
     }
 
@@ -645,6 +646,7 @@
             startTime = now; lastTime = now; totalWaitingDuration = 0;
             currentCycleData = { 
                 Date: new Date().toLocaleDateString(), 
+                Time: new Date().toLocaleTimeString(),
                 Equipment: currentCrane, 
                 Staff: document.getElementById('staffId')?.value || "N/A",
                 Unit: document.getElementById('unitNo')?.value || "N/A",
@@ -673,6 +675,9 @@
         currentCycleData['Waiting'] = waiting;
         currentCycleData['Gross_Cycle'] = gross;
         
+        // Final update for accuracy (record when Stop is pressed)
+        currentCycleData.Time = new Date().toLocaleTimeString();
+
         document.getElementById('last-cycle-display').innerText = net;
         logs.push({ ...currentCycleData }); 
         cycleCount = logs.length;
@@ -713,7 +718,13 @@
     window.downloadReport = () => { 
         if (logs.length === 0) return showToast("NO DATA LOGGED"); 
         
-        const keys = Array.from(new Set(logs.flatMap(l => Object.keys(l)))); 
+        // Define Column Order manually to ensure Time is near Date
+        const manualHeaderOrder = ["Date", "Time", "Equipment", "Unit", "Staff", "Operation", "Category", "Net_Cycle", "Waiting", "Gross_Cycle"];
+        const allPossibleKeys = Array.from(new Set(logs.flatMap(l => Object.keys(l))));
+        
+        // Merge manual order with step keys
+        const keys = manualHeaderOrder.concat(allPossibleKeys.filter(k => !manualHeaderOrder.includes(k)));
+
         let csv = "\ufeff" + keys.map(k => `"${k}"`).join(",") + "\r\n"; 
         
         let sumNet = 0, sumGross = 0, sumWait = 0;
