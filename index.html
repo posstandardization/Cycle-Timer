@@ -488,51 +488,36 @@
         }
     }
 
-    // CSV GENERATION LOGIC - Updated to remove repeated Average columns
+    // CSV GENERATION LOGIC
     function generateCSVString() {
         if (logs.length === 0) return null;
         
-        // Exact headers setup based on user feedback
         const baseHeaders = ["Date", "Time", "Equipment", "Unit", "Cycles", "Staff", "Operation", "Category", "Net_Cycle", "Waiting", "Gross_Cycle"];
         const allKeys = Array.from(new Set(logs.flatMap(l => Object.keys(l))));
         const stepKeys = allKeys.filter(k => k.startsWith('Step_')).sort((a,b) => parseInt(a.split('_')[1]) - parseInt(b.split('_')[1]));
-        
-        // Final headers (Avg Net Cycle etc. removed from main columns)
         const headers = baseHeaders.concat(stepKeys);
 
         let csv = "\ufeff" + headers.map(k => `"${k}"`).join(",") + "\r\n"; 
         
-        // Totals tracker for final AVERAGE summary row
         let columnSums = {};
         headers.forEach(h => columnSums[h] = 0);
 
-        // Add Data Rows
         logs.forEach((l, idx) => { 
             csv += headers.map(h => {
                 let val = l[h] || "";
-                
-                // Set the incremental counter
                 if (h === "Cycles") val = idx + 1;
-
-                // Track sums for vertical average calculation
                 if (h.startsWith('Step_') || h === 'Net_Cycle' || h === 'Waiting' || h === 'Gross_Cycle') {
                     columnSums[h] += parseFloat(val || 0);
                 }
-                
                 return `"${val}"`;
             }).join(",") + "\r\n"; 
         }); 
 
-        // Add Final "AVERAGE" Row at the bottom
         csv += headers.map((h, index) => {
-            // Labeling the row
             if (h === "Category") return `"AVERAGE"`;
-            
-            // Calculate vertical averages for every numeric column
             if (h.startsWith('Step_') || h === 'Net_Cycle' || h === 'Waiting' || h === 'Gross_Cycle') {
                 return `"${(columnSums[h] / logs.length).toFixed(2)}"`;
             }
-            
             return `""`;
         }).join(",") + "\r\n";
 
@@ -544,30 +529,30 @@
         if (!csv) return showToast("NO DATA LOGGED"); 
         const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" }); 
         const link = document.createElement("a"); link.href = URL.createObjectURL(blob); 
-        link.download = `Cycle_Analysis_Salalah_${new Date().getTime()}.csv`; link.click(); 
+        link.download = `Salalah_Cycle_Analysis_${new Date().getTime()}.csv`; link.click(); 
         showToast("REPORT DOWNLOADED"); 
     };
 
     window.handleShare = async (platform) => {
         const csvContent = generateCSVString();
         if (!csvContent) return;
-        const filename = `Cycle_Record_${new Date().getTime()}.csv`;
+        const filename = `Cycle_Analysis_${new Date().getTime()}.csv`;
         const blob = new Blob([csvContent], { type: 'text/csv' });
         const file = new File([blob], filename, { type: 'text/csv' });
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            try { await navigator.share({ files: [file], title: 'Cycle Analysis', text: 'Operation performance report attached.' }); closeShareModal(); return; } catch (err) {}
+            try { await navigator.share({ files: [file], title: 'Performance Analysis', text: 'Operation performance report.' }); closeShareModal(); return; } catch (err) {}
         }
         const last = logs[logs.length - 1];
-        const textSummary = `*Cycle Report*\nAsset: ${last.Equipment}\nCycles: ${logs.length}\nReport shared as CSV.`;
+        const textSummary = `*Cycle Report*\nAsset: ${last.Equipment}\nCycles: ${logs.length}`;
         if (platform === 'whatsapp') window.open(`https://wa.me/?text=${encodeURIComponent(textSummary)}`, '_blank');
-        else window.open(`mailto:?subject=Port Operation Analysis&body=${encodeURIComponent(textSummary)}`, '_blank');
+        else window.open(`mailto:?subject=Port Analysis&body=${encodeURIComponent(textSummary)}`, '_blank');
         closeShareModal();
     };
 
     // UI & Logic
     window.resetLastRecord = () => {
         if (logs.length === 0) return showToast("NO RECORDS TO RESET");
-        openModal("REMOVE LAST?", "The last recorded cycle will be deleted permanently.", () => {
+        openModal("REMOVE LAST?", "Last record will be deleted.", () => {
             logs.pop(); cycleCount = logs.length;
             document.getElementById('cycle-count').innerText = cycleCount;
             document.getElementById('last-cycle-display').innerText = cycleCount > 0 ? (logs[logs.length-1].Net_Cycle || "0.00") : "0.00";
@@ -577,7 +562,7 @@
 
     window.resetAllRecordsInTimer = () => {
         if (logs.length === 0) return showToast("NO DATA TO CLEAR");
-        openModal("CLEAR ALL DATA?", "This will delete all cycles logged in this session.", () => {
+        openModal("CLEAR ALL DATA?", "This will delete all cycles in this session.", () => {
             logs = []; cycleCount = 0;
             document.getElementById('cycle-count').innerText = "0";
             document.getElementById('last-cycle-display').innerText = "0.00";
@@ -586,7 +571,7 @@
     };
 
     window.clearLocalStorage = () => {
-        openModal("WIPE STORAGE?", "This will erase all logs stored on this device.", () => {
+        openModal("WIPE STORAGE?", "Erases all logs from this device.", () => {
             localStorage.removeItem(LOGS_STORAGE_KEY); logs = []; cycleCount = 0;
             document.getElementById('cycle-count').innerText = "0";
             document.getElementById('last-cycle-display').innerText = "0.00";
@@ -620,15 +605,14 @@
         document.getElementById('modeToggleContainer').classList.remove('hidden');
         
         let unitDropdownHTML = '';
-        let unitLabel = 'UNIT#';
+        let filterHTML = '';
 
         if (equipment === 'QC') {
-            unitLabel = 'CRANE#';
             unitDropdownHTML = `<select id="unitNo" class="dark-input text-xs">${generateSelectRange('QC', 8, 40)}</select>`;
             inputDiv.innerHTML = `
                 <div class="grid grid-cols-2 gap-3">
                     <div><label class="setup-label">OP-ID</label><input type="text" id="staffId" placeholder="STAFF" class="dark-input text-xs"></div>
-                    <div><label class="setup-label">${unitLabel}</label>${unitDropdownHTML}</div>
+                    <div><label class="setup-label">QC#</label>${unitDropdownHTML}</div>
                 </div>
                 <label class="setup-label">Measurement Type</label>
                 <select id="qcCategory" onchange="window.updateQCCategory(this.value)" class="dark-input text-xs w-full">
@@ -641,11 +625,22 @@
             currentCategory = 'Above Deck';
         } else if (equipment === 'RTG') {
             unitDropdownHTML = `<select id="unitNo" class="dark-input text-xs">${generateSelectRange('RTG', 34, 135)}</select>`;
+            // Added Filter Dropdown for RTG
+            filterHTML = `
+                <div>
+                    <label class="setup-label">Lift Filter</label>
+                    <select id="rtgFilter" onchange="window.updateRTGFilter(this.value)" class="dark-input text-xs w-full">
+                        <option value="Single">Single</option>
+                        <option value="Dual">Dual</option>
+                    </select>
+                </div>`;
             inputDiv.innerHTML = `
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-3 mb-3">
                     <div><label class="setup-label">OP-ID</label><input type="text" id="staffId" placeholder="STAFF" class="dark-input text-xs"></div>
                     <div><label class="setup-label">RTG#</label>${unitDropdownHTML}</div>
-                </div>`;
+                </div>
+                ${filterHTML}`;
+            currentCategory = 'Single'; // Default RTG category
         } else if (equipment === 'TT') {
             unitDropdownHTML = `<select id="unitNo" class="dark-input text-xs">${generateSelectRange('TT', 305, 500)}</select>`;
             inputDiv.innerHTML = `
@@ -653,6 +648,7 @@
                     <div><label class="setup-label">OP-ID</label><input type="text" id="staffId" placeholder="STAFF" class="dark-input text-xs"></div>
                     <div><label class="setup-label">TT#</label>${unitDropdownHTML}</div>
                 </div>`;
+            currentCategory = 'Standard';
         } else if (equipment === 'EH') {
             unitDropdownHTML = `<select id="unitNo" class="dark-input text-xs">${generateSelectRange('EH', 5, 20)}</select>`;
             inputDiv.innerHTML = `
@@ -660,6 +656,7 @@
                     <div><label class="setup-label">OP-ID</label><input type="text" id="staffId" placeholder="STAFF" class="dark-input text-xs"></div>
                     <div><label class="setup-label">EH#</label>${unitDropdownHTML}</div>
                 </div>`;
+            currentCategory = 'Standard';
         } else if (equipment === 'RS') {
             unitDropdownHTML = `<select id="unitNo" class="dark-input text-xs">${generateSelectRange('RS', 5, 12)}</select>`;
             inputDiv.innerHTML = `
@@ -667,18 +664,22 @@
                     <div><label class="setup-label">OP-ID</label><input type="text" id="staffId" placeholder="STAFF" class="dark-input text-xs"></div>
                     <div><label class="setup-label">RS#</label>${unitDropdownHTML}</div>
                 </div>`;
+            currentCategory = 'Standard';
         } else {
             inputDiv.innerHTML = `
                 <div class="grid grid-cols-2 gap-3">
                     <input type="text" id="staffId" placeholder="OP-ID" class="dark-input text-xs">
                     <input type="text" id="unitNo" placeholder="UNIT#" class="dark-input text-xs">
                 </div>`;
+            currentCategory = 'Standard';
         }
         
         resetCurrentTimerUI(); updateMode('LOADING'); window.showScreen('timer-screen');
     };
 
     window.updateQCCategory = (val) => { currentCategory = val; renderSteps(); };
+    window.updateRTGFilter = (val) => { currentCategory = val; }; // Update Category for RTG Single/Dual
+    
     window.updateMode = (mode) => {
         if (startTime) return;
         currentMode = mode;
@@ -702,7 +703,15 @@
         if (num === 1 && !stopBtnEl.classList.contains('hidden')) finalizeCycleSilently(now);
         if (num === 1) {
             startTime = now; lastTime = now; totalWaitingDuration = 0;
-            currentCycleData = { Date: new Date().toLocaleDateString(), Time: new Date().toLocaleTimeString(), Equipment: currentCrane, Staff: document.getElementById('staffId')?.value || "N/A", Unit: document.getElementById('unitNo')?.value || "N/A", Category: currentCategory, Operation: currentMode };
+            currentCycleData = { 
+                Date: new Date().toLocaleDateString(), 
+                Time: new Date().toLocaleTimeString(), 
+                Equipment: currentCrane, 
+                Staff: document.getElementById('staffId')?.value || "N/A", 
+                Unit: document.getElementById('unitNo')?.value || "N/A", 
+                Category: currentCategory, 
+                Operation: currentMode 
+            };
             clearInterval(activeInterval); activeInterval = setInterval(() => { document.getElementById('main-timer').innerText = ((Date.now() - startTime) / 1000).toFixed(2); }, 50);
             stopBtnEl.classList.add('hidden');
         } else { currentCycleData[`Step_${num - 1}`] = ((now - lastTime) / 1000).toFixed(2); }
@@ -732,7 +741,7 @@
     function resetCurrentTimerUI() { clearInterval(activeInterval); startTime = null; isPaused = false; isWaiting = false; document.getElementById('main-timer').innerText = "0.00"; document.getElementById('stop-cycle-btn').classList.add('hidden'); document.getElementById('pause-btn').style.opacity = '1'; document.getElementById('wait-btn').style.opacity = '1'; renderSteps(); }
     window.closeModal = () => { document.getElementById('custom-modal-overlay').style.display = 'none'; };
     window.openModal = (title, msg, onConfirm) => { document.getElementById('modal-title').innerText = title; document.getElementById('modal-msg').innerText = msg; document.getElementById('custom-modal-overlay').style.display = 'flex'; document.getElementById('modal-confirm-btn').onclick = () => { onConfirm(); closeModal(); }; };
-    window.goHome = () => { if (startTime) { openModal("ABORT MEASUREMENT?", "Current timing data will be lost.", () => { resetCurrentTimerUI(); window.showScreen(window.parentScreen); }); } else { window.showScreen(window.parentScreen); } };
+    window.goHome = () => { if (startTime) { openModal("ABORT MEASUREMENT?", "Timing data will be lost.", () => { resetCurrentTimerUI(); window.showScreen(window.parentScreen); }); } else { window.showScreen(window.parentScreen); } };
     window.openQuickManual = () => { document.getElementById('manualEquipId').value = ''; document.getElementById('manualStaffId').value = ''; document.getElementById('manualStepList').innerHTML = ''; window.showScreen('manual-setup-screen'); };
     window.addManualStep = () => { let i = document.getElementById('manualStepInput'); if (i && i.value.trim()) { const list = document.getElementById('manualStepList'); const d = document.createElement('div'); d.className = 'flex justify-between items-center bg-black/40 p-3 rounded-lg border border-white/5'; d.innerHTML = `<span class="text-xs font-bold">${i.value}</span>`; list.appendChild(d); i.value = ''; } };
     window.openManualTimer = () => { showToast("Configuring..."); };
